@@ -1,0 +1,8 @@
+add_executable(binance_test binance_test.cpp)
+target_link_libraries(binance_test infra)
+
+# Test websocket
+add_executable(websocket_server_test websocket_server_test.cpp)
+target_link_libraries(websocket_server_test infra)
+add_executable(websocket_client_test websocket_client_test.cpp)
+target_link_libraries(websocket_client_test infra)

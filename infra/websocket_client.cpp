@@ -1,8 +1,16 @@
-#include "websocket.h"
+#include "websocket_client.h"
 
 namespace infra {
 
 WebSocketClient::WebSocketClient() {
+  client_.onopen = []() {
+    printf("onopen\n");
+  };
+
+  client_.onclose = []() {
+    printf("onclose\n");
+  };
+
   reconn_setting_t reconn;
   reconn_setting_init(&reconn);
   reconn.min_delay = 1000;
@@ -15,8 +23,6 @@ WebSocketClient::~WebSocketClient() {}
 
 void WebSocketClient::set_msg_handler(std::function<void(const std::string &)> handler) { client_.onmessage = handler; }
 
-void WebSocketClient::connect(const std::string &uri) { client_.open(uri.c_str()); }
-
-void WebSocketClient::run() {}
+int WebSocketClient::connect(const std::string &uri) { return client_.open(uri.c_str()); }
 
 }  // namespace infra

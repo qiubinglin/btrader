@@ -13,14 +13,16 @@ class WebSocketClient {
   ~WebSocketClient();
 
   void set_msg_handler(std::function<void(const std::string &)> handler);
+  int connect(const std::string &uri);
+  int write(const std::string &msg) { return client_.send(msg); }
 
-  void connect(const std::string &uri);
-
-  void run();
+  bool is_connected() { return client_.isConnected(); }
+  int close() { return client_.close(); }
 
  private:
   hv::WebSocketClient client_;
-  std::function<void(const std::string &)> msg_handler_;
 };
+
+class WSClientSetter {};
 
 }  // namespace infra

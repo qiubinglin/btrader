@@ -24,3 +24,4 @@ add_subdirectory(strategy)
 add_subdirectory(strategies)
 
 add_subdirectory(main)
+add_subdirectory(tests)
