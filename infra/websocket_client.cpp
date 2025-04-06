@@ -3,6 +3,7 @@
 namespace infra {
 
 WebSocketClient::WebSocketClient() {
+  client_.setPingInterval(0); /* hv::WebSocketClient will auto response pong. */
   client_.onopen = []() {
     printf("onopen\n");
   };

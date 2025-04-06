@@ -1,63 +1,65 @@
-// #include <stdio.h>
+#include <stdio.h>
 
-// #include "infra/websocket_client.h"
-// #include "infra/common.h"
+#include <iostream>
 
-// class MDTest {
-// public:
-//     void test_get_md() {
-//         infra::WebSocketClient client;
-//         client.set_msg_handler([](const std::string &msg){
-            
-//         });
+#include "infra/common.h"
+#include "infra/format.h"
+#include "infra/websocket_client.h"
 
-//         std::string uri = "wss://ws-api.binance.com:443/ws-api/v3/btcusdt@trade";
-//         client.connect(uri);
+#include "broker/binance_data.h"
 
-//         client.run();
-//     }
-// };
+class BinanceMDTest {
+   public:
+    void test_get_md() {
+        infra::WebSocketClient ws;
+        ws.set_msg_handler([](const std::string &msg) {
+            // Json::json jsondata = Json::json::parse(msg);
+            std::cout << msg << std::endl;
+        });
 
-// // int main() {
-// //     MDTest test;
-// //     test.test_get_md();
-// //     return 0;
-// // }
+        // const std::string uri = "wss://stream.binance.com:443/stream?streams=btcusdt@trade/btcusdt@depth20@100ms";
+        const std::string uri = "wss://stream.binance.com:443/stream?streams=btcusdt@kline_1s";
+        if (ws.connect(uri) != 0) {
+            std::cout << "websocket is not connected!" << std::endl;
+            return;
+        }
 
-// // #include "WebSocketClient.h"
-// using namespace hv;
+        /* Subscribe btc data */
+        // {
+        //     Json::json jsondata = {
+        //         {"method", "SUBSCRIBE"}, {"params", {"btcusdt@aggTrade", "btcusdt@depth"}}, {"id", 1}};
+        //     if (ws.write(jsondata.dump())) {
+        //         std::cout << "websocket write failed!" << std::endl;
+        //         return;
+        //     }
+        // }
 
-int main(int argc, char** argv) {
-//     WebSocketClient ws;
-//     ws.onopen = []() {
-//         printf("onopen\n");
-//     };
-//     ws.onmessage = [](const std::string& msg) {
-//         printf("onmessage: %.*s\n", (int)msg.size(), msg.data());
-//     };
-//     ws.onclose = []() {
-//         printf("onclose\n");
-//     };
+        std::string str;
+        while (std::getline(std::cin, str)) {
+            if (!ws.is_connected()) break;
+            if (str == "quit") {
+                ws.close();
+                break;
+            }
+        }
+    }
 
-//     // reconnect: 1,2,4,8,10,10,10...
-//     reconn_setting_t reconn;
-//     reconn_setting_init(&reconn);
-//     reconn.min_delay = 1000;
-//     reconn.max_delay = 10000;
-//     reconn.delay_policy = 2;
-//     ws.setReconnect(&reconn);
+    void test_BinanceData() {
+        btra::broker::BinanceData bd_broker;
+        bd_broker.setup(Json::json());
+        bd_broker.start();
+        std::string str;
+        while (std::getline(std::cin, str)) {
+            if (str == "quit") {
+                break;
+            }
+        }
+    }
+};
 
-//     ws.open("wss://data-stream.binance.vision:443/ws/btcusdt@kline_1m");
-
-//     std::string str;
-//     while (std::getline(std::cin, str)) {
-//         if (!ws.isConnected()) break;
-//         if (str == "quit") {
-//             ws.close();
-//             break;
-//         }
-//         ws.send(str);
-//     }
-
+int main() {
+    BinanceMDTest test;
+    // test.test_get_md();
+    test.test_BinanceData();
     return 0;
 }

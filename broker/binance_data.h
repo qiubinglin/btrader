@@ -6,7 +6,9 @@
 namespace btra::broker {
 
 class BinanceData : public DataService {
+  static const std::string s_ws_stream_prefix;
  public:
+  ~BinanceData();
   void setup(const Json::json &cfg) override;
   void start() override;
   void serve() override;

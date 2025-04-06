@@ -6,3 +6,4 @@ rxcpp 4.1.1
 fmt
 boost
 libhv 1.3.3
+libssl-dev

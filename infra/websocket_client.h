@@ -21,8 +21,16 @@ class WebSocketClient {
 
  private:
   hv::WebSocketClient client_;
+
+  friend class WSClientSetter;
 };
 
-class WSClientSetter {};
+class WSClientSetter {
+public:
+  WSClientSetter(WebSocketClient &wsc) : wsc_(wsc) {}
+
+private:
+  WebSocketClient &wsc_;
+};
 
 }  // namespace infra

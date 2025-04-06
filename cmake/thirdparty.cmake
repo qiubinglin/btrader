@@ -8,4 +8,8 @@ include(FetchContent)
 
 find_package(fmt)
 
+# OpenSSL
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+
 add_subdirectory(thirdparty)

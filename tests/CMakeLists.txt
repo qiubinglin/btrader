@@ -1,5 +1,5 @@
 add_executable(binance_test binance_test.cpp)
-target_link_libraries(binance_test infra)
+target_link_libraries(binance_test broker infra OpenSSL::SSL OpenSSL::Crypto)
 
 # Test websocket
 add_executable(websocket_server_test websocket_server_test.cpp)
