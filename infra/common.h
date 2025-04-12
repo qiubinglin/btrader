@@ -2,8 +2,9 @@
 
 #include <iostream>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <string>
+
+#include "infra/json.h"
 
 #define DECLARE_SPTR(name) using name##SPtr = std::shared_ptr<name>;
 #define FORWARD_DECLARE_SPTR(name) \
@@ -14,5 +15,3 @@
 #define FORWARD_DECLARE_UPTR(name) \
   class name;                      \
   DECLARE_UPTR(name);
-
-namespace Json = nlohmann;
