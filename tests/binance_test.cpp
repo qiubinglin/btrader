@@ -8,8 +8,8 @@
 
 #include "broker/binance_data.h"
 
-class BinanceMDTest {
-   public:
+class BinanceTest {
+public:
     void test_get_md() {
         infra::WebSocketClient ws;
         ws.set_msg_handler([](const std::string &msg) {
@@ -19,7 +19,7 @@ class BinanceMDTest {
 
         // const std::string uri = "wss://stream.binance.com:443/stream?streams=btcusdt@trade/btcusdt@depth20@100ms";
         const std::string uri = "wss://stream.binance.com:443/stream?streams=btcusdt@kline_1s";
-        if (ws.connect(uri) != 0) {
+        if (ws.open(uri) != 0) {
             std::cout << "websocket is not connected!" << std::endl;
             return;
         }
@@ -36,7 +36,8 @@ class BinanceMDTest {
 
         std::string str;
         while (std::getline(std::cin, str)) {
-            if (!ws.is_connected()) break;
+            if (!ws.is_connected())
+                break;
             if (str == "quit") {
                 ws.close();
                 break;
@@ -58,7 +59,7 @@ class BinanceMDTest {
 };
 
 int main() {
-    BinanceMDTest test;
+    BinanceTest test;
     // test.test_get_md();
     test.test_BinanceData();
     return 0;

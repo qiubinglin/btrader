@@ -18,7 +18,7 @@ void BinanceData::setup(const Json::json &cfg) {
 }
 
 void BinanceData::start() {
-    if (client_.connect(uri_)) {
+    if (client_.open(uri_)) {
         std::cout << "Connect binance md server failed!" << std::endl;
     }
 }

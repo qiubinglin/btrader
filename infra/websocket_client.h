@@ -13,7 +13,7 @@ class WebSocketClient {
   ~WebSocketClient();
 
   void set_msg_handler(std::function<void(const std::string &)> handler);
-  int connect(const std::string &uri);
+  int open(const std::string &uri);
   int write(const std::string &msg) { return client_.send(msg); }
 
   bool is_connected() { return client_.isConnected(); }

@@ -24,6 +24,6 @@ WebSocketClient::~WebSocketClient() {}
 
 void WebSocketClient::set_msg_handler(std::function<void(const std::string &)> handler) { client_.onmessage = handler; }
 
-int WebSocketClient::connect(const std::string &uri) { return client_.open(uri.c_str()); }
+int WebSocketClient::open(const std::string &uri) { return client_.open(uri.c_str()); }
 
 }  // namespace infra

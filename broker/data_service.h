@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "infra/infra.h"
-#include "types.h"
-#include "writer.h"
+#include "core/types.h"
+#include "journal/writer.h"
 
 namespace btra::broker {
 

@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
         printf("onmessage: %.*s\n", (int)msg.size(), msg.data());
     });
 
-    ws.connect("ws://127.0.0.1:9999/test");
+    ws.open("ws://127.0.0.1:9999/test");
 
     std::string str;
     while (std::getline(std::cin, str)) {
