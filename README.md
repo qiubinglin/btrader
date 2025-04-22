@@ -1,3 +1,19 @@
+# Build
+First install the dependencies.
+
+On ubuntu:
+```
+sudo apt install libboost-dev libfmt-dev libssl-dev
+```
+
+Then enter the source directory.
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
 # Requirements
 
 ## Thirdparty Libraries
