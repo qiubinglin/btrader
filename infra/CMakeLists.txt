@@ -1,7 +1,7 @@
 file(GLOB src
     *.cpp
     detail/*.cpp
-    # web/*.cpp
+    web/*.cpp
 )
 set(crypto_src
     crypto/signer.cpp
@@ -20,7 +20,7 @@ target_include_directories(infra PUBLIC
 )
 target_include_directories(infra PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/detail
-    # ${CMAKE_CURRENT_SOURCE_DIR}/web
+    ${CMAKE_CURRENT_SOURCE_DIR}/web
 )
 target_link_libraries(infra
     nng

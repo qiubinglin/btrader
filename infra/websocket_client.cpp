@@ -3,21 +3,23 @@
 namespace infra {
 
 WebSocketClient::WebSocketClient() {
-  client_.setPingInterval(0); /* hv::WebSocketClient will auto response pong. */
-  client_.onopen = []() {
-    printf("onopen\n");
-  };
+    client_.setPingInterval(0); /* hv::WebSocketClient will auto response pong. */
+    client_.onopen = [this]() {
+        is_opened_ = true;
+        printf("onopen\n");
+    };
 
-  client_.onclose = []() {
-    printf("onclose\n");
-  };
+    client_.onclose = [this]() {
+        is_opened_ = false;
+        printf("onclose\n");
+    };
 
-  reconn_setting_t reconn;
-  reconn_setting_init(&reconn);
-  reconn.min_delay = 1000;
-  reconn.max_delay = 10000;
-  reconn.delay_policy = 2;
-  client_.setReconnect(&reconn);
+    reconn_setting_t reconn;
+    reconn_setting_init(&reconn);
+    reconn.min_delay = 1000;
+    reconn.max_delay = 10000;
+    reconn.delay_policy = 2;
+    client_.setReconnect(&reconn);
 }
 
 WebSocketClient::~WebSocketClient() {}
@@ -26,4 +28,10 @@ void WebSocketClient::set_msg_handler(std::function<void(const std::string &)> h
 
 int WebSocketClient::open(const std::string &uri) { return client_.open(uri.c_str()); }
 
-}  // namespace infra
+int WebSocketClient::write(const std::string &msg) { return client_.send(msg); }
+
+bool WebSocketClient::is_connected() { return is_opened_ and client_.isConnected(); }
+
+int WebSocketClient::close() { return client_.close(); }
+
+} // namespace infra

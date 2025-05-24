@@ -131,6 +131,10 @@ enum class ExecType : int8_t { Unknown, Cancel, Trade };
 
 enum class BsFlag : int8_t { Unknown, Buy, Sell };
 
+/**
+ * @brief Trade side
+ * 
+ */
 enum class Side : int8_t {
   Buy,                        // 买入
   Sell,                       // 卖出
@@ -192,7 +196,12 @@ enum class PriceLevel : int8_t {
 
 enum class VolumeCondition : int8_t { Any, Min, All };
 
-enum class TimeCondition : int8_t { IOC, GFD, GTC };
+enum class TimeCondition : int8_t {
+  IOC, /* 立即成交可用部分，剩余取消 */
+  GFD, /* 当日有效 */
+  GTC, /* 订单持续有效，直到手动取消 */
+  FOK /* 必须全部成交，否则取消 */
+};
 
 enum class OrderStatus : int8_t {
   Unknown,

@@ -8,8 +8,8 @@ add_executable(websocket_client_test websocket_client_test.cpp)
 target_link_libraries(websocket_client_test infra)
 
 # Test http
-# add_executable(http_test http_test.cpp)
-# target_link_libraries(http_test infra)
+add_executable(http_test http_test.cpp)
+target_link_libraries(http_test infra)
 
 add_executable(ed25519_test ed25519_test.c)
 target_link_libraries(ed25519_test infra)
