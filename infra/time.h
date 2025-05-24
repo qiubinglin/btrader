@@ -40,6 +40,7 @@ struct TimeSpec {
   TimeSpec& operator+=(const TimeSpec& that);
   TimeSpec& operator-=(const TimeSpec& that);
   int64_t to_nano() const;
+  int64_t to_mili() const;
 };
 
 struct time_point_info {
@@ -77,6 +78,13 @@ class time {
    * @return int64_t
    */
   static int64_t now_in_sec();
+
+  /**
+   * @brief Get timestamp in mili-seconds.
+   * 
+   * @return int64_t 
+   */
+  static int64_t now_in_mili();
 
   /**
    * Given a timestamp, returns the start point of next minute.

@@ -43,6 +43,10 @@ TimeSpec &TimeSpec::operator-=(const TimeSpec &that) {
 
 int64_t TimeSpec::to_nano() const { return sec * time_unit::NANOSECONDS_PER_SECOND + nano; }
 
+int64_t TimeSpec::to_mili() const {
+  return sec * time_unit::MILLISECONDS_PER_SECOND + nano / time_unit::NANOSECONDS_PER_MILLISECOND;
+}
+
 #ifdef __linux__
 
 // Make sure to use clock_gettime instead of syscall to have better performance
@@ -115,6 +119,11 @@ uint32_t time::nano_hashed(int64_t nano_time) { return hash_32((const unsigned c
 int64_t time::now_in_sec() {
   auto duration = steady_clock_count() - get_instance().base_.steady_clock_count;
   return (get_instance().base_.system_clock_count + duration).sec;
+}
+
+int64_t time::now_in_mili() {
+  auto duration = steady_clock_count() - get_instance().base_.steady_clock_count;
+  return (get_instance().base_.system_clock_count + duration).to_mili();
 }
 
 [[maybe_unused]] int64_t time::next_minute(int64_t nanotime) {
