@@ -1,12 +1,15 @@
 #include <stdio.h>
 
 #include <iostream>
+#include <fstream>
 
 #include "infra/common.h"
 #include "infra/format.h"
 #include "infra/websocket_client.h"
+#include "infra/time.h"
 
-#include "broker/binance_data.h"
+#include "broker/binance/binance_data.h"
+#include "broker/binance/binance_broker.h"
 
 class BinanceTest {
 public:
@@ -56,11 +59,89 @@ public:
             }
         }
     }
+
+    void test_trade() {
+        // std::string name = "BTCUSDT";
+
+        // // 原始字符串模板（注意外层大括号转义为 {{ 和 }}）
+        // std::string json = fmt::format(R"({{
+        //     "id": "e2a85d9f-07a5-4f94-8d5f-789dc3deb097",
+        //     "method": "order.place",
+        //     "params": {{
+        //         "symbol": "{}",
+        //         "side": "BUY",
+        //         "type": "LIMIT",
+        //         "price": "0.1",
+        //         "quantity": "10",
+        //         "timeInForce": "GTC",
+        //         "timestamp": 1655716096498,
+        //         "apiKey": "T59MTDLWlpRW16JVeZ2Nju5A5C98WkMm8CSzWC4oqynUlTm1zXOxyauT8LmwXEv9",
+        //         "signature": "5942ad337e6779f2f4c62cd1c26dba71c91514400a24990a3e7f5edec9323f90"
+        //     }}
+        // }})", name);
+
+        // fmt::print("生成的 JSON:\n{}\n", json);
+
+        Json::json jsondata;
+        jsondata["id"] = "187d3cb2-942d-484c-8271-4e2141bbadb1";
+        jsondata["method"] = "time";
+        std::cout << jsondata.dump() << std::endl;
+
+        infra::WebSocketClient ws;
+        ws.set_msg_handler([](const std::string &msg) {
+            // Json::json jsondata = Json::json::parse(msg);
+            std::cout << msg << std::endl;
+        });
+
+        const std::string uri = "wss://ws-api.binance.com:443/ws-api/v3";
+        if (ws.open(uri) != 0) {
+            std::cout << "websocket is not connected!" << std::endl;
+            return;
+        }
+        while (not ws.is_connected()) {}
+        ws.write(jsondata.dump());
+
+        std::string str;
+        while (std::getline(std::cin, str)) {
+            if (str == "quit") {
+                break;
+            }
+        }
+    }
+
+    void test_BinanceTrade() {
+        btra::broker::BinanceBroker broker;
+        std::ifstream f("/home/qiubinglin/btrader/usrconf/binance.json");
+        Json::json broker_cfg = Json::json::parse(f);
+
+        broker.setup(broker_cfg);
+        broker.start();
+
+        btra::OrderInput order;
+        order.order_id = 1;
+        order.instrument_id = "ADAUSDT";
+        order.side = btra::enums::Side::Buy;
+        order.price_type = btra::enums::PriceType::Limit;
+        order.volume = 10;
+        order.limit_price = 0.7;
+        order.time_condition = btra::enums::TimeCondition::GTC;
+        order.insert_time = infra::time::now_in_mili();
+        broker.insert_order(order);
+
+        std::string str;
+        while (std::getline(std::cin, str)) {
+            if (str == "quit") {
+                break;
+            }
+        }
+    }
 };
 
 int main() {
     BinanceTest test;
     // test.test_get_md();
-    test.test_BinanceData();
+    // test.test_BinanceData();
+    // test.test_trade();
+    test.test_BinanceTrade();
     return 0;
 }

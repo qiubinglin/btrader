@@ -20,7 +20,7 @@ public:
 private:
     void on_msg(const std::string &msg);
 
-    infra::WebSocketClient client_;
+    // infra::WebSocketClient client_;
     std::string uri_;
 };
 
