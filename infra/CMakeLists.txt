@@ -6,6 +6,7 @@ file(GLOB src
 set(crypto_src
     crypto/signer.cpp
     crypto/ed25519.c
+    crypto/base64.c
 )
 add_library(infra
     ${src}

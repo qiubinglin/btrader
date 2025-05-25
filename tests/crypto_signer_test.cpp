@@ -20,7 +20,7 @@ public:
         int ret = EXIT_FAILURE;
         EVP_PKEY *priv = NULL, *pub = NULL;
 
-        infra::crypto::EncrypKey priv_obj;
+        infra::crypto::EncrypKey priv_obj, pub_obj;
         infra::crypto::Signer signer;
         std::string signature;
         std::string msg;
@@ -40,6 +40,8 @@ public:
         {
             priv_obj.pkey = priv;
             priv = NULL;
+            pub_obj.pkey = pub;
+            pub = NULL;
 
             signer.set_ctx(libctx);
             msg.resize(sizeof(hamlet));
@@ -51,8 +53,10 @@ public:
                 goto cleanup;
             }
 
-            if (!ed25519_verify(pub, (const unsigned char *)msg.data(), msg.size(),
-                                (const unsigned char *)signature.data(), signature.size(), libctx)) {
+            signer.set_ctx(libctx);
+            err = signer.verify(pub_obj, msg.data(), msg.size(), signature.data(), signature.size());
+            signer.set_ctx(NULL);
+            if (err) {
                 fprintf(stderr, "demo_verify failed.\n");
                 goto cleanup;
             }
