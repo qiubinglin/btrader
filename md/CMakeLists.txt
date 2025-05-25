@@ -1,5 +1,5 @@
 file(GLOB src
-    *.cpp
+    md_engine.cpp
 )
 add_library(md
     ${src}

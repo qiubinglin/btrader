@@ -1,5 +1,5 @@
 file(GLOB src
-    *.cpp
+    td_engine.cpp
 )
 add_library(td
     ${src}

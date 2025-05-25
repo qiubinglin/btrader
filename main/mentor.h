@@ -5,18 +5,18 @@
 namespace btra {
 
 class Mentor {
- public:
-  Mentor(int argc, char **argv);
-  ~Mentor();
+public:
+    Mentor(int argc, char **argv);
+    ~Mentor();
 
-  int run();
+    int run();
 
- private:
-  void init();
+private:
+    void init();
 
-  std::string role_;
-  std::string cfg_file_;
-  EventEngine *event_engine_ = nullptr;
+    std::string role_;
+    std::string cfg_file_;
+    EventEngine *event_engine_ = nullptr;
 };
 
-}  // namespace btra
+} // namespace btra

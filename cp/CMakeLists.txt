@@ -1,5 +1,5 @@
 file(GLOB src
-    *.cpp
+    cp_engine.cpp
 )
 add_library(computation
     ${src}

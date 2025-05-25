@@ -1,5 +1,7 @@
 file(GLOB src
-    *.cpp
+    main.cpp
+    mentor.cpp
+    option_parser.cpp
 )
 add_executable(btrader
     ${src}

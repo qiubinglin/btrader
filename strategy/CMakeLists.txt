@@ -1,5 +1,5 @@
 file(GLOB src
-    *.cpp
+    executor.cpp
 )
 add_library(strategy
     ${src}
