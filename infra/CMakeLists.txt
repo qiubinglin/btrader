@@ -18,6 +18,7 @@ target_include_directories(infra PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/nng/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libhv/include
+    ${OPENSSL_INCLUDE_DIR} # openssl
 )
 target_include_directories(infra PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/detail
@@ -27,6 +28,7 @@ target_link_libraries(infra
     nng
     fmt::fmt
     hv_static
+    ${OPENSSL_LIBRARIES} # openssl
 )
 
 add_executable(MemIPCTest
