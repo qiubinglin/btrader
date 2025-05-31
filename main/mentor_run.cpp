@@ -12,31 +12,25 @@
 namespace btra {
 
 int Mentor::_run() {
-    std::string fds_json_file;
+    std::string fds_data;
 
 #ifndef HP
     std::ifstream f(cfg_file_);
     auto json_cfg = Json::json::parse(f);
     MainCfg cfg_obj(json_cfg);
 
-    Json::json name2fd;
-
     auto all_journals = cfg_obj.get_journal_names();
     std::vector<journal::JourIndicator> jour_inds(all_journals.size());
     for (size_t i = 0; i < all_journals.size(); ++i) {
         jour_inds[i].init();
-        name2fd[all_journals[i]] = jour_inds[i].get_fd();
+        fds_data += all_journals[i];
+        fds_data += ':';
+        fds_data += std::to_string(jour_inds[i].get_fd());
+        if (i != all_journals.size() - 1) {
+            fds_data += ':';
+        }
     }
-
-    /* Save name2fd to a temp file. */
-    fds_json_file = std::getenv("USER");
-    fds_json_file += std::to_string(infra::time::now_in_sec()) + ".json";
-    fds_json_file = std::filesystem::current_path().string() + "/" + fds_json_file;
-    {
-        std::ofstream ofs(fds_json_file);
-        ofs << name2fd.dump();
-    }
-    fds_json_file = "FDS="+ fds_json_file;
+    fds_data = "FDS="+ fds_data;
 #else
     printf("In HP mode.\n");
 #endif
@@ -52,7 +46,7 @@ int Mentor::_run() {
         std::string role_arg = "--role=md";
         std::string cfg_arg = "--cfg=" + cfg_file_;
         char *args[] = {curr_binary.data(), role_arg.data(), cfg_arg.data(), NULL};
-        char *envs[] = {fds_json_file.data(), NULL};
+        char *envs[] = {fds_data.data(), NULL};
         execvpe(args[0], args, envs);
         exit(EXIT_FAILURE);
     }
@@ -67,7 +61,7 @@ int Mentor::_run() {
         std::string role_arg = "--role=cp";
         std::string cfg_arg = "--cfg=" + cfg_file_;
         char *args[] = {curr_binary.data(), role_arg.data(), cfg_arg.data(), NULL};
-        char *envs[] = {fds_json_file.data(), NULL};
+        char *envs[] = {fds_data.data(), NULL};
         execvpe(args[0], args, envs);
         exit(EXIT_FAILURE);
     }
@@ -82,7 +76,7 @@ int Mentor::_run() {
         std::string role_arg = "--role=td";
         std::string cfg_arg = "--cfg=" + cfg_file_;
         char *args[] = {curr_binary.data(), role_arg.data(), cfg_arg.data(), NULL};
-        char *envs[] = {fds_json_file.data(), NULL};
+        char *envs[] = {fds_data.data(), NULL};
         execvpe(args[0], args, envs);
         exit(EXIT_FAILURE);
     }

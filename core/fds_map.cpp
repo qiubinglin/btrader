@@ -5,6 +5,22 @@
 
 namespace btra {
 
+static std::vector<std::string> split(const std::string &str, char deli) {
+    std::vector<std::string> res;
+    std::size_t beg = 0;
+    std::size_t pos;
+    pos = str.find(deli, beg);
+    while (pos != std::string::npos) {
+        res.push_back(str.substr(beg, pos - beg));
+        beg = pos + 1;
+        pos = str.find(deli, beg);
+    }
+    if (beg < str.size()) {
+        res.push_back(str.substr(beg, str.size() - beg));
+    }
+    return res;
+}
+
 const FdsMap &FdsMap::get_fds_map() {
     static FdsMap name2fd;
     static bool has_init = false;
@@ -13,15 +29,11 @@ const FdsMap &FdsMap::get_fds_map() {
     if (not has_init) {
         auto env_ptr = std::getenv("FDS");
         if (env_ptr) {
-            std::string fds_file = env_ptr;
-            std::ifstream f(fds_file);
-            Json::json fds_json = Json::json::parse(f);
-            // printf("FDS: %s\n", fds_file.c_str());
-            for (auto &[key, value] : fds_json.items()) {
-                if (value.is_number()) {
-                    name2fd[key] = value.get<int>();
-                    // printf("name2fd_ %s %d\n", key.c_str(), name2fd[key]);
-                }
+            std::string fds_data = env_ptr;
+            // printf("%s\n", fds_data.c_str());
+            auto fds_vec = split(fds_data, ':');
+            for (size_t i = 0; i < fds_vec.size() - 1; i += 2) {
+                name2fd[fds_vec[i]] = std::stoi(fds_vec[i + 1]);
             }
         }
 
