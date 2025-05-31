@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "exceptions.h"
+#include "core/fds_map.h"
 
 namespace btra::journal {
 
@@ -15,6 +16,12 @@ Writer::Writer(const JLocationSPtr &location, uint32_t dest_id, bool lazy)
       size_to_write_(0),
       writer_start_time_32int_(infra::time::nano_hashed(infra::time::now_time())) {
   journal_.seek_to_time(infra::time::now_time());
+
+  const auto &fds_map = FdsMap::get_fds_map();
+  std::string key = std::to_string(location->uid) + "_" + std::to_string(dest_id);
+  if (fds_map.count(key)) {
+    jour_ind_.set_fd(fds_map.at(key));
+  }
 }
 
 uint64_t Writer::current_frame_uid() {
@@ -57,6 +64,7 @@ void Writer::close_frame(size_t data_length, int64_t gen_time) {
   journal_.page_->set_last_frame_position(frame->address() - journal_.page_->address());
   journal_.next();
   writer_mtx_.unlock();
+  jour_ind_.post();
 }
 
 void Writer::copy_frame(const FrameUnitSPtr &source) {

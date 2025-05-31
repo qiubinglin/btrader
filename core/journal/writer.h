@@ -110,6 +110,8 @@ class Writer {
   uint32_t writer_start_time_32int_;
   std::mutex writer_mtx_ = {};
 
+  JourIndicator jour_ind_;
+
   void close_page(int64_t trigger_time);
 };
 DECLARE_UPTR(Writer)

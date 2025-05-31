@@ -3,6 +3,7 @@
 #include "jid.h"
 #include "jlocation.h"
 #include "page.h"
+#include "infra/epoll_usage.h"
 
 namespace btra::journal {
 
@@ -60,6 +61,40 @@ class Journal {
   friend class Reader;
 
   friend class Writer;
+};
+
+class JourIndicator {
+public:
+    JourIndicator();
+    JourIndicator(int efd) : efd_(efd) {}
+    ~JourIndicator();
+    int init();
+    int post();
+    void set_fd(int efd) { efd_ = efd; }
+    int get_fd() const { return efd_; }
+
+private:
+    int efd_{-1};
+
+    friend class JourObserver;
+};
+
+#define MAX_EVENTS 10
+
+class JourObserver {
+public:
+    JourObserver();
+    ~JourObserver();
+    int init();
+    int add_target(int efd);
+    int wait();
+    int handle();
+
+private:
+    int epfd_{-1};
+    int coming_event_num_{0};
+    size_t events_received_{0};
+    struct epoll_event events_[MAX_EVENTS];
 };
 
 }  // namespace btra::journal

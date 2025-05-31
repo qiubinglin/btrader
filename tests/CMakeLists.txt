@@ -16,3 +16,6 @@ target_link_libraries(ed25519_test infra)
 
 add_executable(crypto_signer_test crypto_signer_test.cpp)
 target_link_libraries(crypto_signer_test infra)
+
+add_executable(journal_epoll_test journal_epoll_test.cpp)
+target_link_libraries(journal_epoll_test core)

@@ -3,6 +3,7 @@ project(btrader)
 
 include(cmake/thirdparty.cmake)
 include(cmake/compile.cmake)
+include(cmake/macro.cmake)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)

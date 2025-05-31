@@ -41,4 +41,87 @@ void Journal::load_page(int page_id) {
 
 void Journal::load_next_page() { load_page(page_->get_page_id() + 1); }
 
+JourIndicator::JourIndicator() {}
+
+JourIndicator::~JourIndicator() {
+    if (efd_ > 0)
+        close(efd_);
+}
+
+int JourIndicator::init() {
+    efd_ = create_eventfd(0, EFD_NONBLOCK);
+    return efd_;
+}
+
+int JourIndicator::post() {
+#ifndef HP
+    if (efd_ == -1) {
+        return -1;
+    }
+    uint64_t val = 1;
+    write(efd_, &val, sizeof(val));
+#endif
+    return 0;
+}
+
+JourObserver::JourObserver() {}
+
+JourObserver::~JourObserver() {
+    if (epfd_ > 0)
+        close(epfd_);
+}
+
+int JourObserver::init() {
+    epfd_ = create_epoll(EFD_CLOEXEC);
+    if (epfd_ == -1) {
+      perror("create_epoll");
+    }
+    return epfd_;
+}
+
+int JourObserver::add_target(int efd) {
+    struct epoll_event ev;
+    ev.events = EPOLLIN | EPOLLET;
+    ev.data.fd = efd;
+    if (epoll_ctl(epfd_, EPOLL_CTL_ADD, efd, &ev) == -1) {
+        perror("epoll_ctl");
+        return -1;
+    }
+    return 0;
+}
+
+int JourObserver::wait() {
+    coming_event_num_ = epoll_wait(epfd_, events_, MAX_EVENTS, -1);
+    if (coming_event_num_ == -1) {
+        perror("epoll_wait");
+        return -1;
+    }
+    return coming_event_num_;
+}
+
+int JourObserver::handle() {
+    for (int i = 0; i < coming_event_num_; i++) {
+        int fd = events_[i].data.fd;
+
+        // 注意：边缘触发下必须循环读光
+        while (1) {
+            uint64_t val;
+            ssize_t s = read(fd, &val, sizeof(val));
+            if (s == -1) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK)
+                    break; // 没有更多数据，退出循环
+                else {
+                    perror("read");
+                    exit(EXIT_FAILURE);
+                }
+            } else if (s == 0) {
+                break; // EOF
+            } else {
+                // printf("Parent received event from fd %d, val=%lu\n", fd, val);
+                events_received_++;
+            }
+        }
+    }
+}
+
 }  // namespace btra
