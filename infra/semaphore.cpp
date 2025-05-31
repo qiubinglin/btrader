@@ -16,6 +16,6 @@ int Sem::post(size_t limit) {
     }
 }
 
-int Sem::destroy() { return sem_destroy(&sem);}
+int Sem::destroy() { return sem_destroy(&sem); }
 
 } // namespace infra

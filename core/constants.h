@@ -7,4 +7,4 @@ constexpr int MB = 1024 * KB;
 
 constexpr int PAGE_SIZE = 128 * MB;
 
-}  // namespace btra
+} // namespace btra

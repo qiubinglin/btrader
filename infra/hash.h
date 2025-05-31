@@ -13,4 +13,4 @@ uint32_t hash_32(const unsigned char *key, int32_t length, uint32_t seed = HASH_
 
 uint32_t hash_str_32(const std::string &key, uint32_t seed = HASH_SEED);
 
-}
+} // namespace infra

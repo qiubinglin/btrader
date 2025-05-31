@@ -10,4 +10,4 @@ void ExtScheduler::add_timer(int64_t time, const CBFunc &callback) {}
 
 void ExtScheduler::add_time_interval(int64_t duration, const CBFunc &callback) {}
 
-}  // namespace btra
+} // namespace btra

@@ -5,11 +5,11 @@
 namespace btra {
 
 class NetDevice {
- public:
-  NetDevice();
-  NetDevice(const std::string &ip);
+public:
+    NetDevice();
+    NetDevice(const std::string &ip);
 
- private:
+private:
 };
 
-}  // namespace btra
+} // namespace btra

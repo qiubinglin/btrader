@@ -16,4 +16,4 @@ namespace infra {
 
 bool release_mmap_buffer(uintptr_t address, [[maybe_unused]] size_t size, bool lazy);
 
-}  // namespace infra
+} // namespace infra
