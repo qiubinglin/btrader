@@ -10,6 +10,9 @@
 namespace btra {
 
 Mentor::Mentor(int argc, char **argv) {
+    if (argc <= 1) {
+        throw std::runtime_error("argc <= 1");
+    }
     OptionParser parser;
     parser.option(0, "role", 1, [&](const char *s) { role_ = s; });
     parser.option(0, "cfg", 1, [&](const char *s) { cfg_file_ = s; });
@@ -24,6 +27,9 @@ Mentor::~Mentor() {
 }
 
 int Mentor::run() {
+    if (role_ == "master") {
+        return _run();
+    }
     if (event_engine_) {
         event_engine_->run();
         return 0;
@@ -34,6 +40,9 @@ int Mentor::run() {
 }
 
 void Mentor::init() {
+    if (role_ == "master") {
+        return;
+    }
     if (role_ == "cp") {
         event_engine_ = new CPEngine();
     } else if (role_ == "md") {
@@ -43,6 +52,7 @@ void Mentor::init() {
     } else {
         throw std::runtime_error("Not supported role!");
     }
+
     std::ifstream f(cfg_file_);
     event_engine_->setcfg(Json::json::parse(f));
 }

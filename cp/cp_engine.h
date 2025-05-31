@@ -10,6 +10,7 @@ private:
     void react() override;
     void on_setup() override;
     void on_active() override;
+    std::string name() const override { return "cp"; }
 
     void add_strategy(strategy::StrategySPtr strat);
 

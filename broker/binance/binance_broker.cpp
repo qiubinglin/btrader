@@ -54,12 +54,12 @@ BinanceBroker::~BinanceBroker() {
 }
 
 void BinanceBroker::setup(const Json::json &cfg) {
-    public_key_str_ = cfg["public_key"].get<std::string>();
+    public_key_str_ = cfg["account"].get<std::string>();
     if (cfg.contains("public_key_file")) {
         auto public_key_file = cfg["public_key_file"].get<std::string>();
         public_key_ = infra::crypto::EncrypKey(public_key_file, false);
     }
-    auto secret_key_file = cfg["secret_key_file"].get<std::string>();
+    auto secret_key_file = cfg["password"].get<std::string>();
     secret_key_ = infra::crypto::EncrypKey(secret_key_file, true);
     uri_ = s_wss_endpoint;
 

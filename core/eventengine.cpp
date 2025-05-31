@@ -26,6 +26,7 @@ void EventEngine::stop() { live_ = false; }
 
 void EventEngine::setup() {
   on_setup();
+  ob_helper_.add_customer(reader_);
   events_ = rx::observable<>::create<EventSPtr>([this](auto &s) { this->produce(s); }).publish();
   react();
   live_ = true;
@@ -36,8 +37,8 @@ ExtScheduler EventEngine::ext_scheduler() { return ExtScheduler(*this); }
 void EventEngine::produce(const rx::subscriber<EventSPtr> &sb) {
   try {
     do {
-      live_ = drain(sb) && live_;
       on_active();
+      live_ = drain(sb) && live_;
     } while (continual_ and live_);
   } catch (...) {
     live_ = false;
@@ -50,7 +51,7 @@ void EventEngine::produce(const rx::subscriber<EventSPtr> &sb) {
 
 bool EventEngine::drain(const rx::subscriber<EventSPtr> &sb) {
   // todo. using NetDevice to get nanomsg and handle it before main read loop.
-  while (live_ and reader_->data_available()) {
+  while (live_ and ob_helper_.data_available()) {
     if (reader_->current_frame()->gen_time() <= end_time_) {
       int64_t frame_time = reader_->current_frame()->gen_time();
       if (frame_time > now_event_time_) {

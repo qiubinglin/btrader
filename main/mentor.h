@@ -14,6 +14,8 @@ public:
 private:
     void init();
 
+    int _run();
+
     std::string role_;
     std::string cfg_file_;
     EventEngine *event_engine_ = nullptr;

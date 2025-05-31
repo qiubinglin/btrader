@@ -9,6 +9,7 @@ class TDEngine : public EventEngine {
 public:
     void react() override;
     void on_setup() override;
+    std::string name() const override { return "td"; }
 
 private:
     void on_trading_start(const EventSPtr &event);

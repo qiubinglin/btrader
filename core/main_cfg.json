@@ -1,0 +1,28 @@
+{
+    "system" : {
+        "mode": "live",
+        "output_root_path": "./output"
+    },
+    "md": [
+        {
+            "institution": "binance",
+            "account": "bing",
+            "password": "/home/qiubinglin/Private_key.txt",
+            "authentication": "private-key"
+        }
+    ],
+    "strategy": [
+        {
+            "path": "/home/qiubinglin/btrader/build/lib",
+            "id": "MyStrategy"
+        }
+    ],
+    "td": [
+        {
+            "institution": "binance",
+            "account": "euHZeWJLF1IO5MNsuKIQYqJH4ZqLfFbtwxp0ychQi41f7CDBRRCrSt2d7nRzXq1T",
+            "password": "/home/qiubinglin/Private_key.txt",
+            "authentication": "private-key"
+        }
+    ]
+}

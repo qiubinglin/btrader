@@ -10,6 +10,7 @@ public:
     void react() override;
     void on_active() override;
     void on_setup() override;
+    std::string name() const override { return "md"; }
 
 private:
     void on_trading_start(const EventSPtr &event);

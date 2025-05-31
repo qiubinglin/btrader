@@ -160,6 +160,7 @@ struct RequestReadFromPublic {  //
   int64_t from_time;   //
 };
 
+/* Determine directory? */
 struct Location {  //
   PACK_DATA_BODY
   uint32_t location_uid;   //

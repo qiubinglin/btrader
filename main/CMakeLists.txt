@@ -1,6 +1,7 @@
 file(GLOB src
     main.cpp
     mentor.cpp
+    mentor_run.cpp
     option_parser.cpp
 )
 add_executable(btrader

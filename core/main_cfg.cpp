@@ -51,4 +51,35 @@ JLocationSPtr MainCfg::td_reponse_location() const {
   return res;
 }
 
+std::vector<std::string> MainCfg::get_journal_names() const {
+    std::vector<std::string> res;
+    /* md */
+    {
+        auto md_l = md_location();
+        for (const auto dest : md_dests_) {
+            std::string key = std::to_string(md_l->uid) + "_" + std::to_string(dest);
+            res.push_back(key);
+        }
+
+        auto md_req_l = md_req_location();
+        std::string key =
+            std::to_string(md_req_l->uid) + "_" + std::to_string(journal::JIDUtil::build(journal::JIDUtil::MD_REQ));
+        res.push_back(key);
+    }
+
+    /* td */
+    {
+        auto td_l = td_location();
+        for (const auto dest : td_dests_) {
+            std::string key = std::to_string(td_l->uid) + "_" + std::to_string(dest);
+            res.push_back(key);
+        }
+
+        auto td_resp_l = td_reponse_location();
+        std::string key = std::to_string(td_resp_l->uid) + "_" +
+                          std::to_string(journal::JIDUtil::build(journal::JIDUtil::TD_RESPONSE));
+        res.push_back(key);
+    }
+    return res;
+}
 }

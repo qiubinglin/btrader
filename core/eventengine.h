@@ -10,6 +10,7 @@
 #include "reader.h"
 #include "uid_util.h"
 #include "writer.h"
+#include "core/observe_helper.h"
 
 namespace rx = rxcpp;
 
@@ -40,6 +41,7 @@ class EventEngine {
   journal::Writer *get_writer(uint32_t id) { return writers_.at(id).get(); }
   ExtScheduler ext_scheduler();
   const MainCfg &get_main_cfg() const { return main_cfg_; }
+  virtual std::string name() const { return "EventEngine"; }
 
  protected:
   void produce(const rx::subscriber<EventSPtr> &sb);
@@ -63,6 +65,8 @@ class EventEngine {
   MainCfg main_cfg_;
 
   Json::json cfg_;
+
+  ObserveHelper ob_helper_;
 
   friend class ExtScheduler;
 };
