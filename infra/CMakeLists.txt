@@ -2,6 +2,7 @@ file(GLOB src
     *.cpp
     detail/*.cpp
     web/*.cpp
+    epoll_usage.c
 )
 set(crypto_src
     crypto/signer.cpp
