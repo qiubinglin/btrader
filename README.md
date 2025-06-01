@@ -23,3 +23,4 @@ fmt
 boost
 libhv 1.3.3
 libssl-dev
+spdlog 1.14.1
