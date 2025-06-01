@@ -13,6 +13,7 @@ public:
 
 private:
     void init();
+    void setup_log(const std::string &id);
 
     int _run();
 

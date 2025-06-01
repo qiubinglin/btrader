@@ -12,4 +12,7 @@ find_package(fmt)
 find_package(OpenSSL REQUIRED)
 # include_directories(${OPENSSL_INCLUDE_DIR})
 
+# spdlog
+find_package(spdlog REQUIRED)
+
 add_subdirectory(thirdparty)

@@ -3,7 +3,7 @@ First install the dependencies.
 
 On ubuntu:
 ```
-sudo apt install libboost-dev libfmt-dev libssl-dev
+sudo apt install libboost-dev libfmt-dev libssl-dev libspdlog-dev
 ```
 
 Then enter the source directory.

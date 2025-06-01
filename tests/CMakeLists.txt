@@ -19,3 +19,7 @@ target_link_libraries(crypto_signer_test infra)
 
 add_executable(journal_epoll_test journal_epoll_test.cpp)
 target_link_libraries(journal_epoll_test core)
+
+# spd test
+add_executable(spdlog_demo spdlog_demo.cpp)
+target_link_libraries(spdlog_demo spdlog::spdlog)

@@ -30,6 +30,7 @@ target_link_libraries(infra
     fmt::fmt
     hv_static
     ${OPENSSL_LIBRARIES} # openssl
+    spdlog::spdlog # spdlog
 )
 
 add_executable(MemIPCTest
