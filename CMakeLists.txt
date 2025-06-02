@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(btrader)
 
-include(cmake/thirdparty.cmake)
 include(cmake/compile.cmake)
+include(cmake/thirdparty.cmake)
 include(cmake/macro.cmake)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
