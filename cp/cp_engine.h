@@ -5,6 +5,10 @@
 
 namespace btra {
 
+/**
+ * @brief Only support one account for now.
+ *
+ */
 class CPEngine : public EventEngine {
 private:
     void react() override;
@@ -23,14 +27,15 @@ private:
     void on_transaction(const EventSPtr &event);
     void on_order_action_error(const EventSPtr &event);
     void on_trade(const EventSPtr &event);
-    // void on_position_sync_reset(const EventSPtr &event);
+    void on_position_sync_reset(const EventSPtr &event);
     void on_asset_sync_reset(const EventSPtr &event);
     void on_asset_margin_sync_reset(const EventSPtr &event);
     void on_deregister(const EventSPtr &event);
     void on_broker_state_change(const EventSPtr &event);
     void post_stop();
 
-    template <typename OnMethod = void (strategy::Strategy::*)(strategy::ExecutorSPtr &)> void invoke(OnMethod method) {
+    template <typename OnMethod = void (strategy::Strategy::*)(strategy::ExecutorSPtr &)>
+    void invoke(OnMethod method) {
         auto context = std::dynamic_pointer_cast<strategy::Executor>(executor_);
         for (const auto &strategy : strategies_) {
             (*strategy.*method)(context);
@@ -53,6 +58,16 @@ private:
         auto context = std::dynamic_pointer_cast<strategy::Executor>(executor_);
         for (const auto &strategy : strategies_) {
             (*strategy.*method)(context, data1, data2);
+        }
+    }
+
+    template <typename TradingData1, typename TradingData2,
+              typename OnMethod = void (strategy::Strategy::*)(strategy::ExecutorSPtr &, const TradingData1 &,
+                                                               const TradingData2 &, JID)>
+    void invoke(OnMethod method, const TradingData1 &data1, const TradingData2 &data2, JID source) {
+        auto context = std::dynamic_pointer_cast<strategy::Executor>(executor_);
+        for (const auto &strategy : strategies_) {
+            (*strategy.*method)(context, data1, data2, source);
         }
     }
 
@@ -83,9 +98,6 @@ private:
     int64_t trading_daytime_end_ = 0;
     unsigned trading_msg_count_ = 0;
     unsigned md_account_count_ = 0;
-
-    std::unordered_map<JID, Asset> curr_assets_;
-    std::unordered_map<JID, AssetMargin> curr_asset_margins_;
 };
 
 } // namespace btra

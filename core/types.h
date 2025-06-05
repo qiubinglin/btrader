@@ -10,15 +10,15 @@ namespace btra {
 
 #define PACK_DATA_BODY static constexpr bool fixed = true;
 
-#define PACK_DATA_BODY2(tag_num)                                                                                       \
-    static constexpr bool fixed = true;                                                                                \
+#define PACK_DATA_BODY2(tag_num)        \
+    static constexpr bool fixed = true; \
     static constexpr int tag = MsgTag::tag_num;
 
-#define UNFIXED_DATA_BODY(TagClass)                                                                                    \
-    static constexpr bool fixed = false;                                                                               \
-    static constexpr int tag = MsgTag::TagClass;                                                                       \
-    TagClass() = default;                                                                                              \
-    TagClass(const char *, uint32_t);                                                                                  \
+#define UNFIXED_DATA_BODY(TagClass)              \
+    static constexpr bool fixed = false;         \
+    static constexpr int tag = MsgTag::TagClass; \
+    TagClass() = default;                        \
+    TagClass(const char *, uint32_t);            \
     std::string to_string() const;
 
 static constexpr int INSTRUMENT_ID_LEN = 32;
@@ -35,7 +35,6 @@ static constexpr int INSTITUTION_ID_LEN = 32;
 
 struct MsgTag {
     enum Tag {
-        Dummy,
         PageEnd,
         NextPage,
         OrderInput,
@@ -56,11 +55,11 @@ struct MsgTag {
         TradingStart,
         TradingStop,
         InstrumentKey,
+        Instrument,
+        Position,
+        AccountReq,
+        PositionBook,
     };
-};
-
-struct Dummy {
-    PACK_DATA_BODY2(Dummy)
 };
 
 struct TimeValue { //
@@ -129,7 +128,7 @@ struct Register { //
 };
 
 struct Deregister {
-    PACK_DATA_BODY2(Deregister)
+    UNFIXED_DATA_BODY(Deregister)
     uint32_t location_uid;  //
     enums::Module category; //
     enums::RunMode mode;    //
@@ -160,7 +159,10 @@ struct RequestReadFromPublic { //
     int64_t from_time;  //
 };
 
-/* Determine directory? */
+/**
+ * @brief Determine directory
+ *
+ */
 struct Location { //
     PACK_DATA_BODY
     uint32_t location_uid;  //
@@ -267,8 +269,8 @@ struct Commission { //
     double min_commission; // 最小手续费
 };
 
-struct Instrument { //
-    PACK_DATA_BODY
+struct Instrument {
+    PACK_DATA_BODY2(Instrument)
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id; // 合约ID
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所ID
     enums::InstrumentType instrument_type;               // 合约类型
@@ -343,10 +345,10 @@ struct Quote { //
     double settlement_price; // 结算价
     double iopv;             // 基金实时参考净值
 
-    infra::Array<double, 10> bid_price;   // 申买价
-    infra::Array<double, 10> ask_price;   // 申卖价
-    infra::Array<int64_t, 10> bid_volume; // 申买量
-    infra::Array<int64_t, 10> ask_volume; // 申卖量
+    infra::Array<double, 20> bid_price;  // 申买价
+    infra::Array<double, 20> ask_price;  // 申卖价
+    infra::Array<double, 20> bid_volume; // 申买量
+    infra::Array<double, 20> ask_volume; // 申卖量
     infra::Array<char, TRAIDNG_PHASE_CODE_LEN> trading_phase_code;
     // 标的状态, 上交所用四位, 深交所用两位
     //************************************上海现货行情交易状态***************************************************************
@@ -511,10 +513,11 @@ struct BlockMessage { //
     int64_t insert_time;                                 // 写入时间
 };
 
-struct OrderAction { //
+struct OrderAction {
     PACK_DATA_BODY2(OrderAction)
-    uint64_t order_id;        // 订单ID
-    uint64_t order_action_id; // 订单操作ID
+    infra::Array<char, INSTRUMENT_ID_LEN> instrument_id;
+    uint64_t order_id;        // Order id
+    uint64_t target_order_id; // Target order id
 
     enums::OrderActionFlag action_flag; // 订单操作类型
 
@@ -676,7 +679,7 @@ struct HistoryTrade { //
 };
 
 struct Position { //
-    PACK_DATA_BODY
+    PACK_DATA_BODY2(Position)
     int64_t update_time;                      // 更新时间
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
@@ -851,6 +854,30 @@ struct TradingStart {
 struct TradingStop {
     PACK_DATA_BODY2(TradingStop)
     int64_t sync_time;
+};
+
+struct AccountReq {
+    PACK_DATA_BODY2(AccountReq)
+
+    enum ReqType {
+        Status,
+        OrderBook,
+        Order,
+        PositionBook,
+    };
+    uint64_t id;
+    ReqType type;
+    infra::Array<char, INSTRUMENT_ID_LEN> instrument_id;
+    uint64_t target_id; /* target id you request */
+    int64_t insert_time;
+};
+
+// key = hash_instrument(exchange_id, instrument_id)
+struct PositionBook {
+    UNFIXED_DATA_BODY(PositionBook)
+
+    std::unordered_map<uint32_t, Position> long_positions;
+    std::unordered_map<uint32_t, Position> short_positions;
 };
 
 inline void order_from_input(const OrderInput &input, Order &order);

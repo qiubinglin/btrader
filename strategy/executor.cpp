@@ -44,27 +44,23 @@ uint64_t Executor::cancel_order(uint64_t order_id) {
     auto writer = engine_->get_writer(account_location_uid);
 
     OrderAction &action = writer->open_data<OrderAction>(now_event_time());
-    action.order_action_id = writer->current_frame_uid();
-    action.order_id = order_id;
+    action.order_id = writer->current_frame_uid();
+    action.target_order_id = order_id;
     action.action_flag = enums::OrderActionFlag::Cancel;
 
-    uint64_t order_action_id = action.order_action_id;
+    uint64_t order_action_id = action.order_id;
     writer->close_data();
     return order_action_id;
 }
 
 int64_t Executor::get_trading_day() const { return 0; }
 
-bool Executor::is_book_held() const { return book_held_; }
+void Executor::req_deregister() {}
 
-bool Executor::is_positions_mirrored() const { return positions_mirrored_; }
+void Executor::update_strategy_state(StrategyStateUpdate &state_update) {}
 
-void Executor::hold_book() { book_held_ = true; }
+const Book &Executor::book() const { return book_; }
 
-void Executor::hold_positions() { positions_mirrored_ = false; }
-
-void Executor::bypass_accounting() { bypass_accounting_ = true; }
-
-bool Executor::is_bypass_accounting() const { return bypass_accounting_; }
+Book &Executor::book() { return book_; }
 
 } // namespace btra::strategy

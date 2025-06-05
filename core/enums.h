@@ -261,4 +261,15 @@ public:
     inline static const uint32_t All = 0b00100000;     // read all journal
 };
 
+/**
+ * @brief Market data type
+ * 
+ */
+enum class MDType : int8_t {
+    Unknown,
+    Kline,
+    Depth,
+    Trade,
+};
+
 } // namespace btra::enums

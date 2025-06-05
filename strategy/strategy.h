@@ -1,8 +1,8 @@
 #pragma once
 
+#include "core/book.h"
 #include "executor.h"
 #include "jlocation.h"
-#include "positionbook.h"
 #include "types.h"
 
 namespace btra::strategy {
@@ -26,7 +26,7 @@ public:
     virtual void on_trading_day(ExecutorSPtr &executor, int64_t daytime) {}
 
     /**
-     * @brief Callback on quote update, from td
+     * @brief Callback on quote update, from md
      *
      * @param executor
      * @param quote
@@ -116,7 +116,7 @@ public:
     virtual void on_history_trade(ExecutorSPtr &executor, const HistoryTrade &history_trade, JID source) {}
 
     /**
-     * @brief 历史订单查询报错回调
+     * @brief Callback on request history order error
      *
      * @param executor
      * @param error
@@ -126,7 +126,7 @@ public:
     }
 
     /**
-     * @brief 历史成交查询报错回调
+     * @brief Callback on request history trade error
      *
      * @param executor
      * @param error
@@ -136,14 +136,14 @@ public:
     }
 
     /**
-     * @brief 同步柜台资金持仓信息回调
+     * @brief 同步柜台持仓信息回调
      *
      * @param executor
      * @param old_book
      * @param new_book
      */
-    virtual void on_position_sync_reset(ExecutorSPtr &executor, const PositionBook &old_book,
-                                        const PositionBook &new_book) {}
+    virtual void on_position_sync_reset(ExecutorSPtr &executor, const PositionBookFn &old_book,
+                                        const PositionBookFn &new_book, JID source) {}
 
     /**
      * @brief 同步柜台资金信息回调
@@ -152,17 +152,18 @@ public:
      * @param old_asset
      * @param new_asset
      */
-    virtual void on_asset_sync_reset(ExecutorSPtr &executor, const Asset &old_asset, const Asset &new_asset) {}
+    virtual void on_asset_sync_reset(ExecutorSPtr &executor, const Asset &old_asset, const Asset &new_asset,
+                                     JID source) {}
 
     /**
-     * @brief 同步柜台资金信息回调
+     * @brief 同步柜台保证金信息回调
      *
      * @param executor
      * @param old_asset_margin
      * @param new_asset_margin
      */
     virtual void on_asset_margin_sync_reset(ExecutorSPtr &executor, const AssetMargin &old_asset_margin,
-                                            const AssetMargin &new_asset_margin) {}
+                                            const AssetMargin &new_asset_margin, JID source) {}
 
     /**
      * @brief 断开回调
@@ -198,5 +199,5 @@ DECLARE_SPTR(Strategy)
 
 } // namespace btra::strategy
 
-#define REGISTER_STRATEGY(strat)                                                                                       \
+#define REGISTER_STRATEGY(strat) \
     extern "C" btra::strategy::Strategy *create_strategy_##strat() { return new strat(); }

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <type_traits>
 #include <vector>
+#include <sstream>
 
 //------------------------------------------------------------------------
 // workaround for using c++20 with hana-1.7.0@conan-center

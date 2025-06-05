@@ -128,19 +128,22 @@ void CPEngine::on_trade(const EventSPtr &event) {
     invoke(&strategy::Strategy::on_trade, event->data<Trade>(), event->source());
 }
 
-// void CPEngine::on_position_sync_reset(const EventSPtr &event) {
-//   invoke(&strategy::Strategy::on_position_sync_reset, event->data<Quote>(), event->source());
-// }
+void CPEngine::on_position_sync_reset(const EventSPtr &event) {
+    PositionBook new_position_book = event->data<PositionBook>();
+    invoke(&strategy::Strategy::on_position_sync_reset, PositionBookFn(executor_->book().positions),
+           PositionBookFn(new_position_book), event->source());
+    executor_->book().positions = new_position_book;
+}
 
 void CPEngine::on_asset_sync_reset(const EventSPtr &event) {
-    invoke(&strategy::Strategy::on_asset_sync_reset, curr_assets_.at(event->source()), event->data<Asset>());
-    curr_assets_[event->source()] = event->data<Asset>();
+    invoke(&strategy::Strategy::on_asset_sync_reset, executor_->book().asset, event->data<Asset>(), event->source());
+    executor_->book().asset = event->data<Asset>();
 }
 
 void CPEngine::on_asset_margin_sync_reset(const EventSPtr &event) {
-    invoke(&strategy::Strategy::on_asset_margin_sync_reset, curr_asset_margins_.at(event->source()),
-           event->data<AssetMargin>());
-    curr_asset_margins_[event->source()] = event->data<AssetMargin>();
+    invoke(&strategy::Strategy::on_asset_margin_sync_reset, executor_->book().asset_margin, event->data<AssetMargin>(),
+           event->source());
+    executor_->book().asset_margin = event->data<AssetMargin>();
 }
 
 void CPEngine::on_deregister(const EventSPtr &event) {

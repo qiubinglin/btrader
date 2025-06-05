@@ -40,7 +40,7 @@ struct Event {
         return *(reinterpret_cast<const T *>(data_address()));
     }
 
-    template <typename T> std::enable_if_t<not size_fixed_v<T>, const T> data() const {
+    template <typename T> std::enable_if_t<not size_fixed_v<T>, T> data() const {
         return T(data_as_bytes(), data_length());
     }
 };
