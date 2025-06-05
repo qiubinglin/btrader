@@ -58,6 +58,8 @@ public:
      * @return false 
      */
     virtual bool cancel_order(const OrderAction &input) = 0;
+
+    virtual bool req_account_info(const AccountReq &req) = 0;
 };
 
 } // namespace btra::broker

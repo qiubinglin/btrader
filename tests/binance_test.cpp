@@ -122,12 +122,57 @@ public:
         order.instrument_id = "ADAUSDT";
         order.side = btra::enums::Side::Buy;
         order.price_type = btra::enums::PriceType::Limit;
-        order.volume = 10;
-        order.limit_price = 0.7;
+        order.volume = 50;
+        order.limit_price = 0.4;
         order.time_condition = btra::enums::TimeCondition::GTC;
         order.insert_time = infra::time::now_in_mili();
         broker.insert_order(order);
 
+        std::string str;
+        while (std::getline(std::cin, str)) {
+            if (str == "quit") {
+                break;
+            }
+        }
+    }
+
+    void test_cancel_order() {}
+    void test_req_account() {
+        btra::broker::BinanceBroker broker;
+        std::ifstream f("/home/qiubinglin/btrader/usrconf/binance.json");
+        Json::json broker_cfg = Json::json::parse(f);
+
+        broker.setup(broker_cfg);
+        broker.start();
+
+        /* Request account status */
+        {
+            btra::AccountReq req;
+            req.type = btra::AccountReq::Status;
+            req.id = 0;
+            req.insert_time = infra::time::now_in_mili();
+            broker.req_account_info(req);
+        }
+
+        /* Request account order book */
+        {
+            btra::AccountReq req;
+            req.type = btra::AccountReq::OrderBook;
+            req.id = 1;
+            req.insert_time = infra::time::now_in_mili();
+            broker.req_account_info(req);
+        }
+
+        /* Request specified order */
+        {
+            btra::AccountReq req;
+            req.type = btra::AccountReq::Order;
+            req.id = 2;
+            req.target_id = 7094878517;
+            req.instrument_id = "ADAUSDT";
+            req.insert_time = infra::time::now_in_mili();
+            broker.req_account_info(req);
+        }
         std::string str;
         while (std::getline(std::cin, str)) {
             if (str == "quit") {
@@ -142,6 +187,7 @@ int main() {
     // test.test_get_md();
     // test.test_BinanceData();
     // test.test_trade();
-    test.test_BinanceTrade();
+    // test.test_BinanceTrade();
+    test.test_req_account();
     return 0;
 }

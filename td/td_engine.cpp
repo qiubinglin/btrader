@@ -40,8 +40,8 @@ void TDEngine::on_trading_start(const EventSPtr &event) {
 void TDEngine::insert_order(const EventSPtr &event) {
     const auto &order_input = event->data<OrderInput>();
     auto td_uid = get_main_cfg().get_td_location_uid();
-    uint32_t account_location_uid = uidutil::to_account_uid(order_input.order_id, td_uid);
-    bool success = trade_services_[account_location_uid]->insert_order(order_input);
+    uint32_t account_uid = uidutil::to_account_uid(order_input.order_id, td_uid);
+    bool success = trade_services_[account_uid]->insert_order(order_input);
     if (not success) {
         // retry and notify me.
     }
@@ -50,8 +50,8 @@ void TDEngine::insert_order(const EventSPtr &event) {
 void TDEngine::cancel_order(const EventSPtr &event) {
     const OrderAction &action = event->data<OrderAction>();
     auto td_uid = get_main_cfg().get_td_location_uid();
-    uint32_t account_location_uid = uidutil::to_account_uid(action.order_id, td_uid);
-    bool success = trade_services_[account_location_uid]->cancel_order(action);
+    uint32_t account_uid = uidutil::to_account_uid(action.order_id, td_uid);
+    bool success = trade_services_[account_uid]->cancel_order(action);
     if (not success) {
         // retry and notify me.
     }

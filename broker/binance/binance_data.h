@@ -20,6 +20,8 @@ public:
 private:
     void on_msg(const std::string &msg);
 
+    enums::MDType get_mdtype(const Json::json &data) const;
+
     infra::WebSocketClient client_;
     std::string uri_;
 };

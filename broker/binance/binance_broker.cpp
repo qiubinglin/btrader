@@ -21,9 +21,11 @@ static const std::unordered_map<Method, std::string> s_methods = {
     {Method::Place, "order.place"},
 };
 
-static const std::unordered_map<enums::TimeCondition, std::string> s_timecdn = {{enums::TimeCondition::GTC, "GTC"}};
+static const std::unordered_map<enums::TimeCondition, std::string> s_timecdn = {
+    {enums::TimeCondition::GTC, "GTC"}, {enums::TimeCondition::IOC, "IOC"}, {enums::TimeCondition::FOK, "FOK"}};
 
-static const std::unordered_map<enums::PriceType, std::string> s_pricetype = {{enums::PriceType::Limit, "LIMIT"}};
+static const std::unordered_map<enums::PriceType, std::string> s_pricetype = {{enums::PriceType::Limit, "LIMIT"},
+                                                                              {enums::PriceType::Any, "MARKET"}};
 
 static const std::unordered_map<enums::Side, std::string> s_side = {{enums::Side::Buy, "BUY"},
                                                                     {enums::Side::Sell, "SELL"}};
@@ -84,7 +86,6 @@ void BinanceBroker::start() {
 enums::AccountType BinanceBroker::get_account_type() const { return enums::AccountType::Stock; }
 
 bool BinanceBroker::insert_order(const OrderInput &input) {
-    /* OrderInput to binance json data. */
     const char *name = input.instrument_id;
     std::string signature;
 
@@ -97,13 +98,14 @@ bool BinanceBroker::insert_order(const OrderInput &input) {
     params_keys["timeInForce"] = s_timecdn.at(input.time_condition);
     params_keys["timestamp"] = std::to_string(input.insert_time);
     params_keys["apiKey"] = public_key_str_;
+
     std::string msg_to_sign = to_msg(params_keys);
     signature = get_signature(secret_key_, msg_to_sign);
 
-    std::string websocket_json =
-        fmt::format(R"({{
+    std::string websocket_json = fmt::format(
+        R"({{
         "id": "{}",
-        "method": "{}",
+        "method": "order.place",
         "params": {{
             "symbol": "{}",
             "side": "{}",
@@ -116,10 +118,10 @@ bool BinanceBroker::insert_order(const OrderInput &input) {
             "signature": "{}"
         }}
     }})",
-                    input.order_id, s_methods.at(Method::Place), params_keys["symbol"], params_keys["side"],
-                    params_keys["type"], params_keys["price"], params_keys["quantity"], params_keys["timeInForce"],
-                    params_keys["timestamp"], public_key_str_, signature);
+        input.order_id, params_keys["symbol"], params_keys["side"], params_keys["type"], params_keys["price"],
+        params_keys["quantity"], params_keys["timeInForce"], params_keys["timestamp"], public_key_str_, signature);
 
+    // std::cout << websocket_json << std::endl;
     /* Send data. */
     if (client_.write(websocket_json) < 0) {
         std::cerr << "Insert order failed" << std::endl;
@@ -128,13 +130,127 @@ bool BinanceBroker::insert_order(const OrderInput &input) {
 }
 
 bool BinanceBroker::cancel_order(const OrderAction &input) {
-    /* OrderAction to binance json data. */
-    Json::json jsondata;
+    const char *name = input.instrument_id;
+    std::string signature;
+
+    std::map<std::string, std::string> params_keys;
+    params_keys["symbol"] = name;
+    params_keys["origClientOrderId"] = std::to_string(input.target_order_id);
+    params_keys["timestamp"] = std::to_string(input.insert_time);
+    params_keys["apiKey"] = public_key_str_;
+
+    std::string msg_to_sign = to_msg(params_keys);
+    signature = get_signature(secret_key_, msg_to_sign);
+
+    std::string jsondata = fmt::format(R"(
+        {{
+            "id": "{}",
+            "method": "order.cancel",
+            "params": {{
+                "symbol": "{}",
+                "origClientOrderId": "{}",
+                "apiKey": "{}",
+                "signature": "{}",
+                "timestamp": {}
+            }}
+        }}
+    )",
+                                       input.order_id, params_keys["symbol"], params_keys["origClientOrderId"],
+                                       params_keys["apiKey"], signature, params_keys["timestamp"]);
     /* Send data. */
-    if (client_.write(jsondata.dump())) {
+    if (client_.write(jsondata) < 0) {
         std::cerr << "Cancel order failed" << std::endl;
     }
     return true;
+}
+
+bool BinanceBroker::req_account_info(const AccountReq &req) {
+    switch (req.type) {
+    case AccountReq::Status: {
+        std::map<std::string, std::string> params_keys;
+        params_keys["timestamp"] = std::to_string(req.insert_time);
+        params_keys["apiKey"] = public_key_str_;
+
+        std::string msg_to_sign = to_msg(params_keys);
+        std::string signature = get_signature(secret_key_, msg_to_sign);
+
+        std::string jsondata = fmt::format(R"(
+            {{
+                "id": "{}",
+                "method": "account.status",
+                "params": {{
+                    "apiKey": "{}",
+                    "signature": "{}",
+                    "timestamp": {}
+                }}
+            }}
+        )",
+                                           req.id, params_keys["apiKey"], signature, params_keys["timestamp"]);
+        /* Send data. */
+        if (client_.write(jsondata) < 0) {
+            std::cerr << "Req account status failed" << std::endl;
+        }
+    } break;
+    case AccountReq::OrderBook: {
+        std::map<std::string, std::string> params_keys;
+        params_keys["timestamp"] = std::to_string(req.insert_time);
+        params_keys["apiKey"] = public_key_str_;
+
+        std::string msg_to_sign = to_msg(params_keys);
+        std::string signature = get_signature(secret_key_, msg_to_sign);
+        std::string jsondata = fmt::format(R"(
+            {{
+                "id": "{}",
+                "method": "openOrders.status",
+                "params": {{
+                    "apiKey": "{}",
+                    "signature": "{}",
+                    "timestamp": {}
+                }}
+            }}
+        )",
+                                           req.id, params_keys["apiKey"], signature, params_keys["timestamp"]);
+        /* Send data. */
+        if (client_.write(jsondata) < 0) {
+            std::cerr << "Req account order book failed" << std::endl;
+        }
+    } break;
+    case AccountReq::Order: {
+        const char *name = req.instrument_id;
+
+        std::map<std::string, std::string> params_keys;
+        params_keys["symbol"] = name;
+        params_keys["orderId"] = std::to_string(req.target_id);
+        params_keys["timestamp"] = std::to_string(req.insert_time);
+        params_keys["apiKey"] = public_key_str_;
+
+        std::string msg_to_sign = to_msg(params_keys);
+        std::string signature = get_signature(secret_key_, msg_to_sign);
+        std::string jsondata = fmt::format(R"(
+            {{
+                "id": "{}",
+                "method": "order.status",
+                "params": {{
+                    "symbol": "{}",
+                    "orderId": {},
+                    "apiKey": "{}",
+                    "signature": "{}",
+                    "timestamp": {}
+                }}
+            }}
+        )",
+                                           req.id, params_keys["symbol"], params_keys["orderId"], params_keys["apiKey"],
+                                           signature, params_keys["timestamp"]);
+        /* Send data. */
+        if (client_.write(jsondata) < 0) {
+            std::cerr << "Req account status failed" << std::endl;
+        }
+    } break;
+    case AccountReq::PositionBook:
+        break;
+    default:
+        break;
+    }
 }
 
 void BinanceBroker::on_msg(const std::string &msg) { std::cout << msg << std::endl; }
