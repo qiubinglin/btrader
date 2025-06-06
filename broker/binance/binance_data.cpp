@@ -49,6 +49,7 @@ void BinanceData::on_msg(const std::string &msg) {
         writer_->write(now_time, bar);
     } break;
     case enums::MDType::Depth: {
+        // std::cout << "Depth data: " << msg << std::endl;
         std::string price;
         std::string quantity;
         Quote depth;
@@ -61,6 +62,7 @@ void BinanceData::on_msg(const std::string &msg) {
             quantity = item[1];
             depth.bid_price[idx] = std::stod(price);
             depth.bid_volume[idx] = std::stod(quantity);
+            idx++;
         }
 
         idx = 0;
@@ -72,6 +74,7 @@ void BinanceData::on_msg(const std::string &msg) {
             quantity = item[1];
             depth.ask_price[idx] = std::stod(price);
             depth.ask_volume[idx] = std::stod(quantity);
+            idx++;
         }
         auto now_time = infra::time::now_time();
         writer_->write(now_time, depth);
