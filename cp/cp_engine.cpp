@@ -15,6 +15,7 @@ void CPEngine::react() {
     events_.filter(is<MsgTag::AssetMargin>).subscribe(ON_MEM_FUNC(on_asset_margin_sync_reset));
     events_.filter(is<MsgTag::Deregister>).subscribe(ON_MEM_FUNC(on_deregister));
     events_.filter(is<MsgTag::BrokerStateUpdate>).subscribe(ON_MEM_FUNC(on_broker_state_change));
+    events_.filter(over_max_tag).subscribe(ON_MEM_FUNC(on_custom_data));
 }
 
 void CPEngine::on_setup() {
@@ -83,7 +84,6 @@ void CPEngine::pre_start() {
             continue;
         }
         writers_[key]->write(now_time, trading_start);
-        break;
     }
 
     invoke(&strategy::Strategy::pre_start);
@@ -155,5 +155,13 @@ void CPEngine::on_broker_state_change(const EventSPtr &event) {
 }
 
 void CPEngine::post_stop() {}
+
+void CPEngine::on_custom_data(const EventSPtr &event) {
+    auto context = std::dynamic_pointer_cast<strategy::Executor>(executor_);
+    for (const auto &strategy : strategies_) {
+        strategy->on_custom_data(context, event->msg_type(), event->data_as_bytes(), event->data_length(),
+                                 event->source());
+    }
+}
 
 } // namespace btra

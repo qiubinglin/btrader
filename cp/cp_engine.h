@@ -33,6 +33,7 @@ private:
     void on_deregister(const EventSPtr &event);
     void on_broker_state_change(const EventSPtr &event);
     void post_stop();
+    void on_custom_data(const EventSPtr &event);
 
     template <typename OnMethod = void (strategy::Strategy::*)(strategy::ExecutorSPtr &)>
     void invoke(OnMethod method) {

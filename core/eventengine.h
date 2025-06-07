@@ -16,7 +16,12 @@ namespace rx = rxcpp;
 
 namespace btra {
 
-template <MsgTag::Tag tag> bool is(const EventSPtr &event) { return event->msg_type() == tag; }
+template <MsgTag::Tag tag>
+inline bool is(const EventSPtr &event) {
+    return event->msg_type() == tag;
+}
+
+inline bool over_max_tag(const EventSPtr &event) { return event->msg_type() >= MsgTag::TAG_MAX_SIZE; }
 
 #define ON_MEM_FUNC(func) [this](const EventSPtr &event) { this->func(event); }
 

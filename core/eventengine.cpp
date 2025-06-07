@@ -51,18 +51,25 @@ void EventEngine::produce(const rx::subscriber<EventSPtr> &sb) {
 
 bool EventEngine::drain(const rx::subscriber<EventSPtr> &sb) {
     // todo. using NetDevice to get nanomsg and handle it before main read loop.
+    /* There is a different behavior between HP and not HP. To be fixed */
     while (live_ and ob_helper_.data_available()) {
-        if (reader_->current_frame()->gen_time() <= end_time_) {
-            int64_t frame_time = reader_->current_frame()->gen_time();
-            if (frame_time > now_event_time_) {
-                now_event_time_ = frame_time;
+#ifndef HP
+        do {
+#endif
+            if (reader_->current_frame()->gen_time() <= end_time_) {
+                int64_t frame_time = reader_->current_frame()->gen_time();
+                if (frame_time > now_event_time_) {
+                    now_event_time_ = frame_time;
+                }
+                sb.on_next(reader_->current_frame());
+                reader_->next();
+            } else {
+                INFRA_LOG_INFO("reached journal end {}", infra::time::strftime(reader_->current_frame()->gen_time()));
+                return false;
             }
-            sb.on_next(reader_->current_frame());
-            reader_->next();
-        } else {
-            INFRA_LOG_INFO("reached journal end {}", infra::time::strftime(reader_->current_frame()->gen_time()));
-            return false;
-        }
+#ifndef HP
+        } while (live_ and reader_->data_available());
+#endif
     }
     return true;
 }

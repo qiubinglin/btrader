@@ -31,11 +31,15 @@ void TDEngine::on_setup() {
 }
 
 void TDEngine::on_trading_start(const EventSPtr &event) {
-    const auto trading_start = event->data<TradingStart>();
-    begin_time_ = trading_start.sync_time;
+    if (not is_trading_started_) {
+        const auto trading_start = event->data<TradingStart>();
+        begin_time_ = trading_start.sync_time;
 
-    for (auto &[key, service] : trade_services_) {
-        service->start();
+        for (auto &[key, service] : trade_services_) {
+            service->start();
+        }
+        INFRA_LOG_INFO("Trading started at: {}", begin_time_);
+        is_trading_started_ = true;
     }
 }
 
