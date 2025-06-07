@@ -92,20 +92,23 @@ time::time() : base_() {
     base_.steady_clock_count = steady_clock_count();
 }
 
-const time &time::get_instance() {
+time &time::get_instance() {
     static time instance = {};
     return instance;
 }
 
 int64_t time::now_time(TimeUnit unit) {
     switch (unit) {
-    case NANO:
-        return now_in_nano();
-        break;
-    case SEC:
-    default:
-        return now_in_sec();
-        break;
+        case NANO:
+            return now_in_nano();
+            break;
+        case MILI:
+            return now_in_mili();
+            break;
+        case SEC:
+        default:
+            return now_in_sec();
+            break;
     }
 }
 

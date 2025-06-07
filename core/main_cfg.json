@@ -5,7 +5,8 @@
             "path": "./log"
         },
         "mode": "live",
-        "output_root_path": "./output"
+        "output_root_path": "./output",
+        "time_unit": "mili"
     },
     "md": [
         {

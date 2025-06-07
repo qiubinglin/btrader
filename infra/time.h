@@ -50,19 +50,19 @@ struct time_point_info {
 
 enum TimeUnit : int8_t {
     NANO,
+    MILI,
     SEC,
 };
 
 class time {
 private:
     time_point_info base_;
-    TimeUnit unit_ = SEC;
     time();
 
-    static const time &get_instance();
-
 public:
-    static int64_t now_time(TimeUnit unit = get_instance().unit_);
+    TimeUnit unit = MILI; // Default time unit is milliseconds
+    static time &get_instance();
+    static int64_t now_time(TimeUnit unit = get_instance().unit);
 
     /**
      * Get timestamp in nano seconds.

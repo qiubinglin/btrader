@@ -5,6 +5,7 @@
 
 #include "cp_engine.h"
 #include "infra/log.h"
+#include "infra/time.h"
 #include "md_engine.h"
 #include "option_parser.h"
 #include "td_engine.h"
@@ -52,7 +53,7 @@ int Mentor::run() {
 }
 
 void Mentor::init() {
-    setup_log(role_);
+    setup(role_);
     INFRA_LOG_CRITICAL("{} start!", role_);
     if (role_ == "master") {
         return;
@@ -71,9 +72,23 @@ void Mentor::init() {
     event_engine_->setcfg(Json::json::parse(f));
 }
 
-void Mentor::setup_log(const std::string &id) {
+void Mentor::setup(const std::string &id) {
     std::ifstream f(cfg_file_);
     auto cfg = Json::json::parse(f);
+
+    /* time */
+    std::string time_unit_str = cfg["system"]["time_unit"].get<std::string>();
+    if (time_unit_str == "nano") {
+        infra::time::get_instance().unit = infra::TimeUnit::NANO;
+    } else if (time_unit_str == "mili") {
+        infra::time::get_instance().unit = infra::TimeUnit::MILI;
+    } else if (time_unit_str == "sec") {
+        infra::time::get_instance().unit = infra::TimeUnit::SEC;
+    } else {
+        throw std::runtime_error("No such time unit!");
+    }
+
+    /* log */
     std::string level_str = cfg["system"]["log"]["level"].get<std::string>();
     std::string path = cfg["system"]["log"]["path"].get<std::string>();
     if (path.back() != '/') {
