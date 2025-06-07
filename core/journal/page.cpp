@@ -1,13 +1,18 @@
 #include "page.h"
 
 #include "exceptions.h"
+#include "infra/log.h"
 #include "version.h"
 
 namespace btra::journal {
 
 PageUnit::PageUnit(JLocationSPtr location, uint32_t dest_id, const uint32_t page_id, const size_t size, const bool lazy,
                    uintptr_t address)
-    : location_(std::move(location)), dest_id_(dest_id), page_id_(page_id), lazy_(lazy), size_(size),
+    : location_(std::move(location)),
+      dest_id_(dest_id),
+      page_id_(page_id),
+      lazy_(lazy),
+      size_(size),
       header_(reinterpret_cast<PageHeader *>(address)) {
     assert(address > 0);
 }
@@ -28,8 +33,8 @@ PageUnitSPtr PageUnit::load(const JLocationSPtr &location, uint32_t dest_id, uin
     std::string path = get_page_path(location, dest_id, page_id);
     uintptr_t address = infra::load_mmap_buffer(path, page_size, is_writing, lazy);
 
-    // INFRA_LOG_DEBUG("path: {}", path);
-    // INFRA_LOG_DEBUG("page_size {}, address {}", page_size, address);
+    INFRA_LOG_DEBUG("Loading page from {}", path);
+    INFRA_LOG_DEBUG("page_size 0x{0:x}, address 0x{0:x}", page_size, address);
 
     if (address == 0) {
         throw JournalError("unable to load page for " + path);

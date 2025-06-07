@@ -33,6 +33,10 @@ private:
     enums::RunMode dir_mode_;
 };
 
+/**
+ * @brief Indicates a directory in the journal system.
+ * 
+ */
 struct JLocation : public std::enable_shared_from_this<JLocation>, public Location {
     static constexpr uint32_t PUBLIC = 0;
     static constexpr uint32_t SYNC = 1;

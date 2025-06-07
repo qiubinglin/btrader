@@ -43,7 +43,15 @@ public:
 
     [[nodiscard]] uintptr_t address() const { return reinterpret_cast<uintptr_t>(header_); }
 
-    [[nodiscard]] uintptr_t address_border() const { return address() + header_->page_size - sizeof(FrameHeader); }
+    /**
+     * @brief Get the address border of the page.
+     * 
+     * @return uintptr_t 
+     */
+    [[nodiscard]] uintptr_t address_border() const {
+        /* There must be a PageEnd frame in the last page frame. */
+        return address() + header_->page_size - sizeof(FrameHeader);
+    }
 
     [[nodiscard]] uintptr_t first_frame_address() const { return address() + header_->page_header_length; }
 

@@ -11,8 +11,10 @@ constexpr uint32_t PAGE_ID_TRANC = 0xFFFF0000;
 constexpr uint32_t FRAME_ID_TRANC = 0x0000FFFF;
 
 Writer::Writer(const JLocationSPtr &location, uint32_t dest_id, bool lazy)
-    : frame_id_base_(uint64_t(location->uid xor dest_id) << 32u), journal_(location, dest_id, true, lazy),
-      size_to_write_(0), writer_start_time_32int_(infra::time::nano_hashed(infra::time::now_time())) {
+    : frame_id_base_(uint64_t(location->uid xor dest_id) << 32u),
+      journal_(location, dest_id, true, lazy),
+      size_to_write_(0),
+      writer_start_time_32int_(infra::time::nano_hashed(infra::time::now_time())) {
     journal_.seek_to_time(infra::time::now_time());
 
     const auto &fds_map = FdsMap::get_fds_map();
@@ -68,7 +70,7 @@ void Writer::close_frame(size_t data_length, int64_t gen_time) {
 void Writer::copy_frame(const FrameUnitSPtr &source) {
     assert(source->frame_length() + sizeof(FrameHeader) <= journal_.page_->get_page_size());
     if (journal_.current_frame()->address() + source->frame_length() >= journal_.page_->address_border()) {
-        close_page(infra::time::now_in_nano());
+        close_page(infra::time::now_time());
     }
 
     auto frame = journal_.current_frame();
@@ -107,18 +109,21 @@ void Writer::close_data() { close_frame(size_to_write_); }
 
 void Writer::close_page(int64_t trigger_time) {
     PageUnitSPtr last_page = journal_.page_;
-    journal_.load_next_page();
+    journal_.load_next_page(); /* Load the next page for writing. */
 
+    /* Create PageEnd frame. */
     FrameUnit last_page_frame;
     last_page_frame.set_address(last_page->last_frame_address());
     last_page_frame.move_to_next();
-    last_page_frame.set_header_length();
+    last_page_frame.set_header_length(); /* PageEnd only has header */
     last_page_frame.set_trigger_time(trigger_time);
     last_page_frame.set_msg_type(MsgTag::PageEnd);
     last_page_frame.set_source(journal_.location_->uid);
     last_page_frame.set_dest(journal_.dest_id_);
-    last_page_frame.set_gen_time(infra::time::now_in_nano());
+    last_page_frame.set_gen_time(infra::time::now_time());
     last_page_frame.set_data_length(0);
+
+    /* Update page last frame position. */
     last_page->set_last_frame_position(last_page_frame.address() - last_page->address());
 }
 

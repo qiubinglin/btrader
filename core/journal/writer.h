@@ -21,9 +21,17 @@ public:
 
     uint64_t current_frame_uid();
 
+    /**
+     * @brief Opens a new frame for writing.
+     * 
+     * @param trigger_time 
+     * @param msg_type 
+     * @param length 
+     * @return FrameUnitSPtr 
+     */
     FrameUnitSPtr open_frame(int64_t trigger_time, int32_t msg_type, uint32_t length);
 
-    void close_frame(size_t data_length, int64_t gen_time = infra::time::now_in_nano());
+    void close_frame(size_t data_length, int64_t gen_time = infra::time::now_time());
 
     void copy_frame(const FrameUnitSPtr &source);
 

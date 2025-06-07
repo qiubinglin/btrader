@@ -18,8 +18,18 @@ public:
 
     ~Journal();
 
+    /**
+     * @brief Current frame is the one that can be read or written.
+     * 
+     * @return FrameUnitSPtr& 
+     */
     [[nodiscard]] FrameUnitSPtr &current_frame() { return frame_; }
 
+    /**
+     * @brief Current page is the one that contains current frame.
+     * 
+     * @return PageUnitSPtr& 
+     */
     [[nodiscard]] PageUnitSPtr &current_page() { return page_; }
 
     [[nodiscard]] const JLocationSPtr &get_location() const { return location_; }
