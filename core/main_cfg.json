@@ -2,7 +2,8 @@
     "system" : {
         "log": {
             "level": "warn",
-            "path": "./log"
+            "path": "./log",
+            "mode": "log"
         },
         "mode": "live",
         "output_root_path": "./output",

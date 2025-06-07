@@ -126,7 +126,13 @@ void Mentor::setup(const std::string &id) {
     } else {
         throw std::runtime_error("No such log level!");
     }
-    infra::LogMgr::setup_basic_log(path + id + ".log");
+    if (cfg["system"]["log"]["mode"].get<std::string>() != "stdout") {
+        std::string log_file = path + id + ".log";
+        if (std::filesystem::exists(log_file)) {
+            std::filesystem::remove_all(log_file);
+        }
+        infra::LogMgr::setup_basic_log(log_file);
+    }
     infra::LogMgr::set_level(level);
 }
 
