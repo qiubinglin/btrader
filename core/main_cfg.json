@@ -1,8 +1,11 @@
 {
     "system" : {
         "log": {
-            "level": "warn",
+            "level": "info",
             "path": "./log",
+            "logger": "rotating",
+            "max_size": 16,
+            "max_files": 3,
             "mode": "log"
         },
         "mode": "live",

@@ -131,7 +131,16 @@ void Mentor::setup(const std::string &id) {
         if (std::filesystem::exists(log_file)) {
             std::filesystem::remove_all(log_file);
         }
-        infra::LogMgr::setup_basic_log(log_file);
+        std::string logger = cfg["system"]["log"]["logger"].get<std::string>();
+        if (logger == "basic") {
+            infra::LogMgr::setup_basic_log(log_file);
+        } else if (logger == "rotating") {
+            size_t max_size = cfg["system"]["log"]["max_size"].get<size_t>();
+            size_t max_files = cfg["system"]["log"]["max_files"].get<size_t>();
+            infra::LogMgr::setup_rotating_log(log_file, max_size * MB, max_files);
+        } else {
+            throw std::runtime_error("No such logger type!");
+        }
     }
     infra::LogMgr::set_level(level);
 }
