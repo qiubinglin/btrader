@@ -15,6 +15,7 @@ private:
     void on_trading_start(const EventSPtr &event);
     void insert_order(const EventSPtr &event);
     void cancel_order(const EventSPtr &event);
+    void on_account_req(const EventSPtr &event);
 
     std::unordered_map<uint32_t, broker::TradeServiceUPtr> trade_services_;
 };

@@ -35,7 +35,7 @@ static constexpr int INSTITUTION_ID_LEN = 32;
 
 struct MsgTag {
     enum Tag {
-        PageEnd,
+        PageEnd = 0,
         NextPage,
         OrderInput,
         Bar,
@@ -59,6 +59,12 @@ struct MsgTag {
         Position,
         AccountReq,
         PositionBook,
+        Order,
+        HistoryOrder,
+        HistoryTrade,
+        RequestHistoryOrderError,
+        RequestHistoryTradeError,
+        TAG_MAX_SIZE, /* This must be the last tag which indicates the maximum size of the tag. */
     };
 };
 
@@ -366,7 +372,11 @@ struct Quote { //
     // 盘后交易‘V’=波动性中断 第 1位:‘0’= 正常状态 ‘1’= 全天停牌
 };
 
-struct Entrust { //
+/**
+ * @brief The part of order which is not yet filled.
+ *
+ */
+struct Entrust {
     PACK_DATA_BODY2(Entrust)
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
@@ -388,6 +398,10 @@ struct Entrust { //
     int64_t biz_index;     // 业务序号
 };
 
+/**
+ * @brief The part of order which is already filled.
+ *
+ */
 struct Transaction { //
     PACK_DATA_BODY2(Transaction)
     infra::Array<char, DATE_LEN> trading_day; // 交易日
@@ -413,6 +427,10 @@ struct Transaction { //
     int64_t biz_index; // 业务序号
 };
 
+/**
+ * @brief Same as Quote.
+ *
+ */
 struct Tree { //
     PACK_DATA_BODY2(Tree)
     infra::Array<char, DATE_LEN> trading_day; // 交易日
@@ -477,6 +495,10 @@ struct Bar {
     int32_t tick_count; // 区间有效tick数
 };
 
+/**
+ * @brief The input for placing an order.
+ * This structure is used to send an order request to the exchange.
+ */
 struct OrderInput {
     PACK_DATA_BODY2(OrderInput)
     uint64_t order_id;  // 订单ID
@@ -513,6 +535,10 @@ struct BlockMessage { //
     int64_t insert_time;                                 // 写入时间
 };
 
+/**
+ * @brief Same as OrderInput, but used for order cancel. It maybe replace OrderInput in future.
+ *
+ */
 struct OrderAction {
     PACK_DATA_BODY2(OrderAction)
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id;
@@ -536,8 +562,12 @@ struct OrderActionError {
     int64_t insert_time;                                   // 写入时间
 };
 
-struct Order { //
-    PACK_DATA_BODY
+/**
+ * @brief The order in the exchange.
+ *
+ */
+struct Order {
+    PACK_DATA_BODY2(Order)
     uint64_t order_id;                                     // 订单ID
     infra::Array<char, EXTERNAL_ID_LEN> external_order_id; // 柜台订单id
     uint64_t parent_id;                                    // 母单号
@@ -576,7 +606,7 @@ struct Order { //
 };
 
 struct HistoryOrder { //
-    PACK_DATA_BODY
+    PACK_DATA_BODY2(HistoryOrder)
     uint64_t order_id;                                     // 订单ID
     infra::Array<char, EXTERNAL_ID_LEN> external_order_id; // 柜台订单id, 字符型则hash转换
 
@@ -617,6 +647,10 @@ struct HistoryOrder { //
     enums::TimeCondition time_condition;     // 成交时间类型
 };
 
+/**
+ * @brief Same as Transaction?
+ *
+ */
 struct Trade {
     PACK_DATA_BODY2(Trade)
     uint64_t trade_id; // 成交ID
@@ -645,7 +679,7 @@ struct Trade {
 };
 
 struct HistoryTrade { //
-    PACK_DATA_BODY
+    PACK_DATA_BODY2(HistoryTrade)
     uint64_t trade_id; // 成交ID
 
     uint64_t order_id;                                     // 订单ID
@@ -827,14 +861,14 @@ struct RequestHistoryTrade { //
 };
 
 struct RequestHistoryOrderError { //
-    PACK_DATA_BODY
+    PACK_DATA_BODY2(RequestHistoryOrderError)
     int32_t error_id;                            // 错误ID
     infra::Array<char, ERROR_MSG_LEN> error_msg; // 错误信息
     int64_t trigger_time;                        // 写入时间
 };
 
 struct RequestHistoryTradeError { //
-    PACK_DATA_BODY
+    PACK_DATA_BODY2(RequestHistoryTradeError)
     int32_t error_id;                            // 错误ID
     infra::Array<char, ERROR_MSG_LEN> error_msg; // 错误信息
     int64_t trigger_time;                        // 写入时间
@@ -868,8 +902,8 @@ struct AccountReq {
     uint64_t id;
     ReqType type;
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id;
-    uint64_t target_id; /* target id you request */
-    int64_t insert_time;
+    uint64_t target_id;  /* target id you request */
+    int64_t insert_time; /* Maybe useless */
 };
 
 // key = hash_instrument(exchange_id, instrument_id)

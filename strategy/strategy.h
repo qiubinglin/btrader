@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/book.h"
-#include "executor.h"
-#include "jlocation.h"
-#include "types.h"
+#include "core/journal/jlocation.h"
+#include "core/types.h"
+#include "strategy/executor.h"
 
 namespace btra::strategy {
 
@@ -71,7 +71,7 @@ public:
     virtual void on_transaction(ExecutorSPtr &executor, const Transaction &transaction, JID source) {}
 
     /**
-     * @brief Callback on order update???
+     * @brief Callback on order update, from td
      *
      * @param executor
      * @param order
@@ -175,7 +175,7 @@ public:
     virtual void on_deregister(ExecutorSPtr &executor, const Deregister &deregister, JID source) {}
 
     /**
-     * @brief 客户端状态变化回调
+     * @brief Broker客户端状态变化回调
      *
      * @param executor
      * @param broker_state_update
@@ -192,8 +192,8 @@ public:
      * @param length 自定义数据的字节数
      * @param source 数据来源
      */
-    virtual void on_custom_data(ExecutorSPtr &executor, uint32_t msg_type, const std::vector<uint8_t> &data,
-                                uint32_t length, JID source) {}
+    virtual void on_custom_data(ExecutorSPtr &executor, uint32_t msg_type, const char *data, uint32_t length,
+                                JID source) {}
 };
 DECLARE_SPTR(Strategy)
 

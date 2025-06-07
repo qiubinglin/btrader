@@ -3,8 +3,10 @@
 namespace btra {
 
 void TDEngine::react() {
+    events_.filter(is<MsgTag::TradingStart>).subscribe(ON_MEM_FUNC(on_trading_start));
     events_.filter(is<MsgTag::OrderInput>).subscribe(ON_MEM_FUNC(insert_order));
     events_.filter(is<MsgTag::OrderAction>).subscribe(ON_MEM_FUNC(cancel_order));
+    events_.filter(is<MsgTag::AccountReq>).subscribe(ON_MEM_FUNC(on_account_req));
 }
 
 void TDEngine::on_setup() {
@@ -41,6 +43,14 @@ void TDEngine::insert_order(const EventSPtr &event) {
     const auto &order_input = event->data<OrderInput>();
     auto td_uid = get_main_cfg().get_td_location_uid();
     uint32_t account_uid = uidutil::to_account_uid(order_input.order_id, td_uid);
+
+    if (trade_services_[account_uid]->get_state() != enums::BrokerState::Ready) {
+        // If the trade service is not ready, we should not insert the order.
+        // Maybe retry later or notify the user.
+        std::cerr << "Trade service for account " << account_uid << " is not ready." << std::endl;
+        return;
+    }
+
     bool success = trade_services_[account_uid]->insert_order(order_input);
     if (not success) {
         // retry and notify me.
@@ -51,7 +61,33 @@ void TDEngine::cancel_order(const EventSPtr &event) {
     const OrderAction &action = event->data<OrderAction>();
     auto td_uid = get_main_cfg().get_td_location_uid();
     uint32_t account_uid = uidutil::to_account_uid(action.order_id, td_uid);
+
+    if (trade_services_[account_uid]->get_state() != enums::BrokerState::Ready) {
+        // If the trade service is not ready, we should not insert the order.
+        // Maybe retry later or notify the user.
+        std::cerr << "Trade service for account " << account_uid << " is not ready." << std::endl;
+        return;
+    }
+
     bool success = trade_services_[account_uid]->cancel_order(action);
+    if (not success) {
+        // retry and notify me.
+    }
+}
+
+void TDEngine::on_account_req(const EventSPtr &event) {
+    const auto &req = event->data<AccountReq>();
+    auto td_uid = get_main_cfg().get_td_location_uid();
+    uint32_t account_uid = uidutil::to_account_uid(req.id, td_uid);
+    // std::cout << "Requesting account info for account UID: " << account_uid << std::endl;
+    if (trade_services_[account_uid]->get_state() != enums::BrokerState::Ready) {
+        // If the trade service is not ready, we should not insert the order.
+        // Maybe retry later or notify the user.
+        std::cerr << "Trade service for account " << account_uid << " is not ready." << std::endl;
+        return;
+    }
+
+    bool success = trade_services_[account_uid]->req_account_info(req);
     if (not success) {
         // retry and notify me.
     }

@@ -97,6 +97,16 @@ public:
      */
     virtual void update_strategy_state(StrategyStateUpdate &state_update);
 
+    /**
+     * @brief Request account information.
+     *
+     * @param institution The institution which the account belongs to
+     * @param account The account ID
+     * @param req The account request
+     * @return uint64_t The request ID
+     */
+    virtual uint64_t req_account_info(const std::string &institution, const std::string &account, const AccountReq &req);
+
     const Book &book() const;
     Book &book();
 

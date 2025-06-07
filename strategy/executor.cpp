@@ -59,6 +59,20 @@ void Executor::req_deregister() {}
 
 void Executor::update_strategy_state(StrategyStateUpdate &state_update) {}
 
+uint64_t Executor::req_account_info(const std::string &institution, const std::string &account, const AccountReq &req) {
+    auto account_location_uid = journal::JIDUtil::build(institution, account);
+    auto writer = engine_->get_writer(account_location_uid);
+
+    AccountReq &account_req = writer->open_data<AccountReq>(now_event_time());
+    account_req = req;
+
+    account_req.id = writer->current_frame_uid();
+    account_req.insert_time = infra::time::now_time();
+    writer->close_data();
+
+    return account_req.id;
+}
+
 const Book &Executor::book() const { return book_; }
 
 Book &Executor::book() { return book_; }
