@@ -30,7 +30,6 @@ public:
 
 private:
     hv::WebSocketClient client_;
-    bool is_opened_{false};
 
     friend class WSClientSetter;
 };

@@ -3,6 +3,7 @@
 #include <map>
 
 #include "infra/format.h"
+#include "infra/log.h"
 
 namespace btra::broker {
 
@@ -66,11 +67,11 @@ void BinanceBroker::setup(const Json::json &cfg) {
     uri_ = s_wss_endpoint;
 
     client_.on_open([this]() {
-        std::cout << "Binance broker connected successfully!" << std::endl;
+        INFRA_LOG_INFO("Binance broker on open!");
         this->state_ = enums::BrokerState::Ready;
     });
     client_.on_close([this]() {
-        std::cout << "Binance broker disconnected!" << std::endl;
+        INFRA_LOG_INFO("Binance broker on close!");
         this->state_ = enums::BrokerState::DisConnected;
     });
     client_.set_msg_handler([this](const std::string &msg) { this->on_msg(msg); });
@@ -78,13 +79,14 @@ void BinanceBroker::setup(const Json::json &cfg) {
 
 void BinanceBroker::start() {
     if (client_.open(uri_) != 0) {
-        std::cerr << "Connect binance td server failed!" << std::endl;
+        INFRA_LOG_ERROR("Connect binance td server failed!");
         throw std::runtime_error("Connect binance td server failed!");
     }
     int try_count = 0;
-    while (not client_.is_connected() and try_count < 100) {
+    while (not client_.is_connected() and try_count < 10) {
         sleep(1);
         ++try_count;
+        INFRA_LOG_WARN("Binance broker is trying to connect to server, try count: {}", try_count);
     }
     if (not client_.is_connected()) {
         throw std::runtime_error("Connect binance td server overtime!");

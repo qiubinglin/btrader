@@ -5,12 +5,10 @@ namespace infra {
 WebSocketClient::WebSocketClient() {
     client_.setPingInterval(0); /* hv::WebSocketClient will auto response pong. */
     client_.onopen = [this]() {
-        is_opened_ = true;
         printf("onopen\n");
     };
 
     client_.onclose = [this]() {
-        is_opened_ = false;
         printf("onclose\n");
     };
 
@@ -34,7 +32,7 @@ int WebSocketClient::open(const std::string &uri) { return client_.open(uri.c_st
 
 int WebSocketClient::write(const std::string &msg) { return client_.send(msg); }
 
-bool WebSocketClient::is_connected() { return is_opened_ and client_.isConnected(); }
+bool WebSocketClient::is_connected() { return client_.isConnected(); }
 
 int WebSocketClient::close() { return client_.close(); }
 
