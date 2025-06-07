@@ -76,6 +76,24 @@ void Mentor::setup(const std::string &id) {
     std::ifstream f(cfg_file_);
     auto cfg = Json::json::parse(f);
 
+    /* Remove existing output directory */
+    if (id == "master") {
+        std::string output_dir = cfg["system"]["output_root_path"].get<std::string>();
+        auto output_path = std::filesystem::absolute(output_dir);
+        if (std::filesystem::exists(output_path)) {
+            std::cout << fmt::format("Output directory {} already exists, remove it? y/[n]: ", output_path.string());
+            std::string str;
+            if (std::getline(std::cin, str)) {
+                if (str == "y" || str == "Y") {
+                    std::filesystem::remove_all(output_path);
+                } else {
+                    std::cout << "Output directory not removed, exiting..." << std::endl;
+                    std::_Exit(0);
+                }
+            }
+        }
+    }
+
     /* time */
     std::string time_unit_str = cfg["system"]["time_unit"].get<std::string>();
     if (time_unit_str == "nano") {
