@@ -1,8 +1,8 @@
 #include "binance_broker.h"
 
-#include "infra/format.h"
-
 #include <map>
+
+#include "infra/format.h"
 
 namespace btra::broker {
 
@@ -65,6 +65,14 @@ void BinanceBroker::setup(const Json::json &cfg) {
     secret_key_ = infra::crypto::EncrypKey(secret_key_file, true);
     uri_ = s_wss_endpoint;
 
+    client_.on_open([this]() {
+        std::cout << "Binance broker connected successfully!" << std::endl;
+        this->state_ = enums::BrokerState::Ready;
+    });
+    client_.on_close([this]() {
+        std::cout << "Binance broker disconnected!" << std::endl;
+        this->state_ = enums::BrokerState::DisConnected;
+    });
     client_.set_msg_handler([this](const std::string &msg) { this->on_msg(msg); });
 }
 
@@ -166,15 +174,15 @@ bool BinanceBroker::cancel_order(const OrderAction &input) {
 
 bool BinanceBroker::req_account_info(const AccountReq &req) {
     switch (req.type) {
-    case AccountReq::Status: {
-        std::map<std::string, std::string> params_keys;
-        params_keys["timestamp"] = std::to_string(req.insert_time);
-        params_keys["apiKey"] = public_key_str_;
+        case AccountReq::Status: {
+            std::map<std::string, std::string> params_keys;
+            params_keys["timestamp"] = std::to_string(req.insert_time);
+            params_keys["apiKey"] = public_key_str_;
 
-        std::string msg_to_sign = to_msg(params_keys);
-        std::string signature = get_signature(secret_key_, msg_to_sign);
+            std::string msg_to_sign = to_msg(params_keys);
+            std::string signature = get_signature(secret_key_, msg_to_sign);
 
-        std::string jsondata = fmt::format(R"(
+            std::string jsondata = fmt::format(R"(
             {{
                 "id": "{}",
                 "method": "account.status",
@@ -185,20 +193,20 @@ bool BinanceBroker::req_account_info(const AccountReq &req) {
                 }}
             }}
         )",
-                                           req.id, params_keys["apiKey"], signature, params_keys["timestamp"]);
-        /* Send data. */
-        if (client_.write(jsondata) < 0) {
-            std::cerr << "Req account status failed" << std::endl;
-        }
-    } break;
-    case AccountReq::OrderBook: {
-        std::map<std::string, std::string> params_keys;
-        params_keys["timestamp"] = std::to_string(req.insert_time);
-        params_keys["apiKey"] = public_key_str_;
+                                               req.id, params_keys["apiKey"], signature, params_keys["timestamp"]);
+            /* Send data. */
+            if (client_.write(jsondata) < 0) {
+                std::cerr << "Req account status failed" << std::endl;
+            }
+        } break;
+        case AccountReq::OrderBook: {
+            std::map<std::string, std::string> params_keys;
+            params_keys["timestamp"] = std::to_string(req.insert_time);
+            params_keys["apiKey"] = public_key_str_;
 
-        std::string msg_to_sign = to_msg(params_keys);
-        std::string signature = get_signature(secret_key_, msg_to_sign);
-        std::string jsondata = fmt::format(R"(
+            std::string msg_to_sign = to_msg(params_keys);
+            std::string signature = get_signature(secret_key_, msg_to_sign);
+            std::string jsondata = fmt::format(R"(
             {{
                 "id": "{}",
                 "method": "openOrders.status",
@@ -209,24 +217,25 @@ bool BinanceBroker::req_account_info(const AccountReq &req) {
                 }}
             }}
         )",
-                                           req.id, params_keys["apiKey"], signature, params_keys["timestamp"]);
-        /* Send data. */
-        if (client_.write(jsondata) < 0) {
-            std::cerr << "Req account order book failed" << std::endl;
-        }
-    } break;
-    case AccountReq::Order: {
-        const char *name = req.instrument_id;
+                                               req.id, params_keys["apiKey"], signature, params_keys["timestamp"]);
+            /* Send data. */
+            if (client_.write(jsondata) < 0) {
+                std::cerr << "Req account order book failed" << std::endl;
+                std::cerr << "Request: " << jsondata << std::endl;
+            }
+        } break;
+        case AccountReq::Order: {
+            const char *name = req.instrument_id;
 
-        std::map<std::string, std::string> params_keys;
-        params_keys["symbol"] = name;
-        params_keys["orderId"] = std::to_string(req.target_id);
-        params_keys["timestamp"] = std::to_string(req.insert_time);
-        params_keys["apiKey"] = public_key_str_;
+            std::map<std::string, std::string> params_keys;
+            params_keys["symbol"] = name;
+            params_keys["orderId"] = std::to_string(req.target_id);
+            params_keys["timestamp"] = std::to_string(req.insert_time);
+            params_keys["apiKey"] = public_key_str_;
 
-        std::string msg_to_sign = to_msg(params_keys);
-        std::string signature = get_signature(secret_key_, msg_to_sign);
-        std::string jsondata = fmt::format(R"(
+            std::string msg_to_sign = to_msg(params_keys);
+            std::string signature = get_signature(secret_key_, msg_to_sign);
+            std::string jsondata = fmt::format(R"(
             {{
                 "id": "{}",
                 "method": "order.status",
@@ -239,17 +248,18 @@ bool BinanceBroker::req_account_info(const AccountReq &req) {
                 }}
             }}
         )",
-                                           req.id, params_keys["symbol"], params_keys["orderId"], params_keys["apiKey"],
-                                           signature, params_keys["timestamp"]);
-        /* Send data. */
-        if (client_.write(jsondata) < 0) {
-            std::cerr << "Req account status failed" << std::endl;
-        }
-    } break;
-    case AccountReq::PositionBook:
-        break;
-    default:
-        break;
+                                               req.id, params_keys["symbol"], params_keys["orderId"],
+                                               params_keys["apiKey"], signature, params_keys["timestamp"]);
+            /* Send data. */
+            if (client_.write(jsondata) < 0) {
+                std::cerr << "Req account status failed" << std::endl;
+                std::cerr << "Request: " << jsondata << std::endl;
+            }
+        } break;
+        case AccountReq::PositionBook:
+            break;
+        default:
+            break;
     }
 }
 

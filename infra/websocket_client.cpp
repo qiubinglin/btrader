@@ -24,6 +24,10 @@ WebSocketClient::WebSocketClient() {
 
 WebSocketClient::~WebSocketClient() {}
 
+void WebSocketClient::on_open(std::function<void()> handler) { client_.onopen = handler; }
+
+void WebSocketClient::on_close(std::function<void()> handler) { client_.onclose = handler; }
+
 void WebSocketClient::set_msg_handler(std::function<void(const std::string &)> handler) { client_.onmessage = handler; }
 
 int WebSocketClient::open(const std::string &uri) { return client_.open(uri.c_str()); }

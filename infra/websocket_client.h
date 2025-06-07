@@ -12,6 +12,8 @@ public:
     WebSocketClient();
     ~WebSocketClient();
 
+    void on_open(std::function<void()> handler);
+    void on_close(std::function<void()> handler);
     void set_msg_handler(std::function<void(const std::string &)> handler);
     int open(const std::string &uri);
 
