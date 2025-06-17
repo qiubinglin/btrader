@@ -8,16 +8,16 @@ namespace btra::enums {
 enum class RunMode : int8_t { LIVE, DATA, REPLAY, BACKTEST };
 inline std::string get_mode_name(RunMode m) {
     switch (m) {
-    case RunMode::LIVE:
-        return "live";
-    case RunMode::DATA:
-        return "data";
-    case RunMode::REPLAY:
-        return "replay";
-    case RunMode::BACKTEST:
-        return "backtest";
-    default:
-        return "live";
+        case RunMode::LIVE:
+            return "live";
+        case RunMode::DATA:
+            return "data";
+        case RunMode::REPLAY:
+            return "replay";
+        case RunMode::BACKTEST:
+            return "backtest";
+        default:
+            return "live";
     }
 }
 inline RunMode get_mode_by_name(const std::string &name) {
@@ -36,15 +36,15 @@ inline RunMode get_mode_by_name(const std::string &name) {
 enum class Module : int8_t { MD, TD, STRATEGY, SYSTEM };
 inline std::string get_module_name(Module c) {
     switch (c) {
-    case Module::MD:
-        return "md";
-    case Module::TD:
-        return "td";
-    case Module::STRATEGY:
-        return "strategy";
-    case Module::SYSTEM:
-    default:
-        return "system";
+        case Module::MD:
+            return "md";
+        case Module::TD:
+            return "td";
+        case Module::STRATEGY:
+            return "strategy";
+        case Module::SYSTEM:
+        default:
+            return "system";
     }
 }
 inline Module get_module_by_name(const std::string &name) {
@@ -61,15 +61,15 @@ inline Module get_module_by_name(const std::string &name) {
 enum class layout : int8_t { JOURNAL, SQLITE, NANOMSG, LOG };
 inline std::string get_layout_name(layout l) {
     switch (l) {
-    case layout::JOURNAL:
-        return "journal";
-    case layout::SQLITE:
-        return "db";
-    case layout::NANOMSG:
-        return "nn";
-    case layout::LOG:
-    default:
-        return "log";
+        case layout::JOURNAL:
+            return "journal";
+        case layout::SQLITE:
+            return "db";
+        case layout::NANOMSG:
+            return "nn";
+        case layout::LOG:
+        default:
+            return "log";
     }
 }
 
@@ -263,7 +263,7 @@ public:
 
 /**
  * @brief Market data type
- * 
+ *
  */
 enum class MDType : int8_t {
     Unknown,
@@ -271,5 +271,7 @@ enum class MDType : int8_t {
     Depth,
     Trade,
 };
+
+enum class BrokerReqType : uint8_t { Unknown = 0, OrderPlace, OrderCancel, OrderBook, OrderState, PositionBook };
 
 } // namespace btra::enums
