@@ -1,8 +1,9 @@
 #pragma once
 
 #include "broker/trade_service.h"
-#include "infra/websocket_client.h"
+#include "core/requestbook.h"
 #include "infra/crypto/signer.h"
+#include "infra/websocket_client.h"
 
 namespace btra::broker {
 
@@ -26,6 +27,8 @@ private:
 
     infra::WebSocketClient client_;
     std::string uri_;
+
+    RequestBook req_book_;
 };
 
 } // namespace btra::broker

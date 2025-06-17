@@ -136,6 +136,7 @@ bool BinanceBroker::insert_order(const OrderInput &input) {
     if (client_.write(websocket_json) < 0) {
         std::cerr << "Insert order failed" << std::endl;
     }
+    req_book_.add_request(input.order_id, enums::BrokerReqType::OrderPlace);
     return true;
 }
 
@@ -171,6 +172,7 @@ bool BinanceBroker::cancel_order(const OrderAction &input) {
     if (client_.write(jsondata) < 0) {
         std::cerr << "Cancel order failed" << std::endl;
     }
+    req_book_.add_request(input.order_id, enums::BrokerReqType::OrderCancel);
     return true;
 }
 
@@ -200,6 +202,7 @@ bool BinanceBroker::req_account_info(const AccountReq &req) {
             if (client_.write(jsondata) < 0) {
                 std::cerr << "Req account status failed" << std::endl;
             }
+            req_book_.add_request(req.id, enums::BrokerReqType::PositionBook);
         } break;
         case AccountReq::OrderBook: {
             std::map<std::string, std::string> params_keys;
@@ -225,6 +228,7 @@ bool BinanceBroker::req_account_info(const AccountReq &req) {
                 std::cerr << "Req account order book failed" << std::endl;
                 std::cerr << "Request: " << jsondata << std::endl;
             }
+            req_book_.add_request(req.id, enums::BrokerReqType::OrderBook);
         } break;
         case AccountReq::Order: {
             const char *name = req.instrument_id;
@@ -257,6 +261,7 @@ bool BinanceBroker::req_account_info(const AccountReq &req) {
                 std::cerr << "Req account status failed" << std::endl;
                 std::cerr << "Request: " << jsondata << std::endl;
             }
+            req_book_.add_request(req.id, enums::BrokerReqType::OrderState);
         } break;
         case AccountReq::PositionBook:
             break;
@@ -265,6 +270,46 @@ bool BinanceBroker::req_account_info(const AccountReq &req) {
     }
 }
 
-void BinanceBroker::on_msg(const std::string &msg) { std::cout << msg << std::endl; }
+void BinanceBroker::on_msg(const std::string &msg) {
+    INFRA_LOG_INFO("Binance broker received message: {}", msg);
+    // Here you would parse the message and handle it accordingly.
+    // This is a placeholder for the actual message handling logic.
+    // You might want to deserialize the JSON and process the data.
+    Json::json json_msg;
+    try {
+        json_msg = Json::json::parse(msg);
+        if (json_msg.contains("id")) {
+            uint64_t req_id = std::stoull(json_msg["id"].get<std::string>());
+            if (req_book_.has_request(req_id)) {
+                auto req_type = req_book_.get_request(req_id);
+                switch (req_type) {
+                    case enums::BrokerReqType::OrderPlace:
+                        INFRA_LOG_INFO("Order placed successfully, request ID: {}", req_id);
+                        break;
+                    case enums::BrokerReqType::OrderCancel:
+                        INFRA_LOG_INFO("Order cancelled successfully, request ID: {}", req_id);
+                        break;
+                    case enums::BrokerReqType::OrderBook:
+                        INFRA_LOG_INFO("Order book retrieved successfully, request ID: {}", req_id);
+                        break;
+                    case enums::BrokerReqType::OrderState:
+                        INFRA_LOG_INFO("Order state retrieved successfully, request ID: {}", req_id);
+                        break;
+                    case enums::BrokerReqType::PositionBook:
+                        INFRA_LOG_INFO("Position book retrieved successfully, request ID: {}", req_id);
+                        break;
+                    default:
+                        INFRA_LOG_WARN("Unknown request type for ID: {}", req_id);
+                        break;
+                }
+            } else {
+                INFRA_LOG_WARN("Received response for unknown request ID: {}", req_id);
+            }
+        }
+    } catch (const Json::json::parse_error &e) {
+        INFRA_LOG_ERROR("Failed to parse JSON message: {}", e.what());
+        return;
+    }
+}
 
 } // namespace btra::broker

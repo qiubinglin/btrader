@@ -16,15 +16,13 @@ public:
         if (quote_sequence_.size() > 100) {
             quote_sequence_.pop();
         }
-        // std::cout << "Received Quote: " << quote.instrument_id.to_string() << " at " << quote.data_time << std::endl;
-        // for (size_t i = 0; i < quote.bid_price.size(); ++i) {
-        //     std::cout << "Bid Price[" << i << "]: " << quote.bid_price[i] << ", Volume: " << quote.bid_volume[i]
-        //               << std::endl;
-        // }
-        // for (size_t i = 0; i < quote.ask_price.size(); ++i) {
-        //     std::cout << "Ask Price[" << i << "]: " << quote.ask_price[i] << ", Volume: " << quote.ask_volume[i]
-        //               << std::endl;
-        // }
+
+        for (size_t i = 0; i < quote.bid_price.size(); ++i) {
+            INFRA_LOG_INFO("Bid Price[{}]: {}, Volume: {}", i, quote.bid_price[i], quote.bid_volume[i]);
+        }
+        for (size_t i = 0; i < quote.ask_price.size(); ++i) {
+            INFRA_LOG_INFO("Ask Price[{}]: {}, Volume: {}", i, quote.ask_price[i], quote.ask_volume[i]);
+        }
         // You can add your trading logic here based on the quote data
     }
 
@@ -33,18 +31,15 @@ public:
         if (price_sequence_.size() > 100) {
             price_sequence_.pop();
         }
-        // std::cout << "Received Bar: " << bar.instrument_id.to_string() << " at " << bar.end_time << std::endl;
-        // std::cout << "Open: " << bar.open << ", High: " << bar.high << ", Low: " << bar.low << ", Close: " << bar.close
-        //           << ", Volume: " << bar.volume << std::endl;
+        INFRA_LOG_INFO("Bar Data: {} {} {} {} {}", bar.open, bar.high, bar.low, bar.close, bar.volume);
         // You can add your trading logic here based on the bar data
-        if (bar_cnt_++ % 5 == 0) {
-            // {
-            //     btra::AccountReq req;
-            //     req.type = btra::AccountReq::Status;
-            //     executor->req_account_info(institution_, account_, req);
-            // }
+        if (bar_cnt_++ % 10 == 0) {
             {
-                std::cout << "Requesting OrderBook for account: " << account_ << std::endl;
+                btra::AccountReq req;
+                req.type = btra::AccountReq::Status;
+                executor->req_account_info(institution_, account_, req);
+            }
+            {
                 btra::AccountReq req;
                 req.type = btra::AccountReq::OrderBook;
                 executor->req_account_info(institution_, account_, req);
@@ -54,14 +49,13 @@ public:
 
     void on_order(ExecutorSPtr &executor, const Order &order, JID source) override {
         // Handle order updates here
-        std::cout << "Order Update: " << order.order_id << " for " << order.instrument_id.to_string() << " with status "
-                  << static_cast<int>(order.status) << std::endl;
+        INFRA_LOG_INFO("Order Update: {} for {} with status {}", order.order_id, order.instrument_id.to_string(),
+                       static_cast<int>(order.status));
     }
 
     void on_order_action_error(ExecutorSPtr &executor, const OrderActionError &error, JID source) override {
         // Handle order action errors here
-        std::cerr << "Order Action Error: " << error.error_msg.to_string() << " for order ID " << error.order_id
-                  << std::endl;
+        INFRA_LOG_INFO("Order Action Error: {} for order ID {}", error.error_msg.to_string(), error.order_id);
     }
 
     void on_position_sync_reset(ExecutorSPtr &executor, const PositionBookFn &old_book, const PositionBookFn &new_book,

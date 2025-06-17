@@ -51,7 +51,7 @@ void TDEngine::insert_order(const EventSPtr &event) {
     if (trade_services_[account_uid]->get_state() != enums::BrokerState::Ready) {
         // If the trade service is not ready, we should not insert the order.
         // Maybe retry later or notify the user.
-        std::cerr << "Trade service for account " << account_uid << " is not ready." << std::endl;
+        INFRA_LOG_ERROR("Trade service for account {} is not ready.", account_uid);
         return;
     }
 
@@ -69,7 +69,7 @@ void TDEngine::cancel_order(const EventSPtr &event) {
     if (trade_services_[account_uid]->get_state() != enums::BrokerState::Ready) {
         // If the trade service is not ready, we should not insert the order.
         // Maybe retry later or notify the user.
-        std::cerr << "Trade service for account " << account_uid << " is not ready." << std::endl;
+        INFRA_LOG_ERROR("Trade service for account {} is not ready.", account_uid);
         return;
     }
 
@@ -87,7 +87,7 @@ void TDEngine::on_account_req(const EventSPtr &event) {
     if (trade_services_[account_uid]->get_state() != enums::BrokerState::Ready) {
         // If the trade service is not ready, we should not insert the order.
         // Maybe retry later or notify the user.
-        std::cerr << "Trade service for account " << account_uid << " is not ready." << std::endl;
+        INFRA_LOG_ERROR("Trade service for account {} is not ready.", account_uid);
         return;
     }
 
