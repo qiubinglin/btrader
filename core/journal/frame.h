@@ -30,7 +30,7 @@ struct FrameHeader {
 struct FrameUnit : Event {
     ~FrameUnit() override = default;
 
-    [[nodiscard]] bool has_data() const { return header_->length > 0 && header_->msg_type > 0; }
+    [[nodiscard]] bool has_data() const { return header_->length > 0 && header_->msg_type > 0/*PageEnd == 0*/; }
 
     [[nodiscard]] uintptr_t address() const { return reinterpret_cast<uintptr_t>(header_); }
 

@@ -9,6 +9,11 @@ namespace btra {
 using CBFunc = std::function<void(const EventSPtr &)>;
 
 class EventEngine;
+
+/**
+ * @brief ExtScheduler is an extension of the EventEngine that provides scheduling capabilities.
+ * It allows adding one-shot and periodic timer callbacks.
+ */
 class ExtScheduler {
 public:
     ExtScheduler(EventEngine &engine);

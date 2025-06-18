@@ -14,25 +14,23 @@ void EventEngine::setcfg(const Json::json &cfg) { cfg_ = cfg; }
 void EventEngine::run() {
     setup();
     continual_ = true;
-    events_.connect(cs_);
+    events_.connect(cs_); /* Start event loop. */
 }
 
 void EventEngine::step() {
     continual_ = false;
-    events_.connect(cs_);
+    events_.connect(cs_); /* Start event loop. */
 }
 
 void EventEngine::stop() { live_ = false; }
 
 void EventEngine::setup() {
     on_setup();
-    ob_helper_.add_customer(reader_);
+    ob_helper_.add_customer(reader_); // Add reader_ to observe helper for not HP mode.
     events_ = rx::observable<>::create<EventSPtr>([this](auto &s) { this->produce(s); }).publish();
     react();
     live_ = true;
 }
-
-ExtScheduler EventEngine::ext_scheduler() { return ExtScheduler(*this); }
 
 void EventEngine::produce(const rx::subscriber<EventSPtr> &sb) {
     try {
@@ -50,8 +48,6 @@ void EventEngine::produce(const rx::subscriber<EventSPtr> &sb) {
 }
 
 bool EventEngine::drain(const rx::subscriber<EventSPtr> &sb) {
-    // todo. using NetDevice to get nanomsg and handle it before main read loop.
-    /* There is a different behavior between HP and not HP. To be fixed */
 #ifndef HP
     if (live_ and ob_helper_.data_available()) {
 #endif
@@ -64,7 +60,8 @@ bool EventEngine::drain(const rx::subscriber<EventSPtr> &sb) {
                 sb.on_next(reader_->current_frame());
                 reader_->next();
             } else {
-                INFRA_LOG_INFO("reached journal end {}", infra::time::strftime(reader_->current_frame()->gen_time()));
+                INFRA_LOG_INFO("reached defined end time {}",
+                               infra::time::strftime(reader_->current_frame()->gen_time()));
                 return false;
             }
         }

@@ -8,10 +8,10 @@ void Executor::set_engine(EventEngine *engine) { engine_ = engine; }
 
 int64_t Executor::now_event_time() const { return engine_->now_event_time(); }
 
-void Executor::add_timer(int64_t time, const CBFunc &callback) { engine_->ext_scheduler().add_timer(time, callback); }
+void Executor::add_timer(int64_t time, const CBFunc &callback) { ExtScheduler(*engine_).add_timer(time, callback); }
 
 void Executor::add_time_interval(int64_t duration, const CBFunc &callback) {
-    engine_->ext_scheduler().add_time_interval(duration, callback);
+    ExtScheduler(*engine_).add_time_interval(duration, callback);
 }
 
 void Executor::add_td_account(const std::string &institution, const std::string &account) {}

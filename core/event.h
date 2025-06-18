@@ -11,8 +11,18 @@ namespace btra {
 struct Event {
     virtual ~Event() = default;
 
+    /**
+     * @brief Get the generation time of the event. Generation time is the time when the event was created completely.
+     *
+     * @return The generation time.
+     */
     [[nodiscard]] virtual int64_t gen_time() const = 0;
 
+    /**
+     * @brief Get the trigger time of the event. Trigger time is the time when the event is intended to create.
+     *
+     * @return The trigger time.
+     */
     [[nodiscard]] virtual int64_t trigger_time() const = 0;
 
     [[nodiscard]] virtual int32_t msg_type() const = 0;
@@ -33,6 +43,7 @@ struct Event {
 
     /**
      * Using auto with the return mess up the reference with the undlerying memory address, DO NOT USE it.
+     * @brief Get the data of the event as a specific type. This is for fixed size data.
      * @tparam T
      * @return a casted reference to the underlying memory address
      */
@@ -40,6 +51,11 @@ struct Event {
         return *(reinterpret_cast<const T *>(data_address()));
     }
 
+    /**
+     * @brief Get the data of the event as a specific type. This is for variable size data.
+     * @tparam T
+     * @return a new created object of type T.
+     */
     template <typename T> std::enable_if_t<not size_fixed_v<T>, T> data() const {
         return T(data_as_bytes(), data_length());
     }
