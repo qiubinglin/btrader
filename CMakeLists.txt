@@ -16,6 +16,7 @@ add_subdirectory(td)
 add_subdirectory(cp)
 add_subdirectory(strategy)
 add_subdirectory(strategies)
+add_subdirectory(algorithm)
 
 add_subdirectory(main)
 add_subdirectory(tests)
