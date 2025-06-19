@@ -1,4 +1,5 @@
 add_subdirectory(binance)
+add_subdirectory(backtest)
 
 file(GLOB src
     *.cpp
@@ -15,6 +16,7 @@ set(XTP_LIBS
 target_link_libraries(broker
     core
     binance
+    backtest_service
     # ${XTP_LIBS}
 )
 target_include_directories(broker PUBLIC

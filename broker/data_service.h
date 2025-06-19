@@ -25,6 +25,8 @@ public:
      */
     static DataServiceUPtr create(const std::string &institution);
 
+    virtual ~DataService() = default;
+
     /**
      * @brief Set the customer object which enjoy the data service.
      *

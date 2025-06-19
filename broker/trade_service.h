@@ -21,6 +21,8 @@ public:
      */
     static TradeServiceUPtr create(const std::string &institution);
 
+    virtual ~TradeService() = default;
+
     /**
      * @brief Setup config.
      *

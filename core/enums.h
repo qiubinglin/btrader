@@ -228,7 +228,7 @@ enum class BasketType : int8_t { Custom, ETF };
 
 enum class Direction : int8_t { Long, Short };
 
-enum class AccountType : int8_t { Stock, Credit, Future };
+enum class AccountType : int8_t { Stock, Credit, Future, BackTest };
 
 enum class CommissionRateMode : int8_t { ByAmount, ByVolume };
 
