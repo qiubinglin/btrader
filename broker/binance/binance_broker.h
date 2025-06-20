@@ -10,9 +10,10 @@ namespace btra::broker {
 class BinanceBroker : public TradeService {
 public:
     ~BinanceBroker();
-    void setup(const Json::json &cfg);
-    void start();
-    enums::AccountType get_account_type() const;
+    void setup(const Json::json &cfg) override;
+    void start() override;
+    void stop() override;
+    enums::AccountType get_account_type() const override;
 
     bool insert_order(const OrderInput &input) override;
     bool cancel_order(const OrderAction &input) override;

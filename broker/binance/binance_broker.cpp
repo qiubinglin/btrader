@@ -93,6 +93,8 @@ void BinanceBroker::start() {
     }
 }
 
+void BinanceBroker::stop() {}
+
 enums::AccountType BinanceBroker::get_account_type() const { return enums::AccountType::Stock; }
 
 bool BinanceBroker::insert_order(const OrderInput &input) {

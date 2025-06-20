@@ -38,7 +38,7 @@ void CPEngine::on_setup() {
     auto md_req_dest = journal::JIDUtil::build(journal::JIDUtil::MD_REQ);
     writers_[md_req_dest] = std::make_unique<journal::Writer>(main_cfg_.md_req_location(), md_req_dest, false);
 
-    executor_ = std::make_shared<strategy::Executor>(this);
+    executor_ = strategy::Executor::create(main_cfg_.run_mode(), this);
 
     typedef strategy::Strategy *(*create_strat_func)();
     auto cfg_strats = cfg_["strategy"];

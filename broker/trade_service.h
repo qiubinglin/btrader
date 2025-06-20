@@ -37,6 +37,12 @@ public:
     virtual void start() = 0;
 
     /**
+     * @brief Stop the trade service.
+     *
+     */
+    virtual void stop() = 0;
+
+    /**
      * @brief Get the state of broker.
      *
      * @return enums::BrokerState

@@ -10,6 +10,10 @@ void BackTestBroker::start() {
     // Implementation for start
 }
 
+void BackTestBroker::stop() {
+    // Implementation for stop
+}
+
 enums::AccountType BackTestBroker::get_account_type() const {
     return enums::AccountType::BackTest;
 }
