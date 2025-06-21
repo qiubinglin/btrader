@@ -25,6 +25,7 @@ boost
 libhv 1.3.3
 libssl-dev
 spdlog 1.14.1
+pybind11-2.13.6
 ```
 
 ## Python libs

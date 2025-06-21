@@ -15,4 +15,9 @@ find_package(OpenSSL REQUIRED)
 # spdlog
 find_package(spdlog REQUIRED)
 
+# pybind11
+# If can't find pybind11 then do: export pybind11_DIR=/path/to/pybind11/share/cmake/pybind11
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+find_package(pybind11 CONFIG REQUIRED)
+
 add_subdirectory(thirdparty)
