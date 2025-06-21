@@ -38,3 +38,6 @@ build
 
 # usr running config dir
 usrconf
+
+# jupyter notebook checkpoints
+.ipynb_checkpoints

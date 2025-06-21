@@ -26,3 +26,12 @@ libhv 1.3.3
 libssl-dev
 spdlog 1.14.1
 ```
+
+## Python libs
+* Version python-3.10
+```
+pandas
+matplotlib
+mplfinance
+jupyter notebook
+```
