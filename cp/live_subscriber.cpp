@@ -37,31 +37,52 @@ void LiveSubscriber::on_trading_day(const EventSPtr &event) {
 void LiveSubscriber::on_bar(const EventSPtr &event) {
     const auto &bar = event->data<Bar>();
     Invoker::invoke(*this, &strategy::Strategy::on_bar, bar, event->source());
+    if (engine_->is_backtest()) {
+        /* Compute floating profit indicators according to bar and current positions? */
+    }
 }
 
 void LiveSubscriber::on_quote(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_quote, event->data<Quote>(), event->source());
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_tree(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_tree, event->data<Tree>(), event->source());
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_entrust(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_entrust, event->data<Entrust>(), event->source());
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_transaction(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_transaction, event->data<Transaction>(), event->source());
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_order_action_error(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_order_action_error, event->data<OrderActionError>(),
                     event->source());
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_trade(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_trade, event->data<Trade>(), event->source());
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_position_sync_reset(const EventSPtr &event) {
@@ -70,27 +91,42 @@ void LiveSubscriber::on_position_sync_reset(const EventSPtr &event) {
                     PositionBookFn(engine_->executor_->book().positions), PositionBookFn(new_position_book),
                     event->source());
     engine_->executor_->book().positions = new_position_book;
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_asset_sync_reset(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_asset_sync_reset, engine_->executor_->book().asset,
                     event->data<Asset>(), event->source());
     engine_->executor_->book().asset = event->data<Asset>();
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_asset_margin_sync_reset(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_asset_margin_sync_reset, engine_->executor_->book().asset_margin,
                     event->data<AssetMargin>(), event->source());
     engine_->executor_->book().asset_margin = event->data<AssetMargin>();
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_deregister(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_deregister, event->data<Deregister>(), event->source());
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_broker_state_change(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_broker_state_change, event->data<BrokerStateUpdate>(),
                     event->source());
+    if (engine_->is_backtest()) {
+        /* Record infomation */
+    }
 }
 
 void LiveSubscriber::on_custom_data(const EventSPtr &event) {
@@ -98,6 +134,9 @@ void LiveSubscriber::on_custom_data(const EventSPtr &event) {
     for (const auto &strategy : engine_->strategies_) {
         strategy->on_custom_data(context, event->msg_type(), event->data_as_bytes(), event->data_length(),
                                  event->source());
+    }
+    if (engine_->is_backtest()) {
+        /* Record infomation */
     }
 }
 

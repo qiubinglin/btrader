@@ -1,7 +1,8 @@
 #pragma once
 
-#include "eventengine.h"
-#include "strategy.h"
+#include "core/eventengine.h"
+#include "cp/backtest_dump.h"
+#include "strategy/strategy.h"
 
 namespace btra {
 
@@ -25,6 +26,8 @@ private:
     void pre_start();
     void post_stop();
 
+    bool is_backtest() const { return main_cfg_.run_mode() == enums::RunMode::BACKTEST; }
+
 private:
     strategy::ExecutorSPtr executor_;
     std::vector<strategy::StrategySPtr> strategies_;
@@ -36,7 +39,9 @@ private:
     unsigned md_account_count_ = 0;
 
     LiveSubscriber *live_subscriber_{nullptr};
-    BacktestSubscriber *backtest_subscriber_{nullptr};
+    BacktestSubscriber *backtest_subscriber_{nullptr}; /* Not use now */
+
+    BacktestDump backtest_dump_;
 
     friend class LiveSubscriber;
     friend class BacktestSubscriber;

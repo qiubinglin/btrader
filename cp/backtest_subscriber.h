@@ -4,6 +4,10 @@
 
 namespace btra {
 
+/**
+ * @brief BacktestSubscriber is a subscriber for backtesting mode in the CPEngine. But not used in the current version.
+ * 
+ */
 class BacktestSubscriber {
 public:
     BacktestSubscriber(CPEngine *engine) : engine_(engine) {}
