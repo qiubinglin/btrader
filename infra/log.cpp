@@ -19,6 +19,7 @@ void LogMgr::setup_basic_log(const std::string &path) {
             std::filesystem::create_directories(dir);
         }
         auto logger = spdlog::basic_logger_mt("btra", abs_path.string());
+        logger->flush_on(spdlog::level::warn);
         spdlog::set_default_logger(logger);
     } catch (const spdlog::spdlog_ex &ex) {
         std::cerr << "setup_basic_log failed: " << ex.what() << std::endl;
@@ -33,6 +34,7 @@ void LogMgr::setup_rotating_log(const std::string &path, size_t max_size, size_t
             std::filesystem::create_directories(dir);
         }
         auto logger = spdlog::rotating_logger_mt("btra", abs_path.string(), max_size, max_files);
+        logger->flush_on(spdlog::level::warn);
         spdlog::set_default_logger(logger);
     } catch (const spdlog::spdlog_ex &ex) {
         std::cerr << "setup_rotating_log failed: " << ex.what() << std::endl;
