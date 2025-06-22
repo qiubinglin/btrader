@@ -8,6 +8,14 @@
 
 namespace btra::journal {
 
+/**
+ * @brief Compute the real root path
+ *
+ * @param root root path prefix
+ * @param m runmode: live, backtest or etc
+ * @param tags self-defiend path hierarchy.
+ * @return std::filesystem::path
+ */
 std::filesystem::path get_root_dir(const std::filesystem::path &root, enums::RunMode m,
                                    const std::vector<std::string> &tags) {
     static const std::unordered_map<enums::RunMode, std::string> map_env = {

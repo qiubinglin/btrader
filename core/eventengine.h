@@ -117,7 +117,7 @@ protected:
     int64_t end_time_ = 0;   /* End time of the event engine */
     int64_t now_event_time_ = 0;
     journal::ReaderUPtr reader_;
-    WriterMap writers_;
+    WriterMap writers_; /* Current writer key is dest id, replace it by journal id? */
 
     MainCfg main_cfg_;
     Json::json cfg_;

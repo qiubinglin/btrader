@@ -5,7 +5,7 @@
 
 #include "infra/infra.h"
 
-using JID = uint32_t;
+using JID = uint32_t; /* This is part of journal id, to be fixed? */
 
 namespace btra::journal {
 

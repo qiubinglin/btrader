@@ -30,6 +30,7 @@ void EventEngine::setup() {
     events_ = rx::observable<>::create<EventSPtr>([this](auto &s) { this->produce(s); }).publish();
     react();
     live_ = true;
+    INFRA_LOG_CRITICAL("{} setup done!", name());
 }
 
 void EventEngine::produce(const rx::subscriber<EventSPtr> &sb) {

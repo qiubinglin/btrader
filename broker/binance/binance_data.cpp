@@ -22,6 +22,7 @@ void BinanceData::start() {
     if (client_.open(uri_)) {
         std::cout << "Connect binance md server failed!" << std::endl;
     }
+    INFRA_LOG_CRITICAL("Binance data service start!");
 }
 
 void BinanceData::serve() {}

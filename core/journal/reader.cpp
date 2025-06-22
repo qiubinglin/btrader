@@ -5,7 +5,9 @@ namespace btra::journal {
 Reader::~Reader() { journals_.clear(); }
 
 void Reader::join(const JLocationSPtr &location, uint32_t dest_id, const int64_t from_time) {
+    /* Construct journal unique key. */
     auto key = static_cast<uint64_t>(location->uid) << 32u | static_cast<uint64_t>(dest_id);
+
     auto result = journals_.try_emplace(key, location, dest_id, false, lazy_);
     if (result.second) {
         journals_.at(key).seek_to_time(from_time);
@@ -46,9 +48,9 @@ bool Reader::data_available() {
     return current_ != nullptr && current_frame()->has_data();
 }
 
-void Reader::seek_to_time(int64_t nanotime) {
+void Reader::seek_to_time(int64_t time) {
     for (auto &pair : journals_) {
-        pair.second.seek_to_time(nanotime);
+        pair.second.seek_to_time(time);
     }
     sort();
 }

@@ -19,15 +19,20 @@ public:
 
     [[nodiscard]] const PageUnitSPtr get_current_page() const { return journal_.page_; }
 
+    /**
+     * @brief Compute current frame uid.
+     *
+     * @return uint64_t
+     */
     uint64_t current_frame_uid();
 
     /**
      * @brief Opens a new frame for writing.
-     * 
-     * @param trigger_time 
-     * @param msg_type 
-     * @param length 
-     * @return FrameUnitSPtr 
+     *
+     * @param trigger_time
+     * @param msg_type
+     * @param length
+     * @return FrameUnitSPtr
      */
     FrameUnitSPtr open_frame(int64_t trigger_time, int32_t msg_type, uint32_t length);
 
@@ -51,7 +56,8 @@ public:
      * @param msg_type
      * @return a casted reference to the underlying memory address in mmap file
      */
-    template <typename T> std::enable_if_t<size_fixed_v<T>, T &> open_data(int64_t trigger_time = 0) {
+    template <typename T>
+    std::enable_if_t<size_fixed_v<T>, T &> open_data(int64_t trigger_time = 0) {
         auto frame = open_frame(trigger_time, T::tag, sizeof(T));
         return const_cast<T &>(frame->template data<T>());
     }
@@ -112,10 +118,10 @@ public:
     }
 
 private:
-    const uint64_t frame_id_base_;
+    const uint64_t frame_id_base_; /* Use to construct frame id. */
     Journal journal_;
     size_t size_to_write_;
-    uint32_t writer_start_time_32int_;
+    uint32_t writer_start_time_32int_; /* Hashed by start time. */
     std::mutex writer_mtx_ = {};
 
     JourIndicator jour_ind_;

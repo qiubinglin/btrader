@@ -11,9 +11,9 @@ public:
     ~Reader();
 
     /**
-     * join journal at given data location
-     * @param location where the journal locates
-     * @param dest_id journal dest id
+     * @brief Join journal at given unique id
+     * @param location
+     * @param dest_id
      * @param from_time subscribe events after this time, 0 means from start
      */
     void join(const JLocationSPtr &location, uint32_t dest_id, int64_t from_time);
@@ -31,11 +31,15 @@ public:
     bool data_available();
 
     /** seek journal to time */
-    void seek_to_time(int64_t nanotime);
+    void seek_to_time(int64_t time);
 
     /** seek next frame */
     void next();
 
+    /**
+     * @brief Sort to get earliest frame
+     * 
+     */
     void sort();
 
 private:

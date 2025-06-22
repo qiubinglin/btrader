@@ -11,7 +11,7 @@ constexpr uint32_t PAGE_ID_TRANC = 0xFFFF0000;
 constexpr uint32_t FRAME_ID_TRANC = 0x0000FFFF;
 
 Writer::Writer(const JLocationSPtr &location, uint32_t dest_id, bool lazy)
-    : frame_id_base_(uint64_t(location->uid xor dest_id) << 32u),
+    : frame_id_base_(uint64_t(location->uid xor dest_id) << 32u) /* Constructed by journal id */,
       journal_(location, dest_id, true, lazy),
       size_to_write_(0),
       writer_start_time_32int_(infra::time::nano_hashed(infra::time::now_time())) {

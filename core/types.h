@@ -169,13 +169,13 @@ struct RequestReadFromPublic { //
  * @brief Determine directory
  *
  */
-struct Location { //
+struct Location {
     PACK_DATA_BODY
-    uint32_t location_uid;  //
-    enums::Module category; //
-    enums::RunMode mode;    //
-    std::string group;      //
-    std::string name;       //
+    uint32_t location_uid;
+    enums::Module category;
+    enums::RunMode mode;
+    std::string group; /* self-defined group */
+    std::string name; /* self-defined name */
 };
 
 struct RequestReadFromSync { //
