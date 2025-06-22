@@ -18,5 +18,7 @@ add_subdirectory(strategy)
 add_subdirectory(strategies)
 add_subdirectory(algorithm)
 
+add_subdirectory(pylib)
+
 add_subdirectory(main)
 add_subdirectory(tests)
