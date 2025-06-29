@@ -26,3 +26,7 @@ target_link_libraries(spdlog_demo spdlog::spdlog)
 
 # pybind11 test
 pybind11_add_module(pybind11_test pybind11_test.cpp)
+
+# time test
+add_executable(time_test time_test.cpp)
+target_link_libraries(time_test infra)

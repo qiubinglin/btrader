@@ -102,7 +102,7 @@ int64_t time::now_time(TimeUnit unit) {
         case NANO:
             return now_in_nano();
             break;
-        case MILI:
+        case MILLI:
             return now_in_mili();
             break;
         case SEC:
@@ -117,7 +117,7 @@ int64_t time::now_in_nano() {
     return (get_instance().base_.system_clock_count + duration).to_nano();
 }
 
-uint32_t time::nano_hashed(int64_t nano_time) { return hash_32((const unsigned char *)&nano_time, sizeof(nano_time)); }
+uint32_t time::time_hashed(int64_t timestamp) { return hash_32((const unsigned char *)&timestamp, sizeof(timestamp)); }
 
 int64_t time::now_in_sec() {
     auto duration = steady_clock_count() - get_instance().base_.steady_clock_count;
@@ -129,24 +129,70 @@ int64_t time::now_in_mili() {
     return (get_instance().base_.system_clock_count + duration).to_mili();
 }
 
-[[maybe_unused]] int64_t time::next_minute(int64_t nanotime) {
-    return nanotime - nanotime % time_unit::NANOSECONDS_PER_MINUTE + time_unit::NANOSECONDS_PER_MINUTE;
-}
-
-int64_t time::next_trading_day_end(int64_t nanotime) {
-    int64_t end_offset = 15 * time_unit::NANOSECONDS_PER_HOUR + 30 * time_unit::NANOSECONDS_PER_MINUTE;
-    int64_t trading_day = nanotime - nanotime % time_unit::NANOSECONDS_PER_DAY - time_unit::UTC_OFFSET + end_offset;
-    if (trading_day < now_in_nano()) {
-        trading_day += time_unit::NANOSECONDS_PER_DAY;
+[[maybe_unused]] int64_t time::next_minute(int64_t timestamp) {
+    switch (time::get_instance().unit) {
+        case NANO:
+            return timestamp - timestamp % time_unit::SECONDS_PER_MINUTE + time_unit::SECONDS_PER_MINUTE;
+            break;
+        case MILLI:
+            return timestamp - timestamp % time_unit::MILLISECONDS_PER_MINUTE + time_unit::MILLISECONDS_PER_MINUTE;
+            break;
+        case SEC:
+        default:
+            return timestamp - timestamp % time_unit::NANOSECONDS_PER_MINUTE + time_unit::NANOSECONDS_PER_MINUTE;
+            break;
     }
-    return trading_day;
 }
 
-int64_t time::calendar_day_start(int64_t nanotime) {
-    return nanotime - (nanotime % time_unit::NANOSECONDS_PER_DAY) - time_unit::UTC_OFFSET;
+int64_t time::next_trading_day_end(int64_t timestamp) {
+    switch (time::get_instance().unit) {
+        case NANO: {
+            int64_t end_offset = 15 * time_unit::NANOSECONDS_PER_HOUR + 30 * time_unit::NANOSECONDS_PER_MINUTE;
+            int64_t trading_day =
+                timestamp - timestamp % time_unit::NANOSECONDS_PER_DAY - time_unit::NANO_UTC_OFFSET + end_offset;
+            if (trading_day < now_in_nano()) {
+                trading_day += time_unit::NANOSECONDS_PER_DAY;
+            }
+            return trading_day;
+        } break;
+        case MILLI: {
+            int64_t end_offset = 15 * time_unit::MILLISECONDS_PER_HOUR + 30 * time_unit::MILLISECONDS_PER_MINUTE;
+            int64_t trading_day =
+                timestamp - timestamp % time_unit::MILLISECONDS_PER_DAY - time_unit::MILI_UTC_OFFSET + end_offset;
+            if (trading_day < now_in_mili()) {
+                trading_day += time_unit::MILLISECONDS_PER_DAY;
+            }
+            return trading_day;
+        } break;
+        case SEC:
+        default: {
+            int64_t end_offset = 15 * time_unit::SECONDS_PER_HOUR + 30 * time_unit::SECONDS_PER_MINUTE;
+            int64_t trading_day =
+                timestamp - timestamp % time_unit::SECONDS_PER_DAY - time_unit::SEC_UTC_OFFSET + end_offset;
+            if (trading_day < now_in_sec()) {
+                trading_day += time_unit::SECONDS_PER_DAY;
+            }
+            return trading_day;
+        } break;
+    }
 }
 
-int64_t time::today_start() { return calendar_day_start(time::now_in_nano()); }
+int64_t time::calendar_day_start(int64_t timestamp) {
+    switch (time::get_instance().unit) {
+        case NANO:
+            return timestamp - (timestamp % time_unit::NANOSECONDS_PER_DAY) - time_unit::NANO_UTC_OFFSET;
+            break;
+        case MILLI:
+            return timestamp - (timestamp % time_unit::MILLISECONDS_PER_DAY) - time_unit::MILI_UTC_OFFSET;
+            break;
+        case SEC:
+        default:
+            return timestamp - (timestamp % time_unit::SECONDS_PER_DAY) - time_unit::SEC_UTC_OFFSET;
+            break;
+    }
+}
+
+int64_t time::today_start() { return calendar_day_start(time::now_time()); }
 
 int64_t time::strptime(const std::string &time_string, const std::string &format) {
     int64_t nano = 0;
@@ -173,7 +219,21 @@ int64_t time::strptime(const std::string &time_string, const std::string &format
     iss >> std::get_time(&result, normal_format.c_str());
     std::time_t parsed_time = std::mktime(&result);
     auto tp_system = system_clock::from_time_t(parsed_time);
-    return duration_cast<nanoseconds>(tp_system.time_since_epoch()).count() + nano;
+
+    switch (time::get_instance().unit) {
+        case NANO:
+            return duration_cast<nanoseconds>(tp_system.time_since_epoch()).count() + nano;
+            break;
+        case MILLI:
+            return duration_cast<milliseconds>(tp_system.time_since_epoch()).count() +
+                   nano / time_unit::NANOSECONDS_PER_MILLISECOND;
+            break;
+        case SEC:
+        default:
+            return duration_cast<seconds>(tp_system.time_since_epoch()).count() +
+                   nano / time_unit::NANOSECONDS_PER_SECOND;
+            break;
+    }
 }
 
 int64_t time::strptime(const std::string &time_string, std::initializer_list<std::string> formats) {
@@ -186,10 +246,24 @@ int64_t time::strptime(const std::string &time_string, std::initializer_list<std
     return -1;
 }
 
-std::string time::strftime(int64_t nanotime, const std::string &format) {
-    if (nanotime == INT64_MAX) {
+std::string time::strftime(int64_t timestamp, const std::string &format) {
+    if (timestamp == INT64_MAX) {
         return "end of world";
     }
+
+    int64_t nanotime = timestamp;
+    switch (time::get_instance().unit) {
+        case NANO:
+            break;
+        case MILLI:
+            nanotime = timestamp * time_unit::NANOSECONDS_PER_MILLISECOND;
+            break;
+        case SEC:
+        default:
+            nanotime = timestamp * time_unit::NANOSECONDS_PER_SECOND;
+            break;
+    }
+
     time_point<steady_clock> tp_steady((nanoseconds(nanotime)));
     auto tp_epoch_steady = time_point<steady_clock>{};
     auto tp_diff = tp_steady - tp_epoch_steady;
@@ -216,7 +290,7 @@ std::string time::strftime(int64_t nanotime, const std::string &format) {
     }
 }
 
-std::string time::strfnow(const std::string &format) { return strftime(now_in_nano(), format); }
+std::string time::strfnow(const std::string &format) { return strftime(now_time(), format); }
 
 time_point_info time::get_base() { return get_instance().base_; }
 
@@ -224,6 +298,13 @@ void time::reset(TimeSpec system_clock_count, TimeSpec steady_clock_count) {
     time_point_info &base = const_cast<time &>(get_instance()).base_;
     base.system_clock_count = system_clock_count;
     base.steady_clock_count = steady_clock_count;
+}
+
+void time::strptimerange(const std::string &time_string, const std::string &format, int64_t &start_time,
+                         int64_t &end_time) {
+    start_time = strptime(time_string, format);
+    start_time = calendar_day_start(start_time);
+    end_time = next_trading_day_end(start_time);
 }
 
 } // namespace infra

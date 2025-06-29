@@ -99,7 +99,7 @@ void Mentor::setup(const std::string &id) {
     if (time_unit_str == "nano") {
         infra::time::get_instance().unit = infra::TimeUnit::NANO;
     } else if (time_unit_str == "mili") {
-        infra::time::get_instance().unit = infra::TimeUnit::MILI;
+        infra::time::get_instance().unit = infra::TimeUnit::MILLI;
     } else if (time_unit_str == "sec") {
         infra::time::get_instance().unit = infra::TimeUnit::SEC;
     } else {

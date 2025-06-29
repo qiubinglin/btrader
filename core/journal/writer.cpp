@@ -14,7 +14,7 @@ Writer::Writer(const JLocationSPtr &location, uint32_t dest_id, bool lazy)
     : frame_id_base_(uint64_t(location->uid xor dest_id) << 32u) /* Constructed by journal id */,
       journal_(location, dest_id, true, lazy),
       size_to_write_(0),
-      writer_start_time_32int_(infra::time::nano_hashed(infra::time::now_time())) {
+      writer_start_time_32int_(infra::time::time_hashed(infra::time::now_time())) {
     journal_.seek_to_time(infra::time::now_time());
 
     const auto &fds_map = FdsMap::get_fds_map();
