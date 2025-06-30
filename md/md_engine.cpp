@@ -36,6 +36,7 @@ void MDEngine::on_setup() {
 void MDEngine::on_trading_start(const EventSPtr &event) {
     const auto trading_start = event->data<TradingStart>();
     begin_time_ = trading_start.sync_time;
+    INFRA_LOG_INFO("md Trading started at: {}", begin_time_);
 
     for (auto &[key, service] : data_services_) {
         service->start();

@@ -49,6 +49,7 @@ void EventEngine::produce(const rx::subscriber<EventSPtr> &sb) {
 }
 
 bool EventEngine::drain(const rx::subscriber<EventSPtr> &sb) {
+    // INFRA_LOG_INFO("{} drain", name());
 #ifndef HP
     if (live_ and ob_helper_.data_available()) {
 #endif

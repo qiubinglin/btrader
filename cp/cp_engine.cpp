@@ -102,6 +102,7 @@ void CPEngine::on_active() {
         } else if (main_cfg_.run_mode() == enums::RunMode::BACKTEST) {
             backtest_subscriber_->pre_start();
         }
+        INFRA_LOG_CRITICAL("cp pre_start done");
         pre_start_ = true;
     }
 }

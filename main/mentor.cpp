@@ -26,17 +26,28 @@ Mentor::Mentor(int argc, char **argv) {
     if (argc <= 1) {
         throw std::runtime_error("argc <= 1");
     }
+    std::string role, cfg_file;
     OptionParser parser;
-    parser.option(0, "role", 1, [&](const char *s) { role_ = s; });
-    parser.option(0, "cfg", 1, [&](const char *s) { cfg_file_ = s; });
+    parser.option(0, "role", 1, [&](const char *s) { role = s; });
+    parser.option(0, "cfg", 1, [&](const char *s) { cfg_file = s; });
     parser.parse(argv);
-    init();
+    GlobalStateSPtr global_state = std::make_shared<GlobalState>();
+    init(role, cfg_file, global_state);
 }
+
+Mentor::Mentor() {}
 
 Mentor::~Mentor() {
     if (event_engine_) {
         delete event_engine_;
     }
+}
+
+void Mentor::init(const std::string &role, const std::string &cfg_file, GlobalStateSPtr global_state) {
+    role_ = role;
+    cfg_file_ = cfg_file;
+    global_state_ = global_state;
+    _init();
 }
 
 int Mentor::run() {
@@ -52,7 +63,7 @@ int Mentor::run() {
     }
 }
 
-void Mentor::init() {
+void Mentor::_init() {
     setup(role_);
     INFRA_LOG_CRITICAL("{} start!", role_);
     if (role_ == "master") {
@@ -107,42 +118,45 @@ void Mentor::setup(const std::string &id) {
     }
 
     /* log */
-    std::string level_str = cfg["system"]["log"]["level"].get<std::string>();
-    std::string path = cfg["system"]["log"]["path"].get<std::string>();
-    if (path.back() != '/') {
-        path.append("/");
-    }
-    infra::LogLevel level = infra::LogLevel::err;
-    if (level_str == "debug") {
-        level = infra::LogLevel::debug;
-    } else if (level_str == "info") {
-        level = infra::LogLevel::info;
-    } else if (level_str == "warn") {
-        level = infra::LogLevel::warn;
-    } else if (level_str == "error") {
-        level = infra::LogLevel::err;
-    } else if (level_str == "critical") {
-        level = infra::LogLevel::critical;
-    } else {
-        throw std::runtime_error("No such log level!");
-    }
-    if (cfg["system"]["log"]["mode"].get<std::string>() != "stdout") {
-        std::string log_file = path + id + ".log";
-        if (std::filesystem::exists(log_file)) {
-            std::filesystem::remove_all(log_file);
+    if (not global_state_->is_logger_setup) {
+        global_state_->is_logger_setup = true;
+        std::string level_str = cfg["system"]["log"]["level"].get<std::string>();
+        std::string path = cfg["system"]["log"]["path"].get<std::string>();
+        if (path.back() != '/') {
+            path.append("/");
         }
-        std::string logger = cfg["system"]["log"]["logger"].get<std::string>();
-        if (logger == "basic") {
-            infra::LogMgr::setup_basic_log(log_file);
-        } else if (logger == "rotating") {
-            size_t max_size = cfg["system"]["log"]["max_size"].get<size_t>();
-            size_t max_files = cfg["system"]["log"]["max_files"].get<size_t>();
-            infra::LogMgr::setup_rotating_log(log_file, max_size * MB, max_files);
+        infra::LogLevel level = infra::LogLevel::err;
+        if (level_str == "debug") {
+            level = infra::LogLevel::debug;
+        } else if (level_str == "info") {
+            level = infra::LogLevel::info;
+        } else if (level_str == "warn") {
+            level = infra::LogLevel::warn;
+        } else if (level_str == "error") {
+            level = infra::LogLevel::err;
+        } else if (level_str == "critical") {
+            level = infra::LogLevel::critical;
         } else {
-            throw std::runtime_error("No such logger type!");
+            throw std::runtime_error("No such log level!");
         }
+        if (cfg["system"]["log"]["mode"].get<std::string>() != "stdout") {
+            std::string log_file = path + id + ".log";
+            if (std::filesystem::exists(log_file)) {
+                std::filesystem::remove_all(log_file);
+            }
+            std::string logger = cfg["system"]["log"]["logger"].get<std::string>();
+            if (logger == "basic") {
+                infra::LogMgr::setup_basic_log(log_file);
+            } else if (logger == "rotating") {
+                size_t max_size = cfg["system"]["log"]["max_size"].get<size_t>();
+                size_t max_files = cfg["system"]["log"]["max_files"].get<size_t>();
+                infra::LogMgr::setup_rotating_log(log_file, max_size * MB, max_files);
+            } else {
+                throw std::runtime_error("No such logger type!");
+            }
+        }
+        infra::LogMgr::set_level(level);
     }
-    infra::LogMgr::set_level(level);
 }
 
 } // namespace btra
