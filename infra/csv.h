@@ -1,30 +1,32 @@
 #pragma once
 
+#include <fstream>
 #include <string>
 #include <vector>
 
 namespace infra {
 
-class CSV {
+class CSVReader {
 public:
-    bool read(const std::string &filename);
+    ~CSVReader();
+    bool set_file(const std::string &filename);
 
-    bool write(const std::string &filename) const;
-
-    const std::vector<std::string> &get_row(size_t index) const;
-
-    void set_row(size_t index, const std::vector<std::string> &newRow);
-
-    void add_row(const std::vector<std::string> &newRow);
-
-    size_t row_count() const;
+    void read_row(std::vector<std::string> &out);
+    bool is_eof() const;
 
 private:
-    std::vector<std::string> split(const std::string &str, char delimiter) const;
-    std::string join(const std::vector<std::string> &elements, char delimiter) const;
+    std::ifstream ifs_;
+};
+
+class CSVWriter {
+public:
+    bool set_file(const std::string &filename);
+
+    void write_row(const std::vector<std::string> &row);
+    void finish();
 
 private:
-    std::vector<std::vector<std::string>> data_;
+    std::ofstream ofs_;
 };
 
 } // namespace infra

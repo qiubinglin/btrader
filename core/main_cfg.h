@@ -1,8 +1,9 @@
 #pragma once
 
+#include "core/book.h"
+#include "core/journal/jid.h"
+#include "core/journal/jlocation.h"
 #include "infra/infra.h"
-#include "jid.h"
-#include "jlocation.h"
 
 namespace btra {
 
@@ -26,6 +27,11 @@ public:
 
     std::vector<std::string> get_journal_names() const;
 
+    const Book &get_initail_book() const;
+
+    const std::string &root_path() const { return root_; }
+    enums::BacktestDataType get_backtest_data_type() const { return backtest_data_type_; }
+
 private:
     Json::json cfg_;
 
@@ -36,6 +42,9 @@ private:
     std::vector<std::string> md_institutions_;
     std::vector<uint32_t> td_dests_;
     std::vector<std::string> td_institutions_;
+
+    Book initial_book_;
+    enums::BacktestDataType backtest_data_type_{enums::BacktestDataType::None};
 };
 
 } // namespace btra

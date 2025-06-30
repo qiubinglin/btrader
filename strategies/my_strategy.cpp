@@ -58,7 +58,7 @@ public:
         INFRA_LOG_INFO("Order Action Error: {} for order ID {}", error.error_msg.to_string(), error.order_id);
     }
 
-    void on_position_sync_reset(ExecutorSPtr &executor, const PositionBookFn &old_book, const PositionBookFn &new_book,
+    void on_position_sync_reset(ExecutorSPtr &executor, const PositionBook &old_book, const PositionBook &new_book,
                                 JID source) override {}
 
     void on_asset_sync_reset(ExecutorSPtr &executor, const Asset &old_asset, const Asset &new_asset,

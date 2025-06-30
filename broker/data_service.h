@@ -21,9 +21,10 @@ public:
      * @brief Factory function to create different data service according to institution.
      *
      * @param institution Institution name such as binance.
+     * @param backtest_data_type
      * @return DataServiceUPtr
      */
-    static DataServiceUPtr create(const std::string &institution);
+    static DataServiceUPtr create(const std::string &institution, enums::BacktestDataType backtest_data_type);
 
     virtual ~DataService() = default;
 

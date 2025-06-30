@@ -21,6 +21,17 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
         td_dests_.push_back(JIDUtil::build(institution, account));
         td_institutions_.push_back(institution);
     }
+
+    if (cfg_["system"].contains("book")) {
+        initial_book_.asset.avail = cfg_["system"]["book"]["asset"].get<double>();
+    }
+
+    if (cfg_["backtest"]["enabled"].get<bool>() == true) {
+        auto type = cfg_["backtest"]["type"].get<std::string>();
+        if (type == "csv") {
+            backtest_data_type_ = enums::BacktestDataType::CSV;
+        }
+    }
 }
 
 JLocationSPtr MainCfg::md_location() const {
@@ -86,4 +97,9 @@ std::vector<std::string> MainCfg::get_journal_names() const {
     }
     return res;
 }
+
+const Book &MainCfg::get_initail_book() const {
+    return initial_book_;
+}
+
 } // namespace btra

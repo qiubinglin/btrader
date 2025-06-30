@@ -7,6 +7,10 @@
 
 namespace btra {
 
+/**
+ * @brief Only support one instrument for now
+ * 
+ */
 struct BacktestDump {
     struct KLine {
         int64_t start_time;
@@ -15,7 +19,7 @@ struct BacktestDump {
         double close;
         double low;
         double high;
-        double volume;
+        int64_t volume;
     };
 
     struct AssetValue {
@@ -31,11 +35,10 @@ struct BacktestDump {
         enums::Side side;
     };
 
-    std::deque<KLine> klines;
     std::deque<AssetValue> asset_values;
-    std::vector<Trancation> trancations;
+    std::deque<Trancation> trancations;
 
-    void dump_file(const std::string &file_name) const;
+    void dump_files(const std::string &dir) const;
 };
 
 } // namespace btra

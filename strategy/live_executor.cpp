@@ -41,7 +41,6 @@ uint64_t LiveExecutor::cancel_order(uint64_t order_id) {
     OrderAction &action = writer->open_data<OrderAction>(now_event_time());
     action.order_id = writer->current_frame_uid();
     action.target_order_id = order_id;
-    action.action_flag = enums::OrderActionFlag::Cancel;
 
     uint64_t order_action_id = action.order_id;
     writer->close_data();

@@ -26,7 +26,7 @@ private:
     void pre_start();
     void post_stop();
 
-    bool is_backtest() const { return main_cfg_.run_mode() == enums::RunMode::BACKTEST; }
+    bool is_backtest() const { return main_cfg_.get_backtest_data_type() != enums::BacktestDataType::None; }
 
 private:
     strategy::ExecutorSPtr executor_;

@@ -10,7 +10,16 @@
         },
         "mode": "live",
         "output_root_path": "./output",
-        "time_unit": "mili"
+        "time_unit": "milli",
+        "currency": "USD",
+        "book": {
+            "asset": 3000
+        }
+    },
+    "backtest" : {
+        "enabled": false,
+        "type": "csv",
+        "file": "/home/qiubinglin/btrader/Nvidia_stock_data.csv"
     },
     "md": [
         {

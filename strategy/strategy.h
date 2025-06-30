@@ -142,8 +142,8 @@ public:
      * @param old_book
      * @param new_book
      */
-    virtual void on_position_sync_reset(ExecutorSPtr &executor, const PositionBookFn &old_book,
-                                        const PositionBookFn &new_book, JID source) {}
+    virtual void on_position_sync_reset(ExecutorSPtr &executor, const PositionBook &old_book,
+                                        const PositionBook &new_book, JID source) {}
 
     /**
      * @brief 同步柜台资金信息回调

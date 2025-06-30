@@ -64,6 +64,7 @@ struct MsgTag {
         HistoryTrade,
         RequestHistoryOrderError,
         RequestHistoryTradeError,
+        Termination, /* Terminate event engine. */
         TAG_MAX_SIZE, /* This must be the last tag which indicates the maximum size of the tag. */
     };
 };
@@ -175,7 +176,7 @@ struct Location {
     enums::Module category;
     enums::RunMode mode;
     std::string group; /* self-defined group */
-    std::string name; /* self-defined name */
+    std::string name;  /* self-defined name */
 };
 
 struct RequestReadFromSync { //
@@ -416,15 +417,15 @@ struct Transaction { //
     double price;   // 成交价
     int64_t volume; // 成交量
 
-    int64_t bid_no; // 买方订单号
-    int64_t ask_no; // 卖方订单号
+    // int64_t bid_no; // 买方订单号
+    // int64_t ask_no; // 卖方订单号
 
-    enums::ExecType exec_type; // SZ: 成交标识
-    enums::BsFlag bs_flag;     // 买卖方向
+    // enums::ExecType exec_type; // SZ: 成交标识
+    enums::Side side; // 买卖方向
 
-    int64_t main_seq;  // 主序号
-    int64_t seq;       // 子序号
-    int64_t biz_index; // 业务序号
+    // int64_t main_seq;  // 主序号
+    // int64_t seq;       // 子序号
+    // int64_t biz_index; // 业务序号
 };
 
 /**
@@ -481,8 +482,8 @@ struct Bar {
 
     enums::InstrumentType instrument_type; // 合约类型
 
-    int64_t start_time; // 开始时间
-    int64_t end_time;   // 结束时间
+    int64_t start_time{0}; // 开始时间
+    int64_t end_time{0};   // 结束时间
 
     double open;  // 开
     double close; // 收
@@ -544,8 +545,6 @@ struct OrderAction {
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id;
     uint64_t order_id;        // Order id
     uint64_t target_order_id; // Target order id
-
-    enums::OrderActionFlag action_flag; // 订单操作类型
 
     double price;        // 价格
     int64_t volume;      // 数量
@@ -648,7 +647,7 @@ struct HistoryOrder { //
 };
 
 /**
- * @brief Same as Transaction?
+ * @brief Same as Transaction? to be removed
  *
  */
 struct Trade {
@@ -721,32 +720,32 @@ struct Position { //
     enums::InstrumentType instrument_type;               // 合约类型
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所ID
 
-    uint32_t holder_uid;                   //
-    enums::LedgerCategory ledger_category; //
+    // uint32_t holder_uid;                   //
+    // enums::LedgerCategory ledger_category; //
 
     enums::Direction direction; // 持仓方向
 
-    int64_t volume;           // 数量
-    int64_t yesterday_volume; // 昨仓数量
-    int64_t frozen_total;     // 冻结数量
-    int64_t frozen_yesterday; // 冻结昨仓
+    int64_t volume; // 数量
+    // int64_t yesterday_volume; // 昨仓数量
+    // int64_t frozen_total;     // 冻结数量
+    // int64_t frozen_yesterday; // 冻结昨仓
 
-    double last_price; // 最新价
+    // double last_price; // 最新价
 
-    double avg_open_price;      // 开仓均价
+    // double avg_open_price;      // 开仓均价
     double position_cost_price; // 持仓成本价
 
-    double close_price;     // 收盘价(股票和债券)
-    double pre_close_price; // 昨收价(股票和债券)
+    // double close_price;     // 收盘价(股票和债券)
+    // double pre_close_price; // 昨收价(股票和债券)
 
-    double settlement_price;     // 结算价(期货)
-    double pre_settlement_price; // 昨结算(期货) ***
+    // double settlement_price;     // 结算价(期货)
+    // double pre_settlement_price; // 昨结算(期货) ***
 
-    double margin;       // 保证金(期货)
-    double position_pnl; // 持仓盈亏(期货)
-    double close_pnl;    // 平仓盈亏(期货) ***
+    // double margin;       // 保证金(期货)
+    // double position_pnl; // 持仓盈亏(期货)
+    // double close_pnl;    // 平仓盈亏(期货) ***
 
-    double realized_pnl;   // 已实现盈亏
+    // double realized_pnl;   // 已实现盈亏
     double unrealized_pnl; // 未实现盈亏
 };
 
@@ -760,30 +759,30 @@ struct Asset {
     int64_t update_time;                      // 更新时间
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
-    uint32_t holder_uid;                   //
-    enums::LedgerCategory ledger_category; //
+    // uint32_t holder_uid;
+    // enums::LedgerCategory ledger_category;
 
-    double initial_equity; // 期初权益
-    double static_equity;  // 静态权益
-    double dynamic_equity; // 动态权益
+    // double initial_equity; // 期初权益
+    // double static_equity;  // 静态权益
+    // double dynamic_equity; // 动态权益
 
-    double realized_pnl; // 累计收益
-    double unrealized_pnl;
+    // double realized_pnl;   // Realized Profit and Loss
+    // double unrealized_pnl; // Unrealized Profit and Loss
 
-    double avail;        // 可用资金
-    double market_value; // 市值(股票)
+    double avail; // 可用资金
+    // double market_value; // 市值(股票)
 
-    double margin; // 保证金(期货)
+    double margin; // 保证金
 
     double accumulated_fee; // 累计手续费
-    double intraday_fee;    // 当日手续费
+    // double intraday_fee;    // 当日手续费
 
-    double frozen_cash;   // 冻结资金(股票: 买入挂单资金; 期货: 冻结保证金+冻结手续费)
-    double frozen_margin; // 冻结保证金(期货)
-    double frozen_fee;    // 冻结手续费(期货)
+    // double frozen_cash;   // 冻结资金(股票: 买入挂单资金; 期货: 冻结保证金+冻结手续费)
+    // double frozen_margin; // 冻结保证金(期货)
+    // double frozen_fee;    // 冻结手续费(期货)
 
-    double position_pnl; // 持仓盈亏(期货)
-    double close_pnl;    // 平仓盈亏(期货)
+    // double position_pnl; // 持仓盈亏(期货)
+    // double close_pnl;    // 平仓盈亏(期货)
 };
 
 struct AssetMargin {
@@ -912,6 +911,19 @@ struct PositionBook {
 
     std::unordered_map<uint32_t, Position> long_positions;
     std::unordered_map<uint32_t, Position> short_positions;
+
+    void set(const Position &position);
+
+    Position *get(const infra::Array<char, INSTRUMENT_ID_LEN> &instrument_id,
+                  const infra::Array<char, EXCHANGE_ID_LEN> &exchange_id, enums::Direction direction);
+
+    void update(const Transaction &tranction);
+
+    double unrealized_pnl() const;
+};
+
+struct Termination {
+    PACK_DATA_BODY2(Termination)
 };
 
 inline void order_from_input(const OrderInput &input, Order &order);

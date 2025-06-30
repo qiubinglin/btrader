@@ -17,9 +17,10 @@ public:
      * @brief Factory function to create different trade service according to institution.
      *
      * @param institution
+     * @param backtest_data_type
      * @return TradeServiceUPtr
      */
-    static TradeServiceUPtr create(const std::string &institution);
+    static TradeServiceUPtr create(const std::string &institution, enums::BacktestDataType backtest_data_type);
 
     virtual ~TradeService() = default;
 

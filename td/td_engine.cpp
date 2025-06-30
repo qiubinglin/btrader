@@ -3,6 +3,8 @@
 namespace btra {
 
 void TDEngine::react() {
+    events_.filter(is<MsgTag::Termination>).subscribe([this](const EventSPtr &event) { this->stop(); });
+
     events_.filter(is<MsgTag::TradingStart>).subscribe(ON_MEM_FUNC(on_trading_start));
     events_.filter(is<MsgTag::OrderInput>).subscribe(ON_MEM_FUNC(insert_order));
     events_.filter(is<MsgTag::OrderAction>).subscribe(ON_MEM_FUNC(cancel_order));
@@ -21,7 +23,7 @@ void TDEngine::on_setup() {
         const auto &institution = td_institutions[i];
         reader_->join(main_cfg_.td_location(), dest, begin_time_);
 
-        trade_services_[dest] = broker::TradeService::create(institution);
+        trade_services_[dest] = broker::TradeService::create(institution, main_cfg_.get_backtest_data_type());
         trade_services_[dest]->setup(cfg_["td"][i]);
     }
 

@@ -3,6 +3,8 @@
 namespace btra {
 
 void MDEngine::react() {
+    events_.filter(is<MsgTag::Termination>).subscribe([this](const EventSPtr &event) { this->stop(); });
+
     events_.filter(is<MsgTag::TradingStart>).subscribe(ON_MEM_FUNC(on_trading_start));
     events_.filter(is<MsgTag::MDSubscribe>).subscribe(ON_MEM_FUNC(on_subscribe_data));
 }
@@ -21,8 +23,12 @@ void MDEngine::on_setup() {
         auto dest = md_dests[i];
         const auto &institution = md_institutions[i];
         writers_[dest] = std::make_unique<journal::Writer>(main_cfg_.md_location(), dest, false);
-        data_services_[dest] = broker::DataService::create(institution);
+        data_services_[dest] = broker::DataService::create(institution, main_cfg_.get_backtest_data_type());
         data_services_[dest]->setup(cfg_["md"][i]);
+        /* tmp, to be removed in future. */
+        if (main_cfg_.get_backtest_data_type() != enums::BacktestDataType::None) {
+            data_services_[dest]->setup(cfg_["system"]);
+        }
         data_services_[dest]->set_customer(writers_[dest].get());
     }
 }

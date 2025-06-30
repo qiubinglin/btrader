@@ -12,12 +12,30 @@ CPEngine::~CPEngine() {
     if (backtest_subscriber_) {
         delete backtest_subscriber_;
     }
+
+    if (is_backtest()) {
+        backtest_dump_.dump_files(main_cfg_.root_path());
+    }
 }
 
 void CPEngine::react() {
     if (not live_subscriber_) {
         live_subscriber_ = new LiveSubscriber(this);
     }
+    events_.filter(is<MsgTag::Termination>).subscribe([this](const EventSPtr &event) {
+        auto req_md_dest = journal::JIDUtil::build(journal::JIDUtil::MD_REQ);
+        auto now_time = infra::time::now_time();
+        this->writers_[req_md_dest]->write(now_time, Termination());
+
+        for (auto &[key, writer] : this->writers_) {
+            if (key == req_md_dest) {
+                continue;
+            }
+            writer->write(now_time, Termination());
+        }
+        this->stop();
+    });
+
     events_.filter(is<MsgTag::TradingDay>).subscribe(ON_MEM_OBJ(live_subscriber_, on_trading_day));
     events_.filter(is<MsgTag::Bar>).subscribe(ON_MEM_OBJ(live_subscriber_, on_bar));
     events_.filter(is<MsgTag::Quote>).subscribe(ON_MEM_OBJ(live_subscriber_, on_quote));

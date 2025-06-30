@@ -98,7 +98,7 @@ void Mentor::setup(const std::string &id) {
     std::string time_unit_str = cfg["system"]["time_unit"].get<std::string>();
     if (time_unit_str == "nano") {
         infra::time::get_instance().unit = infra::TimeUnit::NANO;
-    } else if (time_unit_str == "mili") {
+    } else if (time_unit_str == "milli") {
         infra::time::get_instance().unit = infra::TimeUnit::MILLI;
     } else if (time_unit_str == "sec") {
         infra::time::get_instance().unit = infra::TimeUnit::SEC;

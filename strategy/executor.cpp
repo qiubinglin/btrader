@@ -2,7 +2,10 @@
 
 namespace btra::strategy {
 
-Executor::Executor(EventEngine *engine) { set_engine(engine); }
+Executor::Executor(EventEngine *engine) {
+    set_engine(engine);
+    book_ = engine_->get_main_cfg().get_initail_book();
+}
 
 void Executor::set_engine(EventEngine *engine) { engine_ = engine; }
 

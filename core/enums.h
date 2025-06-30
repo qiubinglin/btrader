@@ -129,8 +129,6 @@ enum class InstrumentType : int8_t {
 
 enum class ExecType : int8_t { Unknown, Cancel, Trade };
 
-enum class BsFlag : int8_t { Unknown, Buy, Sell };
-
 /**
  * @brief Trade side
  *
@@ -161,10 +159,6 @@ enum class Side : int8_t {
 enum class Offset : int8_t { Open, Close, CloseToday, CloseYesterday };
 
 enum class HedgeFlag : int8_t { Speculation, Arbitrage, Hedge, Covered };
-
-enum class OrderActionFlag : int8_t {
-    Cancel,
-};
 
 enum class PriceType : int8_t {
     Limit, // 限价,证券通用
@@ -226,7 +220,7 @@ enum class BasketVolumeType : int8_t { Unknown, Quantity, Proportion };
 
 enum class BasketType : int8_t { Custom, ETF };
 
-enum class Direction : int8_t { Long, Short };
+enum class Direction : int8_t { Long, Short, Unknown };
 
 enum class AccountType : int8_t { Stock, Credit, Future, BackTest };
 
@@ -273,5 +267,25 @@ enum class MDType : int8_t {
 };
 
 enum class BrokerReqType : uint8_t { Unknown = 0, OrderPlace, OrderCancel, OrderBook, OrderState, PositionBook };
+
+enum class BacktestDataType : uint8_t {
+    None,
+    CSV,
+};
+
+inline Direction side2direction(Side side) {
+    Direction ret = Direction::Unknown;
+    switch (side) {
+        case Side::Buy:
+            ret = Direction::Long;
+            break;
+        case Side::Sell:
+            ret = Direction::Short;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
 
 } // namespace btra::enums
