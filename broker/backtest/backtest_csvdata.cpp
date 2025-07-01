@@ -37,12 +37,10 @@ void BackTestCSVData::start() {
     writer_->write(infra::time::now_time(), Termination());
 }
 
-void BackTestCSVData::serve() {}
+void BackTestCSVData::stop() {}
 
-bool BackTestCSVData::subscribe(const std::vector<InstrumentKey> &instrument_keys) {
-    serve();
-    return true;
-}
+bool BackTestCSVData::subscribe(const std::vector<InstrumentKey> &instrument_keys) { return true; }
+
 bool BackTestCSVData::unsubscribe(const std::vector<InstrumentKey> &instrument_keys) { return true; }
 
 } // namespace btra::broker

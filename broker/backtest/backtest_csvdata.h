@@ -9,7 +9,7 @@ class BackTestCSVData : public DataService {
 public:
     void setup(const Json::json &cfg) override;
     void start() override;
-    void serve() override;
+    void stop() override;
 
     bool subscribe(const std::vector<InstrumentKey> &instrument_keys) override;
     bool unsubscribe(const std::vector<InstrumentKey> &instrument_keys) override;

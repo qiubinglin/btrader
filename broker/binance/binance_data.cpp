@@ -25,7 +25,7 @@ void BinanceData::start() {
     INFRA_LOG_CRITICAL("Binance data service start!");
 }
 
-void BinanceData::serve() {}
+void BinanceData::stop() {}
 
 bool BinanceData::subscribe(const std::vector<InstrumentKey> &instrument_keys) { return true; }
 bool BinanceData::unsubscribe(const std::vector<InstrumentKey> &instrument_keys) { return true; }

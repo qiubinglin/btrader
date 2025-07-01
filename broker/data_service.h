@@ -43,16 +43,16 @@ public:
     virtual void setup(const Json::json &cfg) = 0;
 
     /**
-     * @brief Initialize the service?
+     * @brief Start the service
      *
      */
     virtual void start() = 0;
 
     /**
-     * @brief Run service.
+     * @brief Stop service.
      *
      */
-    virtual void serve() = 0;
+    virtual void stop() = 0;
 
     /**
      * @brief Get the state of broker.
