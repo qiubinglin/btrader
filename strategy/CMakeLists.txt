@@ -4,4 +4,4 @@ file(GLOB src
 add_library(strategy
     ${src}
 )
-target_link_libraries(strategy core)
+target_link_libraries(strategy PUBLIC core)

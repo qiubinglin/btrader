@@ -5,7 +5,7 @@ file(GLOB src
 add_library(core
     ${src}
 )
-target_link_libraries(core
+target_link_libraries(core PUBLIC
     infra
     fmt::fmt    
 )

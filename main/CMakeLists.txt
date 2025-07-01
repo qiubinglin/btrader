@@ -12,6 +12,6 @@ target_include_directories(btrader PRIVATE
     ${PROJECT_SOURCE_DIR}/md
     ${PROJECT_SOURCE_DIR}/td
 )
-target_link_libraries(btrader computation md td infra)
+target_link_libraries(btrader PUBLIC computation md td infra)
 
 configure_file(main.sh ${PROJECT_BINARY_DIR}/main.sh COPYONLY)

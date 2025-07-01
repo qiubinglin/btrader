@@ -25,7 +25,7 @@ target_include_directories(infra PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/detail
     ${CMAKE_CURRENT_SOURCE_DIR}/web
 )
-target_link_libraries(infra
+target_link_libraries(infra PUBLIC
     nng
     fmt::fmt
     hv_static
@@ -36,4 +36,4 @@ target_link_libraries(infra
 add_executable(MemIPCTest
     ./tests/MemIPCTest.cpp
 )
-target_link_libraries(MemIPCTest infra)
+target_link_libraries(MemIPCTest PUBLIC infra)

@@ -13,7 +13,7 @@ set(XTP_LIBS
     /root/libs/libxtptraderapi.so
 )
 
-target_link_libraries(broker
+target_link_libraries(broker PUBLIC
     core
     binance
     backtest_service
