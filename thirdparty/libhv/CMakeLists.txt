@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
-
+cmake_policy(SET CMP0077 NEW) # Fix WITH_OPENSSL warning
 project(hv VERSION 1.3.3)
 
 option(BUILD_SHARED "build shared library" ON)
