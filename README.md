@@ -14,6 +14,12 @@ cmake ..
 make
 ```
 
+# Run
+Configuration template is `core/main_cfg.tpl.json`. Setup your configuration according to the `configuration_help.md`, then run
+```
+./btrader --role=master --cfg=/path/to/configuration_file
+```
+
 # Requirements
 
 ## Thirdparty Libraries
