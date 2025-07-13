@@ -32,8 +32,3 @@ target_link_libraries(infra PUBLIC
     ${OPENSSL_LIBRARIES} # openssl
     spdlog::spdlog # spdlog
 )
-
-add_executable(MemIPCTest
-    ./tests/MemIPCTest.cpp
-)
-target_link_libraries(MemIPCTest PUBLIC infra)

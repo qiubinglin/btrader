@@ -1,6 +1,6 @@
 #pragma once
 
-#include "infra/MemIPC.hpp"
+#include "infra/mem_ipc.hpp"
 
 class BiMemIPC {
 public:

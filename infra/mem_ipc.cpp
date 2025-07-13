@@ -1,14 +1,4 @@
-/**
- * @file MemIPC.cpp
- * @author qiubinglin (qiubinglin@outlook.com)
- * @brief
- * @version 0.1
- * @date 2025-01-20
- *
- * @copyright Copyright (c) 2025
- *
- */
-#include "MemIPC.hpp"
+#include "mem_ipc.hpp"
 
 #include <sys/fcntl.h>
 #include <sys/mman.h>

@@ -1,4 +1,4 @@
-#include "BiMemIPC.hpp"
+#include "bimem_ipc.hpp"
 
 BiMemIPC::BiMemIPC(const std::string &ReadName, size_t ReadSize, const std::string &WriteName, size_t WriteSize)
     : m_ReadChn(ReadName, ReadSize, true), m_WriteChn(WriteName, WriteSize, true) {}

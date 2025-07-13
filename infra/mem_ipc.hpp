@@ -1,13 +1,3 @@
-/**
- * @file MemIPC.hpp
- * @author qiubinglin (qiubinglin@outlook.com)
- * @brief
- * @version 0.1
- * @date 2025-01-20
- *
- * @copyright Copyright (c) 2025
- *
- */
 #pragma once
 
 #include <semaphore.h>

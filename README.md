@@ -35,4 +35,5 @@ pandas
 matplotlib
 mplfinance
 jupyter notebook
+tushare
 ```
