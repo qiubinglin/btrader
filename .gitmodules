@@ -1,0 +1,3 @@
+[submodule "thirdparty/QuantLib"]
+	path = thirdparty/QuantLib
+	url = https://github.com/qiubinglin/QuantLib.git
