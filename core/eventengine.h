@@ -26,7 +26,6 @@ inline bool over_max_tag(const EventSPtr &event) { return event->msg_type() >= M
 #define ON_MEM_FUNC(func) [this](const EventSPtr &event) { this->func(event); }
 #define ON_MEM_OBJ(obj, func) [this](const EventSPtr &event) { this->obj->func(event); }
 
-using WriterMap = std::unordered_map<uint32_t, journal::WriterUPtr>;
 class EventEngine {
 public:
     EventEngine();

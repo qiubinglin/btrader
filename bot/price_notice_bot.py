@@ -13,6 +13,16 @@ from telegram.ext import Application, MessageHandler, CommandHandler, ContextTyp
 from telegram.error import TelegramError
 from telegram.constants import ParseMode
 
+import pybtrader
+class JournalReader(object):
+    ''''''
+    def __init__(self, conf: str):
+        self.reader_impl = pybtrader.tool.JournalReader()
+        self.reader_impl.init(conf)
+
+    def read(self) -> dict:
+        return self.reader_impl.read()
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -28,6 +38,7 @@ class BotConfig:
     admin_user_ids: List[int] = None  # List of admin user IDs who can control the bot
     data_source_url: Optional[str] = None  # Data source URL
     data_file_path: Optional[str] = None   # Local data file path
+    data_journal_conf: Optional[str] = None # data feeding from journal
     interval: int = 60  # Send interval in seconds
     max_message_length: int = 4096  # Telegram max message length
     auto_push: bool = True  # Whether to automatically push data
@@ -37,7 +48,8 @@ class DataReader:
     
     def __init__(self, config: BotConfig):
         self.config = config
-        self.session: Optional[aiohttp.ClientSession] = None
+        self.session: Optional[aiohttp.ClientSession] = None # For http url
+        self.journal_reader: Optional[JournalReader] = None # For journal
     
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
@@ -46,6 +58,15 @@ class DataReader:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.session:
             await self.session.close()
+
+    async def read_from_journal(self) -> Optional[str]:
+        '''Read data from journal'''
+        if not self.journal_reader:
+            self.journal_reader = JournalReader(self.config.data_journal_conf)
+
+        data_dict = self.journal_reader.read()
+        # Parse dict
+        return None
     
     async def read_from_url(self) -> Optional[str]:
         """Read data from URL"""
@@ -98,13 +119,19 @@ class DataReader:
     
     async def get_data(self) -> str:
         """Main method to get data"""
-        # Try URL first
+        # Try journal
+        if self.config.data_journal_conf:
+            data = await self.read_from_journal()
+            if data:
+                return data
+
+        # Try URL
         if self.config.data_source_url:
             data = await self.read_from_url()
             if data:
                 return data
         
-        # Try file next
+        # Try file
         if self.config.data_file_path:
             data = await self.read_from_file()
             if data:

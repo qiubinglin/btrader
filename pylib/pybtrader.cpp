@@ -5,6 +5,8 @@
 #include "broker/pyservice/pydata_service.h"
 #include "broker/pyservice/pytrade_service.h"
 
+#include "py_journal.h"
+
 PYBIND11_MODULE(pybtrader, m) {
     /* to do: Algorithm module for backtest. */
 
@@ -13,5 +15,16 @@ PYBIND11_MODULE(pybtrader, m) {
         auto submodule = m.def_submodule("broker");
         pybind11::class_<btra::broker::PyDataService>(submodule, "DataService");
         pybind11::class_<btra::broker::PyTradeService>(submodule, "TradeService");
+    }
+
+    /* tool */
+    {
+        auto submodule = m.def_submodule("tool");
+        pybind11::class_<btra::PyJournalReader>(submodule, "JournalReader")
+            .def("init", &btra::PyJournalReader::init)
+            .def("read", &btra::PyJournalReader::read);
+        pybind11::class_<btra::PyJournalWriter>(submodule, "JournalWriter")
+            .def("init", &btra::PyJournalWriter::init)
+            .def("write", &btra::PyJournalWriter::write);;
     }
 }
