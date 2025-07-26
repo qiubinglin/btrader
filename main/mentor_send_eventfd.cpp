@@ -16,12 +16,13 @@ static int server_sock = -1;
 
 // 通过Unix域套接字发送文件描述符
 int send_fd(int socket, int fd_to_send) {
-    struct msghdr msg = {0};
+    struct msghdr msg;
     struct cmsghdr *cmsg;
     char buf[CMSG_SPACE(sizeof(int))];
     char dummy_data = 'X';
     struct iovec io = {.iov_base = &dummy_data, .iov_len = 1};
 
+    msg.msg_name = 0;
     msg.msg_iov = &io;
     msg.msg_iovlen = 1;
     msg.msg_control = buf;

@@ -31,4 +31,5 @@ target_link_libraries(infra PUBLIC
     hv_static
     ${OPENSSL_LIBRARIES} # openssl
     spdlog::spdlog # spdlog
+    MurmurHash3
 )

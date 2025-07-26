@@ -27,7 +27,7 @@ double Book::asset_price() const { return asset.avail + positions.unrealized_pnl
 
 void PositionBook::set(const Position &position) {
     auto &positions = position.direction == enums::Direction::Long ? long_positions : short_positions;
-    auto position_ptr = positions[hash_instrument(position.exchange_id, position.instrument_id)] = position;
+    positions[hash_instrument(position.exchange_id, position.instrument_id)] = position;
 }
 
 Position *PositionBook::get(const infra::Array<char, INSTRUMENT_ID_LEN> &instrument_id,
@@ -45,7 +45,8 @@ void PositionBook::update(const Transaction &tranction) {
         position_ptr->trading_day = tranction.trading_day;
         position_ptr->position_cost_price =
             (position_ptr->volume * position_ptr->position_cost_price + tranction.volume * tranction.price) /
-            (position_ptr->volume += tranction.volume);
+            (position_ptr->volume + tranction.volume);
+        position_ptr->volume += tranction.volume;
     } else {
         Position position;
         position.update_time = infra::time::now_time();

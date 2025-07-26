@@ -14,12 +14,13 @@
 
 // 通过Unix域套接字接收文件描述符
 int recv_fd(int socket) {
-    struct msghdr msg = {0};
+    struct msghdr msg;
     struct cmsghdr *cmsg;
     char buf[CMSG_SPACE(sizeof(int))];
     char dummy_data;
     struct iovec io = {.iov_base = &dummy_data, .iov_len = 1};
 
+    msg.msg_name = 0;
     msg.msg_iov = &io;
     msg.msg_iovlen = 1;
     msg.msg_control = buf;
@@ -44,7 +45,6 @@ void FdsMap::fix_fds(std::vector<std::string> &fds_vec, const std::string &socke
 
     int client_sock;
     struct sockaddr_un addr;
-    uint64_t value;
 
     // 连接到服务器
     client_sock = socket(AF_UNIX, SOCK_STREAM, 0);

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-#include "infra/detail/MurmurHash3.h"
+#include "MurmurHash3/MurmurHash3.h"
 
 #define HASH_SEED 42
 

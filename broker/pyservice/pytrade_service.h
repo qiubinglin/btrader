@@ -6,7 +6,7 @@
 
 namespace btra::broker {
 
-class PyTradeService : public TradeService {
+class __attribute__((visibility("default"))) PyTradeService : public TradeService {
 public:
     void setup(const Json::json &cfg) override;
     void start() override;
@@ -17,7 +17,7 @@ public:
     bool req_account_info(const AccountReq &req) override;
 
 private:
-    pybind11::object impl_;
+    // pybind11::object impl_;
 };
 
 } // namespace btra::broker

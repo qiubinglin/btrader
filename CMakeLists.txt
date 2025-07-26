@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0077 NEW)
 project(btrader)
 
-include(cmake/compile.cmake)
+include(cmake/compile_standard.cmake)
 include(cmake/thirdparty.cmake)
+include(cmake/compile_option.cmake)
 include(cmake/macro.cmake)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})

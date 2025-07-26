@@ -32,7 +32,7 @@ void Journal::seek_to_time(int64_t time) {
 }
 
 void Journal::load_page(int page_id) {
-    if (page_.get() == nullptr or page_->get_page_id() != page_id) {
+    if (page_.get() == nullptr or page_->get_page_id() != static_cast<uint32_t>(page_id)) {
         page_ = PageUnit::load(location_, dest_id_, page_id, is_writing_, lazy_);
     }
     frame_->set_address(page_->first_frame_address());
@@ -59,7 +59,9 @@ int JourIndicator::post() {
         return -1;
     }
     uint64_t val = 1;
-    write(efd_, &val, sizeof(val));
+    if (write(efd_, &val, sizeof(val)) < 0) {
+        return -1;
+    }
 #endif
     return 0;
 }
@@ -99,7 +101,7 @@ int JourObserver::wait() {
     return coming_event_num_;
 }
 
-int JourObserver::handle() {
+void JourObserver::handle() {
     for (int i = 0; i < coming_event_num_; i++) {
         int fd = events_[i].data.fd;
 

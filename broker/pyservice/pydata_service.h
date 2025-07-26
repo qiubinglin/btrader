@@ -6,7 +6,7 @@
 
 namespace btra::broker {
 
-class PyDataService : public DataService {
+class __attribute__((visibility("default"))) PyDataService : public DataService {
 public:
     void setup(const Json::json &cfg) override;
     void start() override;
@@ -16,7 +16,7 @@ public:
     bool unsubscribe(const std::vector<InstrumentKey> &instrument_keys) override;
 
 private:
-    pybind11::object impl_;
+    // pybind11::object impl_; to do use smart ptr
 };
 
 } // namespace btra::broker

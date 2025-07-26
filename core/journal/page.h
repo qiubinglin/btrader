@@ -90,7 +90,7 @@ private:
     friend class Reader;
 };
 
-inline static uint32_t find_page_size(const JLocationSPtr &location, uint32_t dest_id) {
+inline static uint32_t find_page_size(const JLocationSPtr &location, uint32_t dest_id [[maybe_unused]]) {
     if (location->category == enums::Module::MD) {
         return 128 * MB;
     }

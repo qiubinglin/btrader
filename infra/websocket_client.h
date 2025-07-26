@@ -1,6 +1,10 @@
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <hv/WebSocketClient.h>
+#pragma GCC diagnostic pop
 
 #include <functional>
 #include <string>

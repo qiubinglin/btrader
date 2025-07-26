@@ -2,7 +2,7 @@
 
 namespace btra::broker {
 
-void BackTestBroker::setup(const Json::json &cfg) {
+void BackTestBroker::setup(const Json::json &) {
     // Implementation for setup
 }
 
@@ -18,17 +18,17 @@ enums::AccountType BackTestBroker::get_account_type() const {
     return enums::AccountType::BackTest;
 }
 
-bool BackTestBroker::insert_order(const OrderInput &input) {
+bool BackTestBroker::insert_order(const OrderInput &) {
     // Implementation for insert_order
     return true;
 }
 
-bool BackTestBroker::cancel_order(const OrderAction &input) {
+bool BackTestBroker::cancel_order(const OrderAction &) {
     // Implementation for cancel_order
     return true;
 }
 
-bool BackTestBroker::req_account_info(const AccountReq &req) {
+bool BackTestBroker::req_account_info(const AccountReq &) {
     // Implementation for req_account_info
     return true;
 }

@@ -270,6 +270,7 @@ bool BinanceBroker::req_account_info(const AccountReq &req) {
         default:
             break;
     }
+    return true;
 }
 
 void BinanceBroker::on_msg(const std::string &msg) {

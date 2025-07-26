@@ -1,3 +1,6 @@
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC") # set -fPIC for nng
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 remove_definitions(-Werror)
 add_subdirectory(nng)
 
@@ -5,3 +8,5 @@ set(WITH_OPENSSL ON) # For libhv compile
 add_subdirectory(libhv)
 unset(WITH_OPENSSL)
 add_definitions(-Werror)
+
+add_subdirectory(MurmurHash3)

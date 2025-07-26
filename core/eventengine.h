@@ -1,6 +1,9 @@
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <rxcpp/rx.hpp>
+#pragma GCC diagnostic pop
 #include <unordered_map>
 
 #include "core/observe_helper.h"

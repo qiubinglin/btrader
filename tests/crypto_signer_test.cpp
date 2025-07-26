@@ -14,9 +14,9 @@ public:
                                      "Or to take Armes again in a sea of troubles,\n";
 
         OSSL_LIB_CTX *libctx = NULL;
-        size_t sig_len = 0;
+        // size_t sig_len = 0;
         unsigned char *sig_value = NULL;
-        char *sig_value_ptr = NULL;
+        // char *sig_value_ptr = NULL;
         int ret = EXIT_FAILURE;
         EVP_PKEY *priv = NULL, *pub = NULL;
 

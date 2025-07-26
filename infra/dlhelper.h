@@ -14,7 +14,7 @@ public:
 
     int load(const std::string &lib);
     template <typename FuncPtr> FuncPtr find_symbol(int id, const std::string &symbol) {
-        if (id < 0 or id > handles_.size()) {
+        if (id < 0 or static_cast<size_t>(id) > handles_.size()) {
             return nullptr;
         }
         return (FuncPtr)dlsym(handles_[id], symbol.c_str());

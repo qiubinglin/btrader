@@ -114,7 +114,7 @@ public:
     int init();
     int add_target(int efd);
     int wait();
-    int handle();
+    void handle();
 
 private:
     int epfd_{-1};

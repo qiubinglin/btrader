@@ -1,7 +1,6 @@
 #include "infra/epoll_usage.h"
 
 int create_epoll(int flags) {
-    struct epoll_event ev;
     return epoll_create1(flags);
 }
 

@@ -5,6 +5,7 @@
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
 #include <stdint.h>
+#include <string.h>
 
 int base64encode(const char *buffer, size_t length, char **b64text) { // Encodes a binary safe base 64 string
     BIO *bio, *b64;

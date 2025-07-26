@@ -1,4 +1,8 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <hv/WebSocketServer.h>
+#pragma GCC diagnostic pop
 using namespace hv;
 
 int main(int argc, char** argv) {
