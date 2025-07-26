@@ -32,6 +32,8 @@ public:
     const std::string &root_path() const { return root_; }
     enums::BacktestDataType get_backtest_data_type() const { return backtest_data_type_; }
 
+    const std::string &get_fds_file() const { return fds_file_; }
+
 private:
     Json::json cfg_;
 
@@ -45,6 +47,8 @@ private:
 
     Book initial_book_;
     enums::BacktestDataType backtest_data_type_{enums::BacktestDataType::None};
+
+    std::string fds_file_;
 };
 
 } // namespace btra

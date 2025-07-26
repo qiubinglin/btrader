@@ -24,7 +24,7 @@ void ObserveHelper::add_customer(journal::ReaderUPtr &reader) {
     for (const auto &[_, jour] : journals) {
         key = std::to_string(jour.get_location()->uid) + "_" + std::to_string(jour.get_dest());
         if (fds_map.count(key)) {
-            // INFRA_LOG_INFO("add_customer {}, {}", key, fds_map.at(key));
+            INFRA_LOG_DEBUG("add_customer {}, {}", key, fds_map.at(key));
             jour_observer_.add_target(fds_map.at(key));
         }
     }

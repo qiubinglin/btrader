@@ -20,11 +20,10 @@ PYBIND11_MODULE(pybtrader, m) {
     /* tool */
     {
         auto submodule = m.def_submodule("tool");
-        pybind11::class_<btra::PyJournalReader>(submodule, "JournalReader")
-            .def("init", &btra::PyJournalReader::init)
-            .def("read", &btra::PyJournalReader::read);
-        pybind11::class_<btra::PyJournalWriter>(submodule, "JournalWriter")
-            .def("init", &btra::PyJournalWriter::init)
-            .def("write", &btra::PyJournalWriter::write);;
+        pybind11::class_<btra::PyJournalComm>(submodule, "JournalComm")
+            .def("init", &btra::PyJournalComm::init)
+            .def("start", &btra::PyJournalComm::start)
+            .def("read", &btra::PyJournalComm::read)
+            .def("write", &btra::PyJournalComm::write);
     }
 }

@@ -42,5 +42,8 @@
             "password": "/home/qiubinglin/Private_key.txt",
             "authentication": "private-key"
         }
-    ]
+    ],
+    "user-app": {
+        "fds_file": "/home/qiubinglin/btrader/userconf/fds.txt"
+    }
 }

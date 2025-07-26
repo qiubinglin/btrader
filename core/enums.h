@@ -5,7 +5,7 @@
 
 namespace btra::enums {
 
-enum class RunMode : int8_t { LIVE, DATA, REPLAY, BACKTEST };
+enum class RunMode : int8_t { LIVE, DATA, REPLAY, BACKTEST, USER_APP };
 inline std::string get_mode_name(RunMode m) {
     switch (m) {
         case RunMode::LIVE:
@@ -16,6 +16,8 @@ inline std::string get_mode_name(RunMode m) {
             return "replay";
         case RunMode::BACKTEST:
             return "backtest";
+        case RunMode::USER_APP:
+            return "user-app";
         default:
             return "live";
     }
@@ -29,6 +31,8 @@ inline RunMode get_mode_by_name(const std::string &name) {
         return RunMode::REPLAY;
     else if (name == "backtest")
         return RunMode::BACKTEST;
+    else if (name == "user-app")
+        return RunMode::USER_APP;
 
     return RunMode::LIVE;
 }

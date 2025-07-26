@@ -30,3 +30,7 @@ pybind11_add_module(pybind11_test pybind11_test.cpp)
 # time test
 add_executable(time_test time_test.cpp)
 target_link_libraries(time_test infra)
+
+# Test for journal communication
+add_executable(journal_comm_test journal_comm_test.cpp)
+target_link_libraries(journal_comm_test pyinterface)

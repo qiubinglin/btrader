@@ -11,9 +11,8 @@ ExecutorSPtr Executor::create(enums::RunMode mode, EventEngine *engine) {
         case enums::RunMode::BACKTEST:
             return std::make_shared<BacktestExecutor>(engine);
         case enums::RunMode::LIVE:
-            return std::make_shared<LiveExecutor>(engine);
         default:
-            throw std::runtime_error("Unsupported run mode for strategy executor.");
+            return std::make_shared<LiveExecutor>(engine);
     }
 }
 

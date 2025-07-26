@@ -2,6 +2,7 @@
 
 #include "cp/backtest_subscriber.h"
 #include "cp/live_subscriber.h"
+#include "strategy/dummy_strategy.h"
 
 namespace btra {
 
@@ -73,25 +74,29 @@ void CPEngine::on_setup() {
 
     executor_ = strategy::Executor::create(main_cfg_.run_mode(), this);
 
-    typedef strategy::Strategy *(*create_strat_func)();
-    auto cfg_strats = cfg_["strategy"];
-    for (size_t i = 0; i < cfg_strats.size(); ++i) {
-        std::string strat_name = cfg_strats[i]["id"].get<std::string>();
-        std::string libfile = fmt::format("lib{}.so", strat_name);
-        std::filesystem::path path = cfg_strats[i]["path"].get<std::string>();
-        path /= libfile;
+    if (main_cfg_.run_mode() == enums::RunMode::USER_APP) {
+        add_strategy(std::make_shared<strategy::DummyStrategy>());
+    } else {
+        typedef strategy::Strategy *(*create_strat_func)();
+        auto cfg_strats = cfg_["strategy"];
+        for (size_t i = 0; i < cfg_strats.size(); ++i) {
+            std::string strat_name = cfg_strats[i]["id"].get<std::string>();
+            std::string libfile = fmt::format("lib{}.so", strat_name);
+            std::filesystem::path path = cfg_strats[i]["path"].get<std::string>();
+            path /= libfile;
 
-        std::string symbol_name = fmt::format("create_strategy_{}", strat_name);
+            std::string symbol_name = fmt::format("create_strategy_{}", strat_name);
 
-        // INFRA_LOG_DEBUG("{}, {}", path.string(), symbol_name);
+            // INFRA_LOG_DEBUG("{}, {}", path.string(), symbol_name);
 
-        if (dlhelper_.load(path.string()) == -1) {
-            throw std::runtime_error("Load strategy failed!");
+            if (dlhelper_.load(path.string()) == -1) {
+                throw std::runtime_error("Load strategy failed!");
+            }
+
+            strategy::StrategySPtr strat_sptr =
+                strategy::StrategySPtr(dlhelper_.find_symbol<create_strat_func>(static_cast<int>(i), symbol_name)());
+            add_strategy(strat_sptr);
         }
-
-        strategy::StrategySPtr strat_sptr =
-            strategy::StrategySPtr(dlhelper_.find_symbol<create_strat_func>(static_cast<int>(i), symbol_name)());
-        add_strategy(strat_sptr);
     }
 }
 

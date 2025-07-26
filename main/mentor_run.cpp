@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <thread>
 
 #include "core/journal/journal.h"
 #include "core/main_cfg.h"
@@ -24,6 +23,7 @@ int Mentor::_run() {
 
     auto all_journals = cfg_obj.get_journal_names();
     std::vector<journal::JourIndicator> jour_inds(all_journals.size());
+    std::vector<int> eventfd_list;
     for (size_t i = 0; i < all_journals.size(); ++i) {
         jour_inds[i].init();
         fds_val += all_journals[i];
@@ -32,8 +32,29 @@ int Mentor::_run() {
         if (i != all_journals.size() - 1) {
             fds_val += ':';
         }
+        eventfd_list.push_back(jour_inds[i].get_fd());
     }
     fds_data = "FDS=" + fds_val;
+
+    if (cfg_obj.run_mode() == enums::RunMode::USER_APP) {
+        s_socket_path = "/tmp/btrader-" + infra::time::strfnow(TIMESTAMP_FORMAT2) + ".sock";
+
+        /* Send correct eventfd data. */
+        send_eventfds_th_ = std::make_unique<std::thread>([eventfd_list, this]{
+            this->send_eventfds(eventfd_list, this->s_socket_path);
+        });
+
+        /* The eventfd data is wrong, correct data will is sent by socket */
+        std::ofstream ofs(cfg_obj.get_fds_file());
+        if (!ofs) {
+            throw std::runtime_error("Can not open to write: " + cfg_obj.get_fds_file());
+        }
+        ofs << fds_val << '\n';
+        ofs << s_socket_path; /* line 2: socket_path. */
+        ofs.flush();
+        ofs.close();
+    }
+
 #else
     printf("In HP mode.\n");
 #endif

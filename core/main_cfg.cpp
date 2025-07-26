@@ -32,6 +32,10 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
             backtest_data_type_ = enums::BacktestDataType::CSV;
         }
     }
+
+    if (run_mode_ == enums::RunMode::USER_APP) {
+        fds_file_ = cfg_["user-app"]["fds_file"].get<std::string>();
+    }
 }
 
 JLocationSPtr MainCfg::md_location() const {

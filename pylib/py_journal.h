@@ -2,28 +2,20 @@
 
 #include <pybind11/stl.h>
 
-#include "core/journal_pack.h"
+#include "core/journal_comm_data.h"
 
 namespace btra {
 
-class PyJournalReader {
+class PyJournalComm {
 public:
-    PyJournalReader() {}
-    void init(const std::string &conf);
+    PyJournalComm() {}
+    void init(const std::string &conf_file);
+    void start();
     pybind11::dict read();
-
-private:
-    JourReadPack readpack_;
-};
-
-class PyJournalWriter {
-public:
-    PyJournalWriter() {}
-    void init(const std::string &conf);
     void write(const pybind11::dict &data);
 
 private:
-    JourWritePack writepack_;
+    JourCommData comm_data_;
 };
 
 } // namespace btra

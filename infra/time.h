@@ -6,6 +6,7 @@
 
 #define DATETIME_FORMAT "%F %T"
 #define TIMESTAMP_FORMAT "%F %T.%N"
+#define TIMESTAMP_FORMAT2 "%F-%T.%N"
 #define TRADING_DAY_FORMAT "%Y%m%d"
 #define HISTORY_DAY_FORMAT "%Y-%m-%d"
 
@@ -69,6 +70,7 @@ private:
 
 public:
     TimeUnit unit = MILLI; // Default time unit is milliseconds
+    static const int64_t END_OF_WORLD = INT64_MAX;
     static time &get_instance();
     static int64_t now_time(TimeUnit unit = get_instance().unit);
 

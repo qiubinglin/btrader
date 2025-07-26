@@ -8,22 +8,14 @@
 namespace btra {
 
 /**
- * @brief JourReadPack is for comminication between btrader and other process.
+ * @brief JourCommData is for comminication between btrader and other process.
  *
  */
-struct JourReadPack {
+struct JourCommData {
     ObserveHelper observe_helper;
     journal::ReaderUPtr reader;
-
-    void init(const Json::json &json);
-};
-
-/**
- * @brief JourWritePack is for comminication between btrader and other process.
- *
- */
-struct JourWritePack {
     WriterMap writers;
+    unsigned md_account_count;
 
     void init(const Json::json &json);
 };

@@ -23,6 +23,7 @@ std::filesystem::path get_root_dir(const std::filesystem::path &root, enums::Run
         {enums::RunMode::BACKTEST, "backtest"},
         {enums::RunMode::DATA, "dataset"},
         {enums::RunMode::REPLAY, "replay"},
+        {enums::RunMode::USER_APP, "runtime"},
     };
 
     auto iter = map_env.find(m);

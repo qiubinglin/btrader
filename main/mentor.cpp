@@ -15,10 +15,17 @@ void signal_handler(int signal) {
     infra::LogMgr::shutdown(); // flush all loggers and shutdown
     /* Use _Exit to skip the execution of atexit-registered cleanup routines, which may otherwise cause issues during
      * the destruction of global or static resources.*/
+
+    if (!btra::Mentor::s_socket_path.empty()) {
+        std::filesystem::remove(btra::Mentor::s_socket_path);
+        btra::Mentor::s_socket_path.clear();
+    }
     std::_Exit(0);
 }
 
 namespace btra {
+
+std::string Mentor::s_socket_path = "";
 
 Mentor::Mentor(int argc, char **argv) {
     std::signal(SIGINT, signal_handler);  // Ctrl+C
@@ -40,6 +47,10 @@ Mentor::Mentor() {}
 Mentor::~Mentor() {
     if (event_engine_) {
         delete event_engine_;
+    }
+    if (!s_socket_path.empty()) {
+        std::filesystem::remove(s_socket_path);
+        s_socket_path.clear();
     }
 }
 
