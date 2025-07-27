@@ -21,6 +21,7 @@ PYBIND11_MODULE(pybtrader, m) {
     {
         auto submodule = m.def_submodule("tool");
         pybind11::class_<btra::PyJournalComm>(submodule, "JournalComm")
+            .def(pybind11::init<>())
             .def("init", &btra::PyJournalComm::init)
             .def("start", &btra::PyJournalComm::start)
             .def("read", &btra::PyJournalComm::read)

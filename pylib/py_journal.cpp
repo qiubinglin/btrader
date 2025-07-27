@@ -3,11 +3,26 @@
 #include <functional>
 #include <unordered_map>
 
+#include "infra/log.h"
+
 namespace btra {
 
 static void on_bar(const EventSPtr &event, pybind11::dict &output) {
+    if (!output.contains("datas")) {
+        output["datas"] = pybind11::list();
+    }
     const auto &bar = event->data<Bar>();
-    std::cout << bar.open << std::endl;
+    pybind11::dict subdict;
+    subdict["start_time"] = bar.start_time;
+    subdict["end_time"] = bar.end_time;
+    subdict["open"] = bar.open;
+    subdict["close"] = bar.close;
+    subdict["high"] = bar.high;
+    subdict["low"] = bar.low;
+    subdict["volume"] = bar.volume;
+
+    pybind11::list list_ref = output["datas"];
+    list_ref.append(subdict);
 }
 
 typedef void (*HandleFunc)(const EventSPtr &, pybind11::dict &);
@@ -39,12 +54,14 @@ void PyJournalComm::start() {
 }
 
 pybind11::dict PyJournalComm::read() {
+    INFRA_LOG_DEBUG("PyJournalComm::read");
     pybind11::dict res;
 
     auto &ob_helper = comm_data_.observe_helper;
     auto &reader = comm_data_.reader;
 #ifndef HP
     if (ob_helper.data_available()) {
+        INFRA_LOG_DEBUG("ob_helper.data_available()");
 #endif
         while (reader->data_available()) {
             auto event = reader->current_frame();
@@ -56,8 +73,6 @@ pybind11::dict PyJournalComm::read() {
 #ifndef HP
     }
 #endif
-
-    /* frame to dict */
     return res;
 }
 
