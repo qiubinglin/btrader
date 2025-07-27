@@ -7,6 +7,7 @@
 #define GETPID getpid
 #endif
 
+#include <cstdint>
 #include <string>
 
 namespace infra {
