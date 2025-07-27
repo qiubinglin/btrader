@@ -92,15 +92,15 @@ int ed25519_sign(EVP_PKEY *priv, const unsigned char *tbs, size_t tbs_len, OSSL_
         fprintf(stderr, "OPENSSL_malloc failed.\n");
         goto cleanup;
     }
-    fprintf(stdout, "Generating signature:\n");
+    // fprintf(stdout, "Generating signature:\n");
     if (!EVP_DigestSign(sign_context, sig_value, &sig_len, tbs, tbs_len)) {
         fprintf(stderr, "EVP_DigestSign failed.\n");
         goto cleanup;
     }
     *sig_out_len = sig_len;
     *sig_out_value = sig_value;
-    BIO_dump_indent_fp(stdout, sig_value, sig_len, 2);
-    fprintf(stdout, "\n");
+    // BIO_dump_indent_fp(stdout, sig_value, sig_len, 2);
+    // fprintf(stdout, "\n");
     ret = 1;
 
 cleanup:
