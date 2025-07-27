@@ -40,6 +40,9 @@ void BinanceData::on_msg(const std::string &msg) {
     switch (mdtype) {
     case enums::MDType::Kline: {
         const Json::json &kline_json = json_data["data"]["k"];
+        if (kline_json["x"].get<bool>() == false) {
+            break;
+        }
         Bar bar;
         bar.instrument_id = json_data["data"]["s"].get<std::string>().c_str();
         bar.start_time = kline_json["t"];
