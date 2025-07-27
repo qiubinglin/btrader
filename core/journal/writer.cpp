@@ -15,6 +15,7 @@ Writer::Writer(const JLocationSPtr &location, uint32_t dest_id, bool lazy)
       journal_(location, dest_id, true, lazy),
       size_to_write_(0),
       writer_start_time_32int_(infra::time::time_hashed(infra::time::now_time())) {
+    /* This may has conficts with rollback journal */
     journal_.seek_to_time(infra::time::now_time());
 
     const auto &fds_map = FdsMap::get_fds_map();

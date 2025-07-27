@@ -12,6 +12,7 @@
         "output_root_path": "./output",
         "time_unit": "milli",
         "currency": "USD",
+        "page_rollback_size": 0,
         "book": {
             "asset": 3000
         }
@@ -25,10 +26,10 @@
         {
             "institution": "binance",
             "account": "bing",
-            "password": "/home/qiubinglin/Private_key.txt",
+            "password": "/home/qiubinglin/btrader/usrconf/Private_key.txt",
             "authentication": "private-key",
             "extra": {
-                "stream_uri": "wss://stream.binance.com:443/stream?streams=ethusdt@kline_1m"
+                "stream_uri": "wss://stream.binance.com:443/stream?streams=ethusdt@kline_1s"
             }
         }
     ],
@@ -42,7 +43,7 @@
         {
             "institution": "binance",
             "account": "euHZeWJLF1IO5MNsuKIQYqJH4ZqLfFbtwxp0ychQi41f7CDBRRCrSt2d7nRzXq1T",
-            "password": "/home/qiubinglin/Private_key.txt",
+            "password": "/home/qiubinglin/btrader/usrconf/Private_key.txt",
             "authentication": "private-key"
         }
     ],

@@ -41,6 +41,7 @@ PageUnitSPtr PageUnit::load(const JLocationSPtr &location, uint32_t dest_id, uin
     }
 
     PageHeader *header = reinterpret_cast<PageHeader *>(address);
+    /* When this page is created in the first, initialize it */
     if (header->last_frame_position == 0) {
         header->version = __JOURNAL_VERSION__;
         header->page_header_length = sizeof(PageHeader);
@@ -79,8 +80,10 @@ uint32_t PageUnit::find_page_id(const JLocationSPtr &location, uint32_t dest_id,
         return 1;
     }
     if (time == 0) {
+        /* This may has conficts with rollback journal */
         return page_ids.front();
     }
+     /* This may has conficts with rollback journal */
     for (int i = static_cast<int>(page_ids.size()) - 1; i >= 0; i--) {
         if (PageUnit::load(location, dest_id, page_ids[i], false, true)->begin_time() < time) {
             return page_ids[i];

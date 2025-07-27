@@ -11,7 +11,11 @@ namespace btra::journal {
  * @brief Journal class, the abstraction of continuous memory access
  */
 class Journal {
+    static uint32_t s_page_rollback_size;
+
 public:
+    static void set_page_rollback_size(uint32_t val);
+
     Journal(JLocationSPtr location, uint32_t dest_id, bool is_writing, bool lazy)
         : location_(std::move(location)),
           dest_id_(dest_id),
@@ -40,8 +44,8 @@ public:
 
     /**
      * @brief Get location unique id.
-     * 
-     * @return uint32_t 
+     *
+     * @return uint32_t
      */
     [[maybe_unused]] [[nodiscard]] uint32_t get_source() const { return location_->location_uid; }
 
@@ -62,7 +66,7 @@ public:
 private:
     /* journal unique id: [location_, dest_id_]. */
     const JLocationSPtr location_; /* Indicate a journal directory, location_ is part of journal unique id. */
-    const uint32_t dest_id_;       /* Indicate a journal file, dest_id_ is part of journal unique id. Make it as unique? */
+    const uint32_t dest_id_; /* Indicate a journal file, dest_id_ is part of journal unique id. Make it as unique? */
 
     const bool is_writing_; /* Read-only or write-only */
     const bool lazy_;
@@ -71,10 +75,12 @@ private:
     FrameUnitSPtr frame_;    /* Current frame. */
     uint64_t page_frame_nb_; /* Current frame number in page. */
 
+    uint32_t page_id_in_rollback_{0};
+
     /**
      * @brief Load page of page_id
-     * 
-     * @param page_id 
+     *
+     * @param page_id
      */
     void load_page(int page_id);
 

@@ -71,7 +71,7 @@ public:
 private:
     const JLocationSPtr location_;
     const uint32_t dest_id_;
-    const uint32_t page_id_;
+    const uint32_t page_id_; /* Begin at 1 by default. */
     const bool lazy_;
     const size_t size_;
     const PageHeader *header_;

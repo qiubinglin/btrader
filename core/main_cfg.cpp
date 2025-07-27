@@ -36,6 +36,8 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
     if (run_mode_ == enums::RunMode::USER_APP) {
         fds_file_ = cfg_["user-app"]["fds_file"].get<std::string>();
     }
+
+    page_rollback_size_ = cfg_["system"]["page_rollback_size"].get<uint32_t>();
 }
 
 JLocationSPtr MainCfg::md_location() const {

@@ -4,6 +4,10 @@
 
 namespace btra::journal {
 
+uint32_t Journal::s_page_rollback_size = 0;
+
+void Journal::set_page_rollback_size(uint32_t val) { s_page_rollback_size = val; }
+
 Journal::~Journal() {
     if (page_.get() != nullptr) {
         page_.reset();
@@ -39,13 +43,42 @@ void Journal::load_page(int page_id) {
     page_frame_nb_ = 0u;
 }
 
-void Journal::load_next_page() { load_page(page_->get_page_id() + 1); }
+void Journal::load_next_page() {
+    if (s_page_rollback_size == 0 or page_->get_page_id() < s_page_rollback_size) [[likely]] {
+        auto old_page_id = page_->get_page_id();
+        load_page(old_page_id + 1);
+
+        if (is_writing_ and page_id_in_rollback_ == old_page_id) {
+            /* In a rollback flow */
+            /* Reinitialize page */
+            PageHeader *header = reinterpret_cast<PageHeader *>(page_->address());
+            header->last_frame_position = header->page_header_length;
+            memset(reinterpret_cast<char *>(page_->address()) + header->page_header_length, 0,
+                   header->page_size - header->page_header_length);
+
+            /* Mark the rollback page id */
+            page_id_in_rollback_ = page_->get_page_id();
+        }
+    } else {
+        /* Rollback to the first page. */
+        load_page(1);
+        if (is_writing_) {
+            /* Reinitialize page */
+            PageHeader *header = reinterpret_cast<PageHeader *>(page_->address());
+            header->last_frame_position = header->page_header_length;
+            memset(reinterpret_cast<char *>(page_->address()) + header->page_header_length, 0,
+                   header->page_size - header->page_header_length);
+
+            /* Mark the rollback page id */
+            page_id_in_rollback_ = 1;
+        }
+    }
+}
 
 JourIndicator::JourIndicator() {}
 
 JourIndicator::~JourIndicator() {
-    if (efd_ > 0)
-        close(efd_);
+    if (efd_ > 0) close(efd_);
 }
 
 int JourIndicator::init() {
@@ -69,8 +102,7 @@ int JourIndicator::post() {
 JourObserver::JourObserver() {}
 
 JourObserver::~JourObserver() {
-    if (epfd_ > 0)
-        close(epfd_);
+    if (epfd_ > 0) close(epfd_);
 }
 
 int JourObserver::init() {

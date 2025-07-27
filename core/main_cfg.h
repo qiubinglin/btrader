@@ -34,6 +34,8 @@ public:
 
     const std::string &get_fds_file() const { return fds_file_; }
 
+    uint32_t get_page_rollback_size() const { return page_rollback_size_; }
+
 private:
     Json::json cfg_;
 
@@ -49,6 +51,8 @@ private:
     enums::BacktestDataType backtest_data_type_{enums::BacktestDataType::None};
 
     std::string fds_file_;
+
+    uint32_t page_rollback_size_{0};
 };
 
 } // namespace btra
