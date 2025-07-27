@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import asyncio
 import json
 import logging
@@ -13,15 +16,38 @@ from telegram.ext import Application, MessageHandler, CommandHandler, ContextTyp
 from telegram.error import TelegramError
 from telegram.constants import ParseMode
 
+GLOBAL_CONFIG = {}
+
 import pybtrader
-class JournalComm(object):
-    ''''''
+class JournalComm:
     def __init__(self, conf: str):
         self.impl = pybtrader.tool.JournalComm()
         self.impl.init(conf)
+        self.impl.start()
+
+        self.prices_per_1m = []
+        self.total_prices_cnt = 60 * 24
 
     def read(self) -> dict:
-        return self.impl.read()
+        data = None
+        while True:
+            try:
+                data = self.impl.read()
+                print(data)
+                self.prices_per_1m.append(data['datas'][0]['close'])
+                if len(self.prices_per_1m) > self.total_prices_cnt:
+                    self.prices_per_1m.pop(0)
+                if self.need_send():
+                    break
+            except Exception as e:
+                logging.error(f"Error reading from journal: {e}")
+                asyncio.sleep(1)
+        return data
+    
+    def need_send(self) -> bool:
+        if len(self.prices_per_1m) < 2:
+            return False
+        return abs((self.prices_per_1m[-1] - self.prices_per_1m[-2]) / self.prices_per_1m[-2]) > 0.02
 
 # Configure logging
 logging.basicConfig(
@@ -34,7 +60,7 @@ logger = logging.getLogger(__name__)
 class BotConfig:
     """Bot configuration class"""
     bot_token: str
-    channel_id: str  # Channel ID (e.g., @channel_name or -1001234567890)
+    chat_id: str  # chat ID (e.g., @chat_name or -1001234567890)
     admin_user_ids: List[int] = None  # List of admin user IDs who can control the bot
     data_source_url: Optional[str] = None  # Data source URL
     data_file_path: Optional[str] = None   # Local data file path
@@ -66,7 +92,7 @@ class DataReader:
 
         data_dict = self.journal_reader.read()
         # Parse dict
-        return None
+        return json.dumps(data_dict, ensure_ascii=False, indent=4)
     
     async def read_from_url(self) -> Optional[str]:
         """Read data from URL"""
@@ -165,7 +191,7 @@ class TelegramInteractiveBot:
         self.application.add_handler(CommandHandler("messages", self.show_messages_command))
         self.application.add_handler(CommandHandler("help", self.help_command))
         
-        # Message handler for channel messages
+        # Message handler for chat messages
         self.application.add_handler(
             MessageHandler(filters.ALL & ~filters.COMMAND, self.handle_message)
         )
@@ -223,7 +249,7 @@ Bot is now ready to receive and send messages! 🚀"""
 📡 <b>Data Source:</b> <code>{self._get_data_source()}</code>
 🔔 <b>Push Interval:</b> <code>{self.config.interval} seconds</code>
 📬 <b>Received Messages:</b> <code>{len(self.received_messages)}</code>
-🎯 <b>Target Channel:</b> <code>{self.config.channel_id}</code>"""
+🎯 <b>Target chat:</b> <code>{self.config.chat_id}</code>"""
         
         await update.message.reply_text(status_message, parse_mode=ParseMode.HTML)
     
@@ -244,7 +270,7 @@ Bot is now ready to receive and send messages! 🚀"""
                 data = await self.data_reader.get_data()
             
             message = self._format_data_message(data)
-            success = await self.send_to_channel(message)
+            success = await self.send_to_chat(message)
             
             if success:
                 await update.message.reply_text("✅ Data pushed successfully!")
@@ -302,14 +328,14 @@ Bot is now ready to receive and send messages! 🚀"""
 /start - Initialize the bot
 /stop - Stop automatic data pushing
 /status - Show current bot status
-/push - Manually push data to channel
+/push - Manually push data to chat
 /autopush - Toggle automatic pushing on/off
 /messages - Show recent received messages
 /help - Show this help message
 
 <b>Features:</b>
-• Automatically push data to configured channel
-• Receive and log messages from channels/users
+• Automatically push data to configured chat
+• Receive and log messages from chats/users
 • Admin control with permission system
 • Multiple data sources (URL, file, sample data)
 • Message formatting and splitting for long content
@@ -391,8 +417,8 @@ Admins can control the bot using commands."""
         
         return message
     
-    async def send_to_channel(self, text: str, parse_mode: ParseMode = ParseMode.HTML) -> bool:
-        """Send message to configured channel"""
+    async def send_to_chat(self, text: str, parse_mode: ParseMode = ParseMode.HTML) -> bool:
+        """Send message to configured chat"""
         try:
             if len(text) > self.config.max_message_length:
                 messages = self._split_message(text)
@@ -403,11 +429,11 @@ Admins can control the bot using commands."""
                     
                     try:
                         await self.application.bot.send_message(
-                            chat_id=self.config.channel_id,
+                            chat_id=self.config.chat_id,
                             text=msg,
                             parse_mode=parse_mode
                         )
-                        logger.info(f"Message part {i+1}/{len(messages)} sent to channel")
+                        logger.info(f"Message part {i+1}/{len(messages)} sent to chat")
                     except TelegramError as e:
                         logger.error(f"Failed to send message part: {e}")
                         success = False
@@ -415,15 +441,15 @@ Admins can control the bot using commands."""
                 return success
             else:
                 await self.application.bot.send_message(
-                    chat_id=self.config.channel_id,
+                    chat_id=self.config.chat_id,
                     text=text,
                     parse_mode=parse_mode
                 )
-                logger.info("Message sent to channel successfully")
+                logger.info("Message sent to chat successfully")
                 return True
                 
         except TelegramError as e:
-            logger.error(f"Failed to send message to channel: {e}")
+            logger.error(f"Failed to send message to chat: {e}, current chat ID: {self.config.chat_id}")
             return False
     
     def _split_message(self, text: str) -> list:
@@ -452,8 +478,9 @@ Admins can control the bot using commands."""
             while self.auto_push_running:
                 try:
                     data = await reader.get_data()
-                    message = self._format_data_message(data)
-                    success = await self.send_to_channel(message)
+                    if data:
+                        message = self._format_data_message(data)
+                        success = await self.send_to_chat(message)
                     
                     if success:
                         logger.info("Auto push successful")
@@ -481,7 +508,7 @@ Admins can control the bot using commands."""
             bot_info = await self.application.bot.get_me()
             logger.info(f"Bot connected: @{bot_info.username}")
             
-            # Send startup message to channel
+            # Send startup message to chat
             startup_message = f"""🚀 <b>Interactive Bot Started</b>
 ⏰ <b>Start Time:</b> <code>{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</code>
 🤖 <b>Bot:</b> @{bot_info.username}
@@ -490,16 +517,19 @@ Admins can control the bot using commands."""
 Bot is ready to receive commands and messages! 
 Use /help for available commands."""
             
-            await self.send_to_channel(startup_message)
+            await self.send_to_chat(startup_message)
             
             # Start auto push if enabled
             if self.config.auto_push:
                 self.auto_push_running = True
+                logger.info("Auto push enabled, starting auto push loop")
                 self._auto_push_task = asyncio.create_task(self._auto_push_loop())
+                await self._auto_push_task
             
             # Start polling
             self.running = True
-            await self.application.run_polling(drop_pending_updates=True)
+            # Disabled for now
+            # await self.application.run_polling(drop_pending_updates=True)
             
         except Exception as e:
             logger.error(f"Failed to start bot: {e}")
@@ -526,15 +556,16 @@ class BotManager:
         """Create bot configuration"""
         return BotConfig(
             # Required configuration
-            bot_token="YOUR_BOT_TOKEN_HERE",
-            channel_id="@your_channel_name",
-            
+            bot_token=GLOBAL_CONFIG.get("bot_token", None),
+            chat_id=GLOBAL_CONFIG.get("chat_id", None),
+
             # Optional: Admin user IDs (get from @userinfobot)
             admin_user_ids=[123456789, 987654321],  # Replace with actual user IDs
             
             # Data source configuration
-            data_source_url="https://jsonplaceholder.typicode.com/posts/1",
-            data_file_path="data.json",
+            data_source_url=None,
+            data_file_path=None,
+            data_journal_conf_file=GLOBAL_CONFIG.get("data_journal_conf_file", None),  # Use global config if available
             
             # Bot behavior
             interval=60,  # Auto push interval
@@ -546,12 +577,12 @@ class BotManager:
         config = self.create_config()
         
         # Validate configuration
-        if config.bot_token == "YOUR_BOT_TOKEN_HERE":
+        if config.bot_token == None:
             logger.error("Please configure Bot Token!")
             return
         
-        if config.channel_id == "@your_channel_name":
-            logger.error("Please configure Channel ID!")
+        if config.chat_id == None:
+            logger.error("Please configure chat ID!")
             return
         
         self.bot = TelegramInteractiveBot(config)
@@ -572,17 +603,28 @@ if __name__ == "__main__":
     print("🤖 Telegram Interactive Bot (Send & Receive)")
     print("=" * 60)
     print("Features:")
-    print("✅ Send data to channel automatically")
-    print("✅ Receive and log messages from users/channels")
+    print("✅ Send data to chat automatically")
+    print("✅ Receive and log messages from users/chats")
     print("✅ Admin commands for bot control")
     print("✅ Manual and automatic data pushing")
     print("✅ Message history tracking")
     print("=" * 60)
-    print("Setup: Configure bot_token, channel_id, and admin_user_ids")
+    print("Setup: Configure bot_token, chat_id, and admin_user_ids")
     print("Commands: /start, /stop, /status, /push, /autopush, /messages, /help")
     print("=" * 60)
-    
+
+    import sys
+    if not len(sys.argv) > 1:
+        raise ValueError("Please provide the configuration file path as the first argument.")
+    config_file = sys.argv[1]
+    print(f"Using configuration file: {config_file}")
+    with open(config_file, 'r', encoding='utf-8') as f:
+        config_data = json.load(f)
+        GLOBAL_CONFIG.update(config_data)
+
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\n👋 Bot stopped")
+
+    print("🤖 Telegram Interactive Bot has been stopped.")
