@@ -14,6 +14,9 @@ void BinanceData::setup(const Json::json &cfg) {
     // trade and depth: "/stream?streams=btcusdt@trade/btcusdt@depth20@100ms"
     /* kline: "/stream?streams=btcusdt@kline_1s" */
     uri_ = s_ws_stream_prefix + "/stream?streams=btcusdt@kline_1s/btcusdt@depth20";
+    if (cfg["extra"].contains("stream_uri")) {
+        uri_ = cfg["extra"]["stream_uri"].get<std::string>();
+    }
 
     client_.set_msg_handler([this](const std::string &msg) { this->on_msg(msg); });
 }
@@ -88,9 +91,9 @@ void BinanceData::on_msg(const std::string &msg) {
 
 enums::MDType BinanceData::get_mdtype(const Json::json &data) const {
     std::string stream_name = data["stream"].get<std::string>();
-    if (stream_name == "btcusdt@kline_1s") {
+    if (stream_name.find("kline") != std::string::npos) {
         return enums::MDType::Kline;
-    } else if (stream_name == "btcusdt@depth20") {
+    } else if (stream_name.find("depth") != std::string::npos) {
         return enums::MDType::Depth;
     } else {
         return enums::MDType::Unknown;

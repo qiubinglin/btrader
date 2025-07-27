@@ -26,7 +26,10 @@
             "institution": "binance",
             "account": "bing",
             "password": "/home/qiubinglin/Private_key.txt",
-            "authentication": "private-key"
+            "authentication": "private-key",
+            "extra": {
+                "stream_uri": "wss://stream.binance.com:443/stream?streams=ethusdt@kline_1s"
+            }
         }
     ],
     "strategy": [
