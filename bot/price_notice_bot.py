@@ -18,6 +18,35 @@ from telegram.constants import ParseMode
 
 GLOBAL_CONFIG = {}
 
+class Kline:
+    """Kline data structure"""
+    def __init__(self):
+        self.open = None
+        self.high = None
+        self.low = None
+        self.close = None
+        self.volume = 0.0
+
+        self.max_price_cnt = 0
+        self.curr_price_cnt = 0
+
+    def add(self, price: float, volume: float):
+        """Add new price and volume to the kline"""
+        if self.curr_price_cnt >= self.max_price_cnt:
+            self.open = None
+            self.high = None
+            self.low = None
+            self.close = None
+            self.volume = 0.0
+            self.curr_price_cnt = 0
+        if self.open is None:
+            self.open = price
+        self.high = price if self.high is None else max(self.high, price)
+        self.low = price if self.low is None else min(self.low, price)
+        self.close = price
+        self.volume += volume
+        self.curr_price_cnt += 1
+
 import pybtrader
 class JournalComm:
     def __init__(self, conf: str):
@@ -25,18 +54,21 @@ class JournalComm:
         self.impl.init(conf)
         self.impl.start()
 
-        self.prices_per_1m = []
-        self.total_prices_cnt = 60 * 24
+        self.hour_kline = Kline()
+        self.hour_kline.max_price_cnt = 60  # 60 minutes
+        self.half_hour_kline = Kline()
+        self.half_hour_kline.max_price_cnt = 30  # 30 minutes
+        self.quarter_hour_kline = Kline()
+        self.quarter_hour_kline.max_price_cnt = 15  # 15 minutes
 
     def read(self) -> dict:
         data = None
         while True:
             try:
                 data = self.impl.read()
-                print(data)
-                self.prices_per_1m.append(data['datas'][0]['close'])
-                if len(self.prices_per_1m) > self.total_prices_cnt:
-                    self.prices_per_1m.pop(0)
+                self.hour_kline.add(data['datas'][0]['close'], data['datas'][0]['volume'])
+                self.half_hour_kline.add(data['datas'][0]['close'], data['datas'][0]['volume'])
+                self.quarter_hour_kline.add(data['datas'][0]['close'], data['datas'][0]['volume'])
                 if self.need_send():
                     break
             except Exception as e:
@@ -45,9 +77,13 @@ class JournalComm:
         return data
     
     def need_send(self) -> bool:
-        if len(self.prices_per_1m) < 2:
-            return False
-        return abs((self.prices_per_1m[-1] - self.prices_per_1m[-2]) / self.prices_per_1m[-2]) > 0.02
+        if abs((self.hour_kline.close - self.hour_kline.open) / self.hour_kline.open) > 0.1:
+            return True
+        if abs((self.half_hour_kline.close - self.half_hour_kline.open) / self.half_hour_kline.open) > 0.05:
+            return True
+        if abs((self.quarter_hour_kline.close - self.quarter_hour_kline.open) / self.quarter_hour_kline.open) > 0.02:
+            return True
+        return False
 
 # Configure logging
 logging.basicConfig(

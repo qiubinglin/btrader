@@ -34,7 +34,9 @@ bool BinanceData::subscribe(const std::vector<InstrumentKey> &instrument_keys) {
 bool BinanceData::unsubscribe(const std::vector<InstrumentKey> &instrument_keys) { return true; }
 
 void BinanceData::on_msg(const std::string &msg) {
-    // std::cout << msg << std::endl;
+    if (msg_cnt_++ % 10000 == 0) {
+        INFRA_LOG_INFO("Receive {} binance data: {}", msg_cnt_, msg);
+    }
     Json::json json_data = Json::json::parse(msg);
     auto mdtype = get_mdtype(json_data);
     switch (mdtype) {

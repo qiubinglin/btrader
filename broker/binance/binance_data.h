@@ -24,6 +24,7 @@ private:
 
     infra::WebSocketClient client_;
     std::string uri_;
+    size_t msg_cnt_{0};
 };
 
 } // namespace btra::broker
