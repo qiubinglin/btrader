@@ -61,15 +61,22 @@ class JournalComm:
         self.quarter_hour_kline = Kline()
         self.quarter_hour_kline.max_price_cnt = 15  # 15 minutes
 
+        self.data_cnt = 0
+
     def read(self) -> dict:
+        send_flag = False
         data = None
         while True:
             try:
                 data = self.impl.read()
+                if self.data_cnt % 60 == 0:
+                    send_flag = True
+                self.data_cnt += 1
                 self.hour_kline.add(data['datas'][0]['close'], data['datas'][0]['volume'])
                 self.half_hour_kline.add(data['datas'][0]['close'], data['datas'][0]['volume'])
                 self.quarter_hour_kline.add(data['datas'][0]['close'], data['datas'][0]['volume'])
-                if self.need_send():
+                if self.need_send() or send_flag:
+                    send_flag = False
                     break
             except Exception as e:
                 logging.error(f"Error reading from journal: {e}")
