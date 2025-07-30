@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/eventengine.h"
-#include "cp/backtest_dump.h"
+#include "engines/cp/backtest_dump.h"
 #include "strategy/strategy.h"
 
 namespace btra {

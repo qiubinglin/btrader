@@ -1,6 +1,6 @@
-#include "cp/live_subscriber.h"
+#include "live_subscriber.h"
 
-#include "cp/strategy_invoke.h"
+#include "strategy_invoke.h"
 
 namespace btra {
 

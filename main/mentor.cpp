@@ -3,12 +3,12 @@
 #include <csignal>
 #include <fstream>
 
-#include "cp_engine.h"
+#include "engines/cp/cp_engine.h"
 #include "infra/log.h"
 #include "infra/time.h"
-#include "md_engine.h"
+#include "engines/md/md_engine.h"
 #include "option_parser.h"
-#include "td_engine.h"
+#include "engines/td/td_engine.h"
 
 void signal_handler(int signal) {
     INFRA_LOG_ERROR("Caught signal {}, flushing logs...", signal);

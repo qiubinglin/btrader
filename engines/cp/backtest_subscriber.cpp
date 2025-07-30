@@ -1,4 +1,4 @@
-#include "cp/backtest_subscriber.h"
+#include "backtest_subscriber.h"
 
 namespace btra {
 

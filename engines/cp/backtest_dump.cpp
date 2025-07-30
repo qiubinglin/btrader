@@ -1,4 +1,4 @@
-#include "cp/backtest_dump.h"
+#include "backtest_dump.h"
 
 #include <sstream>
 
