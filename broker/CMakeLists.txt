@@ -1,6 +1,7 @@
 add_subdirectory(binance)
 add_subdirectory(backtest)
 add_subdirectory(pyservice)
+add_subdirectory(brokersim)
 
 file(GLOB src
     *.cpp
