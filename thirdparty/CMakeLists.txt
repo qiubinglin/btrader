@@ -10,3 +10,4 @@ unset(WITH_OPENSSL)
 add_definitions(-Werror)
 
 add_subdirectory(MurmurHash3)
+add_subdirectory(ta-lib)

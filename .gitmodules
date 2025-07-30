@@ -1,0 +1,3 @@
+[submodule "thirdparty/ta-lib"]
+	path = thirdparty/ta-lib
+	url = https://github.com/TA-Lib/ta-lib.git

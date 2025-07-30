@@ -20,4 +20,7 @@ find_package(spdlog REQUIRED)
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 
+# ta-lib
+set(TA-LIB ta-lib-static)
+
 add_subdirectory(thirdparty)
