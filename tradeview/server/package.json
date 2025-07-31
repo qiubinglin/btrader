@@ -1,0 +1,21 @@
+{
+  "name": "trading-server",
+  "version": "1.0.0",
+  "description": "Trading System Node.js Server",
+  "main": "server.js",
+  "scripts": {
+    "build:cpp": "cd ../cpp && node-gyp rebuild",
+    "start": "npm run build:cpp && node server.js",
+    "dev": "npm run build:cpp && nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5",
+    "node-addon-api": "^7.0.0",
+    "node-gyp": "^10.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
