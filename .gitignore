@@ -41,3 +41,7 @@ usrconf
 
 # jupyter notebook checkpoints
 .ipynb_checkpoints
+
+# clangd
+.cache
+compile_commands.json
