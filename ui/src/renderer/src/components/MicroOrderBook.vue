@@ -1,16 +1,16 @@
 <template>
   <div class="micro-orderbook">
     <div class="micro-header">
-      <div class="header-title">微盘口</div>
+      <div class="header-title">Micro Order Book</div>
       <div class="refresh-button">
-        <el-button size="small" @click="refreshData" :loading="isRefreshing">刷新</el-button>
+        <el-button size="small" @click="refreshData" :loading="isRefreshing">Refresh</el-button>
       </div>
     </div>
     
     <div class="micro-content" v-if="microOrderBook">
-      <!-- 最优卖价 -->
+      <!-- Best Ask -->
       <div class="best-ask section">
-        <div class="section-title">最优卖价</div>
+        <div class="section-title">Best Ask</div>
         <div class="price-level best-level ask-level" v-if="bestAsk">
           <div class="level-info">
             <span class="price ask-price">{{ formatPrice(bestAsk.price) }}</span>
@@ -18,28 +18,28 @@
           </div>
           <div class="level-actions">
             <el-button size="small" type="success" @click="buyAtPrice(bestAsk.price)">
-              买入
+              Buy
             </el-button>
           </div>
         </div>
       </div>
       
-      <!-- 价差信息 -->
+      <!-- Spread Info -->
       <div class="spread-info section">
         <div class="spread-detail">
-          <span class="spread-label">价差:</span>
+          <span class="spread-label">Spread:</span>
           <span class="spread-value">{{ formatPrice(spread) }}</span>
           <span class="spread-percent">({{ spreadPercent.toFixed(3) }}%)</span>
         </div>
         <div class="mid-price">
-          <span class="mid-label">中间价:</span>
+          <span class="mid-label">Mid Price:</span>
           <span class="mid-value">{{ formatPrice(midPrice) }}</span>
         </div>
       </div>
       
-      <!-- 最优买价 -->
+      <!-- Best Bid -->
       <div class="best-bid section">
-        <div class="section-title">最优买价</div>
+        <div class="section-title">Best Bid</div>
         <div class="price-level best-level bid-level" v-if="bestBid">
           <div class="level-info">
             <span class="price bid-price">{{ formatPrice(bestBid.price) }}</span>
@@ -47,30 +47,30 @@
           </div>
           <div class="level-actions">
             <el-button size="small" type="danger" @click="sellAtPrice(bestBid.price)">
-              卖出
+              Sell
             </el-button>
           </div>
         </div>
       </div>
       
-      <!-- 深度统计 -->
+      <!-- Depth Statistics -->
       <div class="depth-stats section">
-        <div class="section-title">深度统计</div>
+        <div class="section-title">Depth Statistics</div>
         <div class="stats-grid">
           <div class="stat-item">
-            <span class="stat-label">买单深度:</span>
+            <span class="stat-label">Bid Depth:</span>
             <span class="stat-value bid-color">{{ formatVolume(bidDepth) }}</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">卖单深度:</span>
+            <span class="stat-label">Ask Depth:</span>
             <span class="stat-value ask-color">{{ formatVolume(askDepth) }}</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">买卖比:</span>
+            <span class="stat-label">Bid/Ask Ratio:</span>
             <span class="stat-value">{{ bidAskRatio.toFixed(2) }}</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">总深度:</span>
+            <span class="stat-label">Total Depth:</span>
             <span class="stat-value">{{ formatVolume(totalDepth) }}</span>
           </div>
         </div>
@@ -78,7 +78,7 @@
     </div>
     
     <div v-else class="no-data">
-      <span>暂无微盘口数据</span>
+      <span>No Micro Order Book Data</span>
     </div>
   </div>
 </template>
@@ -185,7 +185,10 @@ const refreshData = async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-family: 'Courier New', monospace;
+  background: $bg-secondary;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .micro-header {
@@ -194,71 +197,94 @@ const refreshData = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: $bg-tertiary;
   border-bottom: 1px solid $border-color;
+  background: $bg-tertiary;
   
   .header-title {
     font-weight: 600;
     color: $text-primary;
+    font-family: 'Times New Roman', Times, serif;
+  }
+  
+  .refresh-button {
+    .el-button {
+      font-family: 'Times New Roman', Times, serif;
+    }
   }
 }
 
 .micro-content {
   flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   overflow-y: auto;
-  padding: 8px;
 }
 
 .section {
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 4px;
-  padding: 8px;
-  
   .section-title {
-    font-size: $font-size-sm;
-    font-weight: bold;
+    font-weight: 600;
     color: $text-primary;
     margin-bottom: 8px;
-    border-bottom: 1px solid $border-color;
-    padding-bottom: 4px;
+    font-family: 'Times New Roman', Times, serif;
   }
 }
 
-.best-level {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  
-  .level-info {
+.best-ask, .best-bid {
+  .price-level {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid $border-color;
     
-    .price {
-      font-size: $font-size-md;
-      font-weight: bold;
+    .level-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      
+      .price {
+        font-size: $font-size-lg;
+        font-weight: bold;
+        font-family: 'Courier New', monospace;
+        
+        &.ask-price {
+          color: $sell-color;
+        }
+        
+        &.bid-price {
+          color: $buy-color;
+        }
+      }
+      
+      .volume {
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        font-family: 'Courier New', monospace;
+      }
     }
     
-    .volume {
-      font-size: $font-size-sm;
-      color: $text-secondary;
+    .level-actions {
+      .el-button {
+        font-family: 'Times New Roman', Times, serif;
+      }
     }
   }
-}
-
-.ask-level {
-  .price {
-    color: $sell-color;
+  
+  &.ask-level {
+    .price-level {
+      background: rgba(244, 67, 54, 0.05);
+      border-color: $sell-color;
+    }
   }
-}
-
-.bid-level {
-  .price {
-    color: $buy-color;
+  
+  &.bid-level {
+    .price-level {
+      background: rgba(76, 175, 80, 0.05);
+      border-color: $buy-color;
+    }
   }
 }
 
@@ -267,20 +293,23 @@ const refreshData = async () => {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     
     .spread-label {
       color: $text-secondary;
+      font-family: 'Times New Roman', Times, serif;
     }
     
     .spread-value {
-      font-weight: bold;
       color: $text-primary;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
     }
     
     .spread-percent {
-      font-size: $font-size-sm;
-      color: $text-muted;
+      color: $text-secondary;
+      font-size: $font-size-xs;
+      font-family: 'Times New Roman', Times, serif;
     }
   }
   
@@ -291,11 +320,13 @@ const refreshData = async () => {
     
     .mid-label {
       color: $text-secondary;
+      font-family: 'Times New Roman', Times, serif;
     }
     
     .mid-value {
+      color: $text-primary;
       font-weight: bold;
-      color: $warning-color;
+      font-family: 'Courier New', monospace;
     }
   }
 }
@@ -310,19 +341,19 @@ const refreshData = async () => {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 4px;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 2px;
+      padding: 4px 8px;
+      background: $bg-tertiary;
+      border-radius: 4px;
       
       .stat-label {
-        font-size: $font-size-xs;
         color: $text-secondary;
+        font-size: $font-size-sm;
+        font-family: 'Times New Roman', Times, serif;
       }
       
       .stat-value {
-        font-size: $font-size-xs;
         font-weight: bold;
-        color: $text-primary;
+        font-family: 'Courier New', monospace;
         
         &.bid-color {
           color: $buy-color;
@@ -341,6 +372,7 @@ const refreshData = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $text-muted;
+  color: $text-secondary;
+  font-family: 'Times New Roman', Times, serif;
 }
 </style>

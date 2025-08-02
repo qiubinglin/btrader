@@ -18,10 +18,10 @@
       </div>
       <div class="chart-controls">
         <el-button-group size="small">
-          <el-button :type="timeframe === '1m' ? 'primary' : ''" @click="setTimeframe('1m')">1分</el-button>
-          <el-button :type="timeframe === '5m' ? 'primary' : ''" @click="setTimeframe('5m')">5分</el-button>
-          <el-button :type="timeframe === '15m' ? 'primary' : ''" @click="setTimeframe('15m')">15分</el-button>
-          <el-button :type="timeframe === '1h' ? 'primary' : ''" @click="setTimeframe('1h')">1小时</el-button>
+          <el-button :type="timeframe === '1m' ? 'primary' : ''" @click="setTimeframe('1m')">1m</el-button>
+          <el-button :type="timeframe === '5m' ? 'primary' : ''" @click="setTimeframe('5m')">5m</el-button>
+          <el-button :type="timeframe === '15m' ? 'primary' : ''" @click="setTimeframe('15m')">15m</el-button>
+          <el-button :type="timeframe === '1h' ? 'primary' : ''" @click="setTimeframe('1h')">1h</el-button>
         </el-button-group>
       </div>
     </div>
@@ -316,46 +316,57 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background: $bg-secondary;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .chart-header {
-  height: 40px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  background: $bg-tertiary;
+  padding: 0 12px;
   border-bottom: 1px solid $border-color;
+  background: $bg-tertiary;
   
   .symbol-selector {
-    min-width: 120px;
+    .el-select {
+      .el-input__inner {
+        font-family: 'Times New Roman', Times, serif;
+      }
+    }
   }
   
   .price-info {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 2px;
     
     .current-price {
       font-size: $font-size-lg;
       font-weight: bold;
-      font-family: 'Courier New', monospace;
+      font-family: 'Times New Roman', Times, serif;
     }
     
     .price-change {
       font-size: $font-size-sm;
-      font-family: 'Courier New', monospace;
+      font-family: 'Times New Roman', Times, serif;
     }
   }
   
   .chart-controls {
-    display: flex;
-    align-items: center;
+    .el-button-group {
+      .el-button {
+        font-family: 'Times New Roman', Times, serif;
+      }
+    }
   }
 }
 
 .chart-container {
   flex: 1;
-  padding: 8px;
+  overflow: hidden;
 }
 </style>

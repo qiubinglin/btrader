@@ -1,41 +1,47 @@
 <template>
   <div class="trade-list">
-    <div class="trade-header">
-      <div class="header-title">逐笔成交</div>
+    <div class="list-header">
+      <div class="header-title">Trade Details</div>
       <div class="header-actions">
-        <el-button size="small" @click="clearTrades">清空</el-button>
+        <el-button size="small" @click="clearTrades">Clear</el-button>
       </div>
     </div>
-    <div class="trade-table-container">
+    
+    <div class="list-content">
       <el-table
-        :data="tradeHistory"
-        height="100%"
+        :data="tradeList"
+        style="width: 100%"
         size="small"
         :show-header="true"
-        stripe
-        @row-click="handleRowClick"
+        :stripe="true"
+        :border="false"
+        height="100%"
+        @row-click="handleTradeClick"
       >
-        <el-table-column prop="timestamp" label="时间" width="80" align="center">
+        <el-table-column prop="timestamp" label="Time" width="80" align="center">
           <template #default="{ row }">
-            <span class="time-cell">{{ formatTime(row.timestamp) }}</span>
+            <span class="time-text">{{ formatTime(row.timestamp) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="price" label="价格" width="90" align="right">
+        
+        <el-table-column prop="price" label="Price" width="90" align="right">
           <template #default="{ row }">
-            <span class="price-cell" :class="getPriceClass(row)">
+            <span class="price-text" :class="row.side === 'buy' ? 'text-up' : 'text-down'">
               {{ formatPrice(row.price) }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="volume" label="数量" width="80" align="right">
+        
+        <el-table-column prop="volume" label="Volume" width="80" align="right">
           <template #default="{ row }">
-            <span class="volume-cell">{{ formatVolume(row.volume) }}</span>
+            <span class="volume-text">{{ formatVolume(row.volume) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="side" label="方向" width="50" align="center">
+        
+        <el-table-column prop="side" label="Side" width="50" align="center">
           <template #default="{ row }">
-            <span class="side-indicator" :class="row.side">
-              {{ row.side === 'buy' ? '买' : '卖' }}
+            <span class="side-text" :class="row.side === 'buy' ? 'text-up' : 'text-down'">
+              {{ row.side === 'buy' ? 'Buy' : 'Sell' }}
             </span>
           </template>
         </el-table-column>
@@ -47,41 +53,38 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 
 const store = useStore()
 
-const tradeHistory = computed(() => store.state.market.tradeHistory)
+const tradeList = computed(() => store.state.trading.tradeList || [])
 
-const formatTime = (timestamp: number): string => {
+const formatTime = (timestamp: number) => {
   const date = new Date(timestamp)
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`
+  return date.toLocaleTimeString('en-US', { 
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
 }
 
-const formatPrice = (price: number): string => {
+const formatPrice = (price: number) => {
   return price.toFixed(2)
 }
 
-const formatVolume = (volume: number): string => {
-  if (volume >= 1000000) {
-    return (volume / 1000000).toFixed(1) + 'M'
-  } else if (volume >= 1000) {
-    return (volume / 1000).toFixed(1) + 'K'
-  }
-  return volume.toString()
-}
-
-const getPriceClass = (trade: any): string => {
-  return trade.side === 'buy' ? 'text-up' : 'text-down'
-}
-
-const handleRowClick = (row: any) => {
-  // 点击成交记录时，将价格填入交易面板
-  store.dispatch('trading/updateOrderForm', { price: row.price })
+const formatVolume = (volume: number) => {
+  return volume.toFixed(4)
 }
 
 const clearTrades = () => {
-  // 清空成交记录
-  store.commit('market/SET_TRADE_HISTORY', [])
+  store.dispatch('trading/clearTrades')
+  ElMessage.success('Trade list cleared')
+}
+
+const handleTradeClick = (row: any) => {
+  // When clicking on a trade record, fill the price into the trading panel
+  store.dispatch('trading/setOrderPrice', row.price)
 }
 </script>
 
@@ -90,82 +93,67 @@ const clearTrades = () => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: $bg-secondary;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  font-family: 'Times New Roman', Times, serif;
 }
 
-.trade-header {
+.list-header {
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: $bg-tertiary;
   border-bottom: 1px solid $border-color;
+  background: $bg-tertiary;
   
   .header-title {
     font-weight: 600;
     color: $text-primary;
+    font-family: 'Times New Roman', Times, serif;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 8px;
   }
 }
 
-.trade-table-container {
+.list-content {
   flex: 1;
   overflow: hidden;
-  
-  :deep(.el-table) {
-    .el-table__header {
-      th {
-        background: $bg-tertiary !important;
-        font-size: $font-size-sm;
-        font-weight: 600;
-        padding: 8px 0;
-      }
-    }
-    
-    .el-table__body {
-      tr {
-        &:hover {
-          background: rgba(255, 255, 255, 0.05) !important;
-          cursor: pointer;
-        }
-        
-        td {
-          padding: 4px 0;
-          font-size: $font-size-sm;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-      }
-    }
-  }
 }
 
-.time-cell {
+.time-text {
   font-family: 'Courier New', monospace;
   font-size: $font-size-xs;
 }
 
-.price-cell {
+.price-text {
   font-family: 'Courier New', monospace;
   font-weight: bold;
 }
 
-.volume-cell {
+.volume-text {
   font-family: 'Courier New', monospace;
 }
 
-.side-indicator {
+.side-text {
   font-weight: bold;
   padding: 2px 6px;
   border-radius: 2px;
   font-size: $font-size-xs;
+  font-family: 'Times New Roman', Times, serif;
   
-  &.buy {
-    background: $buy-bg;
-    color: $buy-color;
+  &.text-up {
+    background: rgba(76, 175, 80, 0.1);
+    color: $price-up;
   }
   
-  &.sell {
-    background: $sell-bg;
-    color: $sell-color;
+  &.text-down {
+    background: rgba(244, 67, 54, 0.1);
+    color: $price-down;
   }
 }
 </style>

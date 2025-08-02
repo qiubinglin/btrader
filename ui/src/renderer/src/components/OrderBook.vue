@@ -1,20 +1,20 @@
 <template>
   <div class="order-book">
     <div class="orderbook-header">
-      <div class="header-title">买卖档位</div>
+      <div class="header-title">Order Book</div>
       <div class="spread-info" v-if="orderBook">
-        <span class="spread-label">价差:</span>
+        <span class="spread-label">Spread:</span>
         <span class="spread-value">{{ formatPrice(spread) }}</span>
       </div>
     </div>
     
     <div class="orderbook-content" v-if="orderBook">
-      <!-- 卖单区域 -->
+      <!-- Asks Section -->
       <div class="asks-section">
         <div class="section-header sell">
-          <span>价格</span>
-          <span>数量</span>
-          <span>累计</span>
+          <span>Price</span>
+          <span>Volume</span>
+          <span>Total</span>
         </div>
         <div class="order-levels">
           <div 
@@ -31,14 +31,14 @@
         </div>
       </div>
       
-      <!-- 中间价差显示 -->
+      <!-- Spread Section -->
       <div class="spread-section">
         <div class="current-price" :class="priceChangeClass">
           {{ formatPrice(currentPrice) }}
         </div>
       </div>
       
-      <!-- 买单区域 -->
+      <!-- Bids Section -->
       <div class="bids-section">
         <div class="order-levels">
           <div 
@@ -54,15 +54,15 @@
           </div>
         </div>
         <div class="section-header buy">
-          <span>价格</span>
-          <span>数量</span>
-          <span>累计</span>
+          <span>Price</span>
+          <span>Volume</span>
+          <span>Total</span>
         </div>
       </div>
     </div>
     
     <div v-else class="no-data">
-      <span>暂无数据</span>
+      <span>No Data</span>
     </div>
   </div>
 </template>
@@ -148,7 +148,10 @@ const handleLevelClick = (level: any) => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-family: 'Courier New', monospace;
+  background: $bg-secondary;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .orderbook-header {
@@ -157,25 +160,30 @@ const handleLevelClick = (level: any) => {
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: $bg-tertiary;
   border-bottom: 1px solid $border-color;
+  background: $bg-tertiary;
   
   .header-title {
     font-weight: 600;
     color: $text-primary;
+    font-family: 'Times New Roman', Times, serif;
   }
   
   .spread-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: $font-size-sm;
     
     .spread-label {
       color: $text-secondary;
+      font-family: 'Times New Roman', Times, serif;
     }
     
     .spread-value {
       color: $text-primary;
       font-weight: bold;
-      margin-left: 4px;
+      font-family: 'Times New Roman', Times, serif;
     }
   }
 }
@@ -184,54 +192,72 @@ const handleLevelClick = (level: any) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.asks-section, .bids-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.section-header {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  font-size: $font-size-xs;
-  font-weight: bold;
-  background: rgba(255, 255, 255, 0.05);
-  
-  span {
-    flex: 1;
-    text-align: right;
-    
-    &:first-child {
-      text-align: left;
-    }
-  }
-  
-  &.sell {
-    color: $sell-color;
-  }
-  
-  &.buy {
-    color: $buy-color;
-  }
-}
-
-.order-levels {
-  flex: 1;
   overflow: hidden;
 }
 
-.order-level {
-  position: relative;
-  height: 20px;
+.asks-section {
+  flex: 1;
   display: flex;
-  align-items: center;
-  padding: 0 8px;
-  font-size: $font-size-xs;
+  flex-direction: column;
+  
+  .section-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 8px 12px;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $text-secondary;
+    background: $bg-tertiary;
+    border-bottom: 1px solid $border-color;
+    font-family: 'Times New Roman', Times, serif;
+    
+    &.sell {
+      color: $sell-color;
+    }
+  }
+  
+  .order-levels {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+.bids-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  
+  .order-levels {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .section-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 8px 12px;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $text-secondary;
+    background: $bg-tertiary;
+    border-top: 1px solid $border-color;
+    font-family: 'Times New Roman', Times, serif;
+    
+    &.buy {
+      color: $buy-color;
+    }
+  }
+}
+
+.order-level {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 4px 12px;
+  font-size: $font-size-sm;
+  position: relative;
   cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'Times New Roman', Times, serif;
   
   &:hover {
     background: rgba(255, 255, 255, 0.05);
@@ -240,60 +266,46 @@ const handleLevelClick = (level: any) => {
   .level-bg {
     position: absolute;
     top: 0;
-    right: 0;
+    left: 0;
     height: 100%;
-    opacity: 0.3;
-    transition: width 0.2s ease;
+    opacity: 0.1;
+    z-index: 0;
+  }
+  
+  .ask-bg {
+    background: $sell-color;
+  }
+  
+  .bid-bg {
+    background: $buy-color;
   }
   
   span {
     position: relative;
     z-index: 1;
-    flex: 1;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .price {
+    font-weight: bold;
+  }
+  
+  .volume, .cumulative {
     text-align: right;
-    
-    &:first-child {
-      text-align: left;
-    }
-    
-    &.price {
-      font-weight: bold;
-    }
-  }
-}
-
-.ask-level {
-  .level-bg {
-    background: $sell-color;
-  }
-  
-  .price {
-    color: $sell-color;
-  }
-}
-
-.bid-level {
-  .level-bg {
-    background: $buy-color;
-  }
-  
-  .price {
-    color: $buy-color;
   }
 }
 
 .spread-section {
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 8px 12px;
+  background: $bg-tertiary;
   border-top: 1px solid $border-color;
   border-bottom: 1px solid $border-color;
+  text-align: center;
   
   .current-price {
-    font-size: $font-size-md;
+    font-size: $font-size-lg;
     font-weight: bold;
+    font-family: 'Times New Roman', Times, serif;
   }
 }
 
@@ -302,6 +314,7 @@ const handleLevelClick = (level: any) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $text-muted;
+  color: $text-secondary;
+  font-family: 'Times New Roman', Times, serif;
 }
 </style>

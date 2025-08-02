@@ -7,7 +7,7 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   background: $bg-primary;
   color: $text-primary;
   overflow: hidden;
@@ -20,6 +20,7 @@ body {
 // Element Plus 主题覆盖
 .el-table {
   background: transparent !important;
+  font-family: 'Times New Roman', Times, serif;
   
   .el-table__header-wrapper {
     background: $bg-tertiary;
@@ -33,6 +34,7 @@ body {
     background: transparent !important;
     border-color: $border-color !important;
     color: $text-primary !important;
+    font-family: 'Times New Roman', Times, serif;
   }
   
   .el-table__row:hover {
@@ -41,6 +43,8 @@ body {
 }
 
 .el-tabs {
+  font-family: 'Times New Roman', Times, serif;
+  
   .el-tabs__header {
     background: $bg-secondary;
     margin: 0;
@@ -53,6 +57,7 @@ body {
   
   .el-tabs__item {
     color: $text-secondary;
+    font-family: 'Times New Roman', Times, serif;
     
     &.is-active {
       color: $text-primary;
@@ -69,14 +74,18 @@ body {
 }
 
 .el-form {
+  font-family: 'Times New Roman', Times, serif;
+  
   .el-form-item__label {
     color: $text-primary !important;
+    font-family: 'Times New Roman', Times, serif;
   }
   
   .el-input__inner {
     background: $bg-tertiary !important;
     border-color: $border-color !important;
     color: $text-primary !important;
+    font-family: 'Times New Roman', Times, serif;
     
     &:focus {
       border-color: $info-color !important;
@@ -85,10 +94,13 @@ body {
   
   .el-select .el-input__inner {
     background: $bg-tertiary !important;
+    font-family: 'Times New Roman', Times, serif;
   }
 }
 
 .el-button {
+  font-family: 'Times New Roman', Times, serif;
+  
   &.el-button--primary {
     background: $info-color;
     border-color: $info-color;
@@ -166,10 +178,12 @@ body {
 .price-cell {
   font-weight: bold;
   text-align: right;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .volume-cell {
   text-align: right;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .flex-center {

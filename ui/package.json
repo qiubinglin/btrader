@@ -1,7 +1,7 @@
 {
   "name": "btrader-ui",
   "version": "1.0.0",
-  "description": "BTrader订单流交易界面",
+  "description": "BTrader Order Flow Trading System",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
@@ -47,7 +47,7 @@
   "license": "MIT",
   "build": {
     "appId": "com.btrader.ui",
-    "productName": "BTrader UI",
+    "productName": "BTrader Order Flow Trading System",
     "directories": {
       "output": "dist_electron"
     },

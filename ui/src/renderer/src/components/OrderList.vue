@@ -1,18 +1,18 @@
 <template>
   <div class="order-list">
     <div class="order-header">
-      <div class="header-title">委托订单</div>
+      <div class="header-title">Orders</div>
       <div class="header-tabs">
         <el-radio-group v-model="activeFilter" size="small">
-          <el-radio-button label="active">活跃</el-radio-button>
-          <el-radio-button label="completed">已完成</el-radio-button>
-          <el-radio-button label="all">全部</el-radio-button>
+          <el-radio-button label="active">Active</el-radio-button>
+          <el-radio-button label="completed">Completed</el-radio-button>
+          <el-radio-button label="all">All</el-radio-button>
         </el-radio-group>
       </div>
       <div class="header-actions">
-        <el-button size="small" @click="refreshOrders" :loading="isRefreshing">刷新</el-button>
+        <el-button size="small" @click="refreshOrders" :loading="isRefreshing">Refresh</el-button>
         <el-button size="small" @click="cancelAllOrders" type="danger" v-if="hasActiveOrders">
-          全部撤单
+          Cancel All
         </el-button>
       </div>
     </div>
@@ -24,35 +24,35 @@
         size="small"
         :show-header="true"
         stripe
-        empty-text="暂无订单"
+        empty-text="No Orders"
       >
-        <el-table-column prop="orderId" label="订单号" width="120" align="center">
+        <el-table-column prop="orderId" label="Order ID" width="120" align="center">
           <template #default="{ row }">
             <span class="order-id-cell">{{ row.orderId.slice(-8) }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column prop="symbol" label="品种" width="100" align="center">
+        <el-table-column prop="symbol" label="Symbol" width="100" align="center">
           <template #default="{ row }">
             <span class="symbol-cell">{{ row.symbol }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column prop="side" label="方向" width="60" align="center">
+        <el-table-column prop="side" label="Side" width="60" align="center">
           <template #default="{ row }">
             <span class="side-cell" :class="row.side">
-              {{ row.side === 'buy' ? '买' : '卖' }}
+              {{ row.side === 'buy' ? 'Buy' : 'Sell' }}
             </span>
           </template>
         </el-table-column>
         
-        <el-table-column prop="volume" label="数量" width="100" align="right">
+        <el-table-column prop="volume" label="Volume" width="100" align="right">
           <template #default="{ row }">
             <span class="volume-cell">{{ formatVolume(row.volume) }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column prop="filledVolume" label="已成交" width="100" align="right">
+        <el-table-column prop="filledVolume" label="Filled" width="100" align="right">
           <template #default="{ row }">
             <span class="filled-cell" :class="getFilledClass(row)">
               {{ formatVolume(row.filledVolume) }}
@@ -60,13 +60,13 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="price" label="价格" width="100" align="right">
+        <el-table-column prop="price" label="Price" width="100" align="right">
           <template #default="{ row }">
             <span class="price-cell">{{ formatPrice(row.price) }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column prop="status" label="状态" width="80" align="center">
+        <el-table-column prop="status" label="Status" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small">
               {{ getStatusText(row.status) }}
@@ -74,13 +74,13 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="timestamp" label="时间" width="140" align="center">
+        <el-table-column prop="timestamp" label="Time" width="140" align="center">
           <template #default="{ row }">
             <span class="time-cell">{{ formatTime(row.timestamp) }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="100" align="center" fixed="right">
+        <el-table-column label="Actions" width="100" align="center" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
               <el-button 
@@ -90,7 +90,7 @@
                 :disabled="!canCancel(row.status)"
                 v-if="canCancel(row.status)"
               >
-                撤单
+                Cancel
               </el-button>
               <el-button 
                 size="small" 
@@ -99,7 +99,7 @@
                 :disabled="!canModify(row.status)"
                 v-if="canModify(row.status)"
               >
-                改单
+                Modify
               </el-button>
             </div>
           </template>
@@ -175,13 +175,13 @@ const getStatusType = (status: string): string => {
 const getStatusText = (status: string): string => {
   switch (status) {
     case 'pending':
-      return '等待'
+      return 'Waiting'
     case 'partial':
-      return '部分'
+      return 'Partial'
     case 'filled':
-      return '已成'
+      return 'Filled'
     case 'cancelled':
-      return '已撤'
+      return 'Cancelled'
     default:
       return status
   }
@@ -199,9 +199,9 @@ const refreshOrders = async () => {
   isRefreshing.value = true
   try {
     await store.dispatch('account/refreshOrders')
-    ElMessage.success('订单数据已刷新')
+    ElMessage.success('Order data refreshed')
   } catch (error: any) {
-    ElMessage.error(`刷新失败: ${error.message}`)
+    ElMessage.error(`Failed to refresh: ${error.message}`)
   } finally {
     isRefreshing.value = false
   }
@@ -210,23 +210,23 @@ const refreshOrders = async () => {
 const cancelOrder = async (order: any) => {
   try {
     await ElMessageBox.confirm(
-      `确认撤销订单 ${order.orderId.slice(-8)}?`,
-      '确认撤单',
+      `Confirm cancel order ${order.orderId.slice(-8)}?`,
+      'Confirm Cancel',
       {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
     
     const result = await store.dispatch('trading/cancelOrder', order.orderId)
-    ElMessage.success(`撤单成功: ${result.orderId}`)
+    ElMessage.success(`Cancelled successfully: ${result.orderId}`)
     
     // 刷新订单数据
     await refreshOrders()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(`撤单失败: ${error.message}`)
+      ElMessage.error(`Failed to cancel: ${error.message}`)
     }
   }
 }
@@ -241,7 +241,7 @@ const modifyOrder = (order: any) => {
     orderType: 'limit'
   })
   
-  ElMessage.info('订单信息已填入交易面板，请修改后重新提交')
+  ElMessage.info('Order information has been filled into the trading panel, please modify and resubmit')
   
   // 同时撤销原订单
   cancelOrder(order)
@@ -252,11 +252,11 @@ const cancelAllOrders = async () => {
   
   try {
     await ElMessageBox.confirm(
-      `确认撤销所有 ${activeOrders.value.length} 个活跃订单?`,
-      '确认全部撤单',
+      `Confirm cancel all ${activeOrders.value.length} active orders?`,
+      'Confirm All Cancel',
       {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
@@ -266,15 +266,15 @@ const cancelAllOrders = async () => {
       try {
         await store.dispatch('trading/cancelOrder', order.orderId)
       } catch (error) {
-        console.error(`撤销订单 ${order.orderId} 失败:`, error)
+        console.error(`Failed to cancel order ${order.orderId}:`, error)
       }
     }
     
-    ElMessage.success('全部撤单请求已提交')
+    ElMessage.success('All cancel requests submitted')
     await refreshOrders()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(`全部撤单失败: ${error.message}`)
+      ElMessage.error(`Failed to cancel all: ${error.message}`)
     }
   }
 }
@@ -285,6 +285,10 @@ const cancelAllOrders = async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: $bg-secondary;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .order-header {
@@ -293,19 +297,19 @@ const cancelAllOrders = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: $bg-tertiary;
   border-bottom: 1px solid $border-color;
+  background: $bg-tertiary;
   
   .header-title {
     font-weight: 600;
     color: $text-primary;
+    font-family: 'Times New Roman', Times, serif;
   }
   
   .header-tabs {
     .el-radio-group {
-      :deep(.el-radio-button__inner) {
-        font-size: $font-size-xs;
-        padding: 4px 8px;
+      .el-radio-button__inner {
+        font-family: 'Times New Roman', Times, serif;
       }
     }
   }
@@ -349,12 +353,11 @@ const cancelAllOrders = async () => {
 .order-id-cell {
   font-family: 'Courier New', monospace;
   font-size: $font-size-xs;
-  color: $text-secondary;
 }
 
 .symbol-cell {
   font-weight: bold;
-  color: $text-primary;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .side-cell {
@@ -362,6 +365,7 @@ const cancelAllOrders = async () => {
   padding: 2px 6px;
   border-radius: 2px;
   font-size: $font-size-xs;
+  font-family: 'Times New Roman', Times, serif;
   
   &.buy {
     background: $buy-bg;
@@ -376,7 +380,6 @@ const cancelAllOrders = async () => {
 
 .volume-cell, .filled-cell, .price-cell {
   font-family: 'Courier New', monospace;
-  font-weight: bold;
 }
 
 .time-cell {
@@ -387,11 +390,10 @@ const cancelAllOrders = async () => {
 .action-buttons {
   display: flex;
   gap: 4px;
-  justify-content: center;
   
   .el-button {
     font-size: $font-size-xs;
-    padding: 2px 6px;
+    font-family: 'Times New Roman', Times, serif;
   }
 }
 </style>

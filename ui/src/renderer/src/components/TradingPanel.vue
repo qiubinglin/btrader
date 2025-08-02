@@ -1,16 +1,16 @@
 <template>
   <div class="trading-panel">
     <div class="panel-header">
-      <div class="header-title">交易面板</div>
+      <div class="header-title">Trading Panel</div>
       <div class="header-actions">
-        <el-button size="small" @click="resetForm">重置</el-button>
+        <el-button size="small" @click="resetForm">Reset</el-button>
       </div>
     </div>
     
     <div class="panel-content">
       <el-form :model="orderForm" label-width="60px" size="small">
-        <!-- 交易品种 -->
-        <el-form-item label="品种">
+        <!-- Trading Symbol -->
+        <el-form-item label="Symbol">
           <el-select v-model="orderForm.symbol" style="width: 100%">
             <el-option label="BTC/USDT" value="BTC/USDT" />
             <el-option label="ETH/USDT" value="ETH/USDT" />
@@ -18,46 +18,46 @@
           </el-select>
         </el-form-item>
         
-        <!-- 订单类型 -->
-        <el-form-item label="类型">
+        <!-- Order Type -->
+        <el-form-item label="Type">
           <el-select v-model="orderForm.orderType" style="width: 100%">
-            <el-option label="限价单" value="limit" />
-            <el-option label="市价单" value="market" />
+            <el-option label="Limit" value="limit" />
+            <el-option label="Market" value="market" />
           </el-select>
         </el-form-item>
         
-        <!-- 买卖方向 -->
-        <el-form-item label="方向">
+        <!-- Buy/Sell Direction -->
+        <el-form-item label="Side">
           <el-radio-group v-model="orderForm.side" style="width: 100%">
             <el-radio-button label="buy" style="width: 50%">
-              <span style="color: #00c853">买入</span>
+              <span style="color: #00c853">Buy</span>
             </el-radio-button>
             <el-radio-button label="sell" style="width: 50%">
-              <span style="color: #ff1744">卖出</span>
+              <span style="color: #ff1744">Sell</span>
             </el-radio-button>
           </el-radio-group>
         </el-form-item>
         
-        <!-- 价格 -->
-        <el-form-item label="价格" v-if="orderForm.orderType === 'limit'">
+        <!-- Price -->
+        <el-form-item label="Price" v-if="orderForm.orderType === 'limit'">
           <div class="price-input-container">
             <el-input-number
               v-model="orderForm.price"
               :precision="2"
               :step="0.01"
               style="width: 100%"
-              placeholder="请输入价格"
+              placeholder="Enter price"
             />
             <div class="quick-price-buttons">
-              <el-button size="small" @click="setMarketPrice">市价</el-button>
-              <el-button size="small" @click="setBestBid" v-if="bestBid">买一</el-button>
-              <el-button size="small" @click="setBestAsk" v-if="bestAsk">卖一</el-button>
+              <el-button size="small" @click="setMarketPrice">Market</el-button>
+              <el-button size="small" @click="setBestBid" v-if="bestBid">Bid</el-button>
+              <el-button size="small" @click="setBestAsk" v-if="bestAsk">Ask</el-button>
             </div>
           </div>
         </el-form-item>
         
-        <!-- 数量 -->
-        <el-form-item label="数量">
+        <!-- Volume -->
+        <el-form-item label="Volume">
           <div class="volume-input-container">
             <el-input-number
               v-model="orderForm.volume"
@@ -65,26 +65,26 @@
               :step="0.001"
               :min="0.001"
               style="width: 100%"
-              placeholder="请输入数量"
+              placeholder="Enter volume"
             />
             <div class="quick-volume-buttons">
               <el-button size="small" @click="setVolumePercent(25)">25%</el-button>
               <el-button size="small" @click="setVolumePercent(50)">50%</el-button>
               <el-button size="small" @click="setVolumePercent(75)">75%</el-button>
-              <el-button size="small" @click="setVolumePercent(100)">最大</el-button>
+              <el-button size="small" @click="setVolumePercent(100)">Max</el-button>
             </div>
           </div>
         </el-form-item>
         
-        <!-- 预估金额 -->
-        <el-form-item label="金额">
+        <!-- Estimated Amount -->
+        <el-form-item label="Amount">
           <div class="amount-display">
             <span class="amount-value">{{ formatAmount(estimatedAmount) }}</span>
             <span class="amount-currency">USDT</span>
           </div>
         </el-form-item>
         
-        <!-- 提交按钮 -->
+        <!-- Submit Button -->
         <el-form-item>
           <el-button
             :type="orderForm.side === 'buy' ? 'success' : 'danger'"
@@ -95,27 +95,27 @@
             @click="submitOrder"
             :disabled="!canSubmit"
           >
-            {{ orderForm.side === 'buy' ? '买入' : '卖出' }} {{ orderForm.symbol }}
+            {{ orderForm.side === 'buy' ? 'Buy' : 'Sell' }} {{ orderForm.symbol }}
           </el-button>
         </el-form-item>
       </el-form>
       
-      <!-- 持仓信息快显 -->
+      <!-- Position Summary -->
       <div class="position-summary" v-if="currentPosition">
-        <div class="summary-title">当前持仓</div>
+        <div class="summary-title">Current Position</div>
         <div class="summary-content">
           <div class="position-item">
-            <span class="label">数量:</span>
+            <span class="label">Volume:</span>
             <span class="value" :class="currentPosition.volume > 0 ? 'text-up' : 'text-down'">
               {{ formatVolume(currentPosition.volume) }}
             </span>
           </div>
           <div class="position-item">
-            <span class="label">均价:</span>
+            <span class="label">Average Price:</span>
             <span class="value">{{ formatPrice(currentPosition.avgPrice) }}</span>
           </div>
           <div class="position-item">
-            <span class="label">盈亏:</span>
+            <span class="label">PnL:</span>
             <span class="value" :class="currentPosition.unrealizedPnl >= 0 ? 'text-up' : 'text-down'">
               {{ formatPnl(currentPosition.unrealizedPnl) }}
             </span>
@@ -123,7 +123,7 @@
         </div>
       </div>
       
-      <!-- 快速平仓按钮 -->
+      <!-- Quick Close Button -->
       <div class="quick-actions" v-if="currentPosition && currentPosition.volume !== 0">
         <el-button
           type="warning"
@@ -131,7 +131,7 @@
           @click="quickClose"
           :loading="isSubmitting"
         >
-          快速平仓
+          Quick Close
         </el-button>
       </div>
     </div>
@@ -232,21 +232,21 @@ const setVolumePercent = (percent: number) => {
 const submitOrder = async () => {
   try {
     // 确认对话框
-    const confirmText = `确认${orderForm.value.side === 'buy' ? '买入' : '卖出'} ${orderForm.value.volume} ${orderForm.value.symbol}?`
-    await ElMessageBox.confirm(confirmText, '确认交易', {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
+    const confirmText = `Confirm ${orderForm.value.side === 'buy' ? 'Buy' : 'Sell'} ${orderForm.value.volume} ${orderForm.value.symbol}?`
+    await ElMessageBox.confirm(confirmText, 'Confirm Trade', {
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
       type: 'warning'
     })
     
     const result = await store.dispatch('trading/submitOrder')
-    ElMessage.success(`订单提交成功: ${result.orderId}`)
+    ElMessage.success(`Order submitted successfully: ${result.orderId}`)
     
     // 重置表单
     resetForm()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(`订单提交失败: ${error.message || error}`)
+      ElMessage.error(`Order submission failed: ${error.message || error}`)
     }
   }
 }
@@ -255,9 +255,9 @@ const quickClose = async () => {
   if (!currentPosition.value) return
   
   try {
-    await ElMessageBox.confirm(`确认平仓 ${Math.abs(currentPosition.value.volume)} ${orderForm.value.symbol}?`, '确认平仓', {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(`Confirm Close ${Math.abs(currentPosition.value.volume)} ${orderForm.value.symbol}?`, 'Confirm Close', {
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
       type: 'warning'
     })
     
@@ -272,12 +272,12 @@ const quickClose = async () => {
     })
     
     const result = await store.dispatch('trading/submitOrder')
-    ElMessage.success(`平仓订单提交成功: ${result.orderId}`)
+    ElMessage.success(`Close order submitted successfully: ${result.orderId}`)
     
     resetForm()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(`平仓失败: ${error.message || error}`)
+      ElMessage.error(`Close failed: ${error.message || error}`)
     }
   }
 }
@@ -297,6 +297,9 @@ const resetForm = () => {
   display: flex;
   flex-direction: column;
   background: $bg-secondary;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .panel-header {
@@ -304,31 +307,48 @@ const resetForm = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  background: $bg-tertiary;
+  padding: 0 12px;
   border-bottom: 1px solid $border-color;
+  background: $bg-tertiary;
   
   .header-title {
     font-weight: 600;
     color: $text-primary;
+    font-family: 'Times New Roman', Times, serif;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 8px;
   }
 }
 
 .panel-content {
   flex: 1;
-  padding: 16px;
+  padding: 12px;
   overflow-y: auto;
+  
+  .el-form {
+    .el-form-item {
+      margin-bottom: 12px;
+    }
+    
+    .el-form-item__label {
+      font-family: 'Times New Roman', Times, serif;
+    }
+  }
 }
 
 .price-input-container, .volume-input-container {
   .quick-price-buttons, .quick-volume-buttons {
     display: flex;
     gap: 4px;
-    margin-top: 8px;
+    margin-top: 4px;
     
     .el-button {
       flex: 1;
       font-size: $font-size-xs;
+      font-family: 'Times New Roman', Times, serif;
     }
   }
 }
@@ -338,53 +358,64 @@ const resetForm = () => {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: $bg-tertiary;
   border-radius: 4px;
-  font-family: 'Courier New', monospace;
+  border: 1px solid $border-color;
   
   .amount-value {
     font-size: $font-size-lg;
     font-weight: bold;
     color: $text-primary;
+    font-family: 'Courier New', monospace;
   }
   
   .amount-currency {
-    font-size: $font-size-sm;
     color: $text-secondary;
+    font-family: 'Times New Roman', Times, serif;
   }
 }
 
 .position-summary {
-  margin-top: 16px;
+  margin-top: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: $bg-tertiary;
   border-radius: 4px;
   border: 1px solid $border-color;
   
   .summary-title {
-    font-size: $font-size-sm;
-    font-weight: bold;
+    font-weight: 600;
     color: $text-primary;
     margin-bottom: 8px;
-    border-bottom: 1px solid $border-color;
-    padding-bottom: 4px;
+    font-family: 'Times New Roman', Times, serif;
   }
   
   .summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
     .position-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
-      font-size: $font-size-sm;
       
       .label {
         color: $text-secondary;
+        font-size: $font-size-sm;
+        font-family: 'Times New Roman', Times, serif;
       }
       
       .value {
-        font-family: 'Courier New', monospace;
         font-weight: bold;
+        font-family: 'Courier New', monospace;
+        
+        &.text-up {
+          color: $price-up;
+        }
+        
+        &.text-down {
+          color: $price-down;
+        }
       }
     }
   }
@@ -392,18 +423,10 @@ const resetForm = () => {
 
 .quick-actions {
   margin-top: 12px;
-}
-
-:deep(.el-form-item) {
-  margin-bottom: 16px;
   
-  .el-form-item__label {
-    font-size: $font-size-sm;
+  .el-button {
+    width: 100%;
+    font-family: 'Times New Roman', Times, serif;
   }
-}
-
-:deep(.el-radio-button__inner) {
-  width: 100%;
-  text-align: center;
 }
 </style>

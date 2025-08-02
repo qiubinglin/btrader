@@ -14,6 +14,7 @@ function createWindow(): void {
     height: 1080,
     show: false,
     autoHideMenuBar: true,
+    title: 'BTrader Order Flow Trading System',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

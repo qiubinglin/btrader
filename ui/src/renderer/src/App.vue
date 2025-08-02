@@ -2,51 +2,51 @@
   <div id="app" class="trading-app">
     <div class="app-header">
       <div class="header-left">
-        <h1 class="app-title">BTrader 订单流交易系统</h1>
+        <h1 class="app-title">BTrader Order Flow Trading System</h1>
       </div>
       <div class="header-right">
         <div class="connection-status" :class="{ connected: isConnected }">
           <el-icon><Connection /></el-icon>
-          {{ isConnected ? '已连接' : '未连接' }}
+          {{ isConnected ? 'Connected' : 'Disconnected' }}
         </div>
       </div>
     </div>
     
     <div class="app-content">
-      <!-- 左侧：订单流界面 -->
+      <!-- Left: Order Flow Interface -->
       <div class="left-panel">
         <div class="chart-section">
           <OrderFlowChart />
         </div>
         <div class="market-section">
           <el-tabs v-model="activeTab" class="market-tabs">
-            <el-tab-pane label="成交明细" name="trades">
+            <el-tab-pane label="Trade Details" name="trades">
               <TradeList />
             </el-tab-pane>
-            <el-tab-pane label="买卖档位" name="orderbook">
+            <el-tab-pane label="Order Book" name="orderbook">
               <OrderBook />
             </el-tab-pane>
-            <el-tab-pane label="足迹图" name="footprint">
+            <el-tab-pane label="Footprint" name="footprint">
               <FootprintChart />
             </el-tab-pane>
-            <el-tab-pane label="微盘口" name="microbook">
+            <el-tab-pane label="Micro Book" name="microbook">
               <MicroOrderBook />
             </el-tab-pane>
           </el-tabs>
         </div>
       </div>
       
-      <!-- 右侧：交易面板和账户信息 -->
+      <!-- Right: Trading Panel and Account Info -->
       <div class="right-panel">
         <div class="trading-section">
           <TradingPanel />
         </div>
         <div class="account-section">
           <el-tabs class="account-tabs">
-            <el-tab-pane label="持仓状态" name="positions">
+            <el-tab-pane label="Positions" name="positions">
               <PositionList />
             </el-tab-pane>
-            <el-tab-pane label="委托订单" name="orders">
+            <el-tab-pane label="Orders" name="orders">
               <OrderList />
             </el-tab-pane>
           </el-tabs>
@@ -79,23 +79,23 @@ let unsubscribePositionData: (() => void) | null = null
 let unsubscribeOrderData: (() => void) | null = null
 
 onMounted(() => {
-  // 订阅市场数据
+  // Subscribe to market data
   unsubscribeMarketData = window.api.onMarketData((data) => {
     store.dispatch('updateMarketData', data)
     isConnected.value = true
   })
   
-  // 订阅交易数据
+  // Subscribe to trade data
   unsubscribeTradeData = window.api.onTradeData((data) => {
     store.dispatch('updateTradeData', data)
   })
   
-  // 订阅持仓数据
+  // Subscribe to position data
   unsubscribePositionData = window.api.onPositionData((data) => {
     store.dispatch('updatePositionData', data)
   })
   
-  // 订阅订单数据
+  // Subscribe to order data
   unsubscribeOrderData = window.api.onOrderData((data) => {
     store.dispatch('updateOrderData', data)
   })

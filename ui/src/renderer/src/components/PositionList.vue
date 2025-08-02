@@ -1,16 +1,16 @@
 <template>
   <div class="position-list">
     <div class="position-header">
-      <div class="header-title">持仓状态</div>
+      <div class="header-title">Positions</div>
       <div class="header-summary">
         <span class="total-pnl" :class="totalPnlClass">
-          总盈亏: {{ formatPnl(totalPnl) }}
+          Total PnL: {{ formatPnl(totalPnl) }}
         </span>
       </div>
       <div class="header-actions">
-        <el-button size="small" @click="refreshPositions" :loading="isRefreshing">刷新</el-button>
+        <el-button size="small" @click="refreshPositions" :loading="isRefreshing">Refresh</el-button>
         <el-button size="small" @click="closeAllPositions" type="warning" v-if="hasOpenPositions">
-          全部平仓
+          Close All
         </el-button>
       </div>
     </div>
@@ -22,15 +22,15 @@
         size="small"
         :show-header="true"
         stripe
-        empty-text="暂无持仓"
+        empty-text="No Positions"
       >
-        <el-table-column prop="symbol" label="品种" width="100" align="center">
+        <el-table-column prop="symbol" label="Symbol" width="100" align="center">
           <template #default="{ row }">
             <span class="symbol-cell">{{ row.symbol }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column prop="volume" label="数量" width="100" align="right">
+        <el-table-column prop="volume" label="Volume" width="100" align="right">
           <template #default="{ row }">
             <span class="volume-cell" :class="getVolumeClass(row.volume)">
               {{ formatVolume(row.volume) }}
@@ -38,19 +38,19 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="avgPrice" label="均价" width="100" align="right">
+        <el-table-column prop="avgPrice" label="Avg Price" width="100" align="right">
           <template #default="{ row }">
             <span class="price-cell">{{ formatPrice(row.avgPrice) }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column prop="currentPrice" label="现价" width="100" align="right">
+        <el-table-column prop="currentPrice" label="Current Price" width="100" align="right">
           <template #default="{ row }">
             <span class="price-cell">{{ formatPrice(getCurrentPrice(row.symbol)) }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column prop="unrealizedPnl" label="浮动盈亏" width="120" align="right">
+        <el-table-column prop="unrealizedPnl" label="Unrealized PnL" width="120" align="right">
           <template #default="{ row }">
             <span class="pnl-cell" :class="getPnlClass(row.unrealizedPnl)">
               {{ formatPnl(row.unrealizedPnl) }}
@@ -58,7 +58,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="realizedPnl" label="已实现盈亏" width="120" align="right">
+        <el-table-column prop="realizedPnl" label="Realized PnL" width="120" align="right">
           <template #default="{ row }">
             <span class="pnl-cell" :class="getPnlClass(row.realizedPnl)">
               {{ formatPnl(row.realizedPnl) }}
@@ -66,13 +66,13 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="margin" label="保证金" width="100" align="right">
+        <el-table-column prop="margin" label="Margin" width="100" align="right">
           <template #default="{ row }">
             <span class="margin-cell">{{ formatAmount(row.margin) }}</span>
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="120" align="center" fixed="right">
+        <el-table-column label="Actions" width="120" align="center" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
               <el-button 
@@ -81,14 +81,14 @@
                 @click="closePosition(row)"
                 :disabled="row.volume === 0"
               >
-                平仓
+                Close
               </el-button>
               <el-button 
                 size="small" 
                 type="primary" 
                 @click="addToPosition(row)"
               >
-                加仓
+                Add
               </el-button>
             </div>
           </template>
@@ -161,9 +161,9 @@ const refreshPositions = async () => {
   isRefreshing.value = true
   try {
     await store.dispatch('account/refreshPositions')
-    ElMessage.success('持仓数据已刷新')
+    ElMessage.success('Positions data refreshed')
   } catch (error: any) {
-    ElMessage.error(`刷新失败: ${error.message}`)
+    ElMessage.error(`Failed to refresh: ${error.message}`)
   } finally {
     isRefreshing.value = false
   }
@@ -174,11 +174,11 @@ const closePosition = async (position: any) => {
   
   try {
     await ElMessageBox.confirm(
-      `确认平仓 ${Math.abs(position.volume)} ${position.symbol}?`,
-      '确认平仓',
+      `Confirm closing ${Math.abs(position.volume)} ${position.symbol}?`,
+      'Confirm Close',
       {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
@@ -195,13 +195,13 @@ const closePosition = async (position: any) => {
     })
     
     const result = await store.dispatch('trading/submitOrder')
-    ElMessage.success(`平仓订单提交成功: ${result.orderId}`)
+    ElMessage.success(`Close order submitted successfully: ${result.orderId}`)
     
     // 刷新持仓数据
     await refreshPositions()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(`平仓失败: ${error.message}`)
+      ElMessage.error(`Failed to close position: ${error.message}`)
     }
   }
 }
@@ -217,7 +217,7 @@ const addToPosition = (position: any) => {
     price: getCurrentPrice(position.symbol)
   })
   
-  ElMessage.info('已设置加仓参数，请在交易面板调整数量后提交订单')
+  ElMessage.info('Add position parameters set, please adjust quantity in the trading panel and submit the order')
 }
 
 const closeAllPositions = async () => {
@@ -226,11 +226,11 @@ const closeAllPositions = async () => {
   
   try {
     await ElMessageBox.confirm(
-      `确认平仓所有 ${openPositions.length} 个持仓?`,
-      '确认全部平仓',
+      `Confirm closing all ${openPositions.length} positions?`,
+      'Confirm All Close',
       {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
@@ -250,15 +250,15 @@ const closeAllPositions = async () => {
         
         await store.dispatch('trading/submitOrder')
       } catch (error) {
-        console.error(`平仓 ${position.symbol} 失败:`, error)
+        console.error(`Failed to close ${position.symbol}:`, error)
       }
     }
     
-    ElMessage.success('全部平仓订单已提交')
+    ElMessage.success('All close orders submitted')
     await refreshPositions()
   } catch (error: any) {
     if (error !== 'cancel') {
-      ElMessage.error(`全部平仓失败: ${error.message}`)
+      ElMessage.error(`Failed to close all positions: ${error.message}`)
     }
   }
 }
@@ -269,6 +269,10 @@ const closeAllPositions = async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: $bg-secondary;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .position-header {
@@ -277,19 +281,28 @@ const closeAllPositions = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: $bg-tertiary;
   border-bottom: 1px solid $border-color;
+  background: $bg-tertiary;
   
   .header-title {
     font-weight: 600;
     color: $text-primary;
+    font-family: 'Times New Roman', Times, serif;
   }
   
   .header-summary {
     .total-pnl {
-      font-size: $font-size-sm;
       font-weight: bold;
-      font-family: 'Courier New', monospace;
+      font-size: $font-size-sm;
+      font-family: 'Times New Roman', Times, serif;
+      
+      &.text-up {
+        color: $price-up;
+      }
+      
+      &.text-down {
+        color: $price-down;
+      }
     }
   }
   
@@ -302,56 +315,53 @@ const closeAllPositions = async () => {
 .position-table-container {
   flex: 1;
   overflow: hidden;
-  
-  :deep(.el-table) {
-    .el-table__header {
-      th {
-        background: $bg-tertiary !important;
-        font-size: $font-size-sm;
-        font-weight: 600;
-        padding: 8px 0;
-      }
-    }
-    
-    .el-table__body {
-      tr {
-        &:hover {
-          background: rgba(255, 255, 255, 0.05) !important;
-        }
-        
-        td {
-          padding: 8px 0;
-          font-size: $font-size-sm;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-      }
-    }
-  }
 }
 
 .symbol-cell {
   font-weight: bold;
-  color: $text-primary;
+  font-family: 'Times New Roman', Times, serif;
 }
 
-.volume-cell, .price-cell, .margin-cell {
+.volume-cell {
   font-family: 'Courier New', monospace;
-  font-weight: bold;
+  
+  &.text-up {
+    color: $price-up;
+  }
+  
+  &.text-down {
+    color: $price-down;
+  }
+}
+
+.price-cell {
+  font-family: 'Courier New', monospace;
 }
 
 .pnl-cell {
   font-family: 'Courier New', monospace;
   font-weight: bold;
+  
+  &.text-up {
+    color: $price-up;
+  }
+  
+  &.text-down {
+    color: $price-down;
+  }
+}
+
+.margin-cell {
+  font-family: 'Courier New', monospace;
 }
 
 .action-buttons {
   display: flex;
   gap: 4px;
-  justify-content: center;
   
   .el-button {
     font-size: $font-size-xs;
-    padding: 4px 8px;
+    font-family: 'Times New Roman', Times, serif;
   }
 }
 </style>

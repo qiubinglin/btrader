@@ -1,7 +1,7 @@
 <template>
   <div class="footprint-chart">
     <div class="footprint-header">
-      <div class="header-title">足迹图</div>
+      <div class="header-title">Footprint Chart</div>
       <div class="header-controls">
         <el-select v-model="aggregation" size="small" style="width: 80px">
           <el-option label="0.01" :value="0.01" />
@@ -30,12 +30,12 @@
               <div 
                 class="buy-bar" 
                 :style="{ width: level.buyPercentage + '%' }"
-                :title="`买入: ${level.buyVolume}`"
+                :title="`Buy: ${level.buyVolume}`"
               ></div>
               <div 
                 class="sell-bar" 
                 :style="{ width: level.sellPercentage + '%' }"
-                :title="`卖出: ${level.sellVolume}`"
+                :title="`Sell: ${level.sellVolume}`"
               ></div>
             </div>
             <div class="volume-text">
@@ -197,7 +197,10 @@ watch(currentPrice, (newPrice) => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-family: 'Courier New', monospace;
+  background: $bg-secondary;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  font-family: 'Times New Roman', Times, serif;
 }
 
 .footprint-header {
@@ -206,115 +209,115 @@ watch(currentPrice, (newPrice) => {
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  background: $bg-tertiary;
   border-bottom: 1px solid $border-color;
+  background: $bg-tertiary;
   
   .header-title {
     font-weight: 600;
     color: $text-primary;
+    font-family: 'Times New Roman', Times, serif;
+  }
+  
+  .header-controls {
+    display: flex;
+    gap: 8px;
   }
 }
 
 .footprint-content {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .price-levels {
-  height: 100%;
-  overflow-y: auto;
-  padding: 4px;
-}
-
-.price-level {
-  display: flex;
-  align-items: center;
-  height: 24px;
-  margin-bottom: 1px;
-  padding: 0 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 2px;
-  cursor: pointer;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-}
-
-.price-info {
-  width: 80px;
-  text-align: right;
-  
-  .price-value {
-    font-size: $font-size-xs;
-    font-weight: bold;
-  }
-}
-
-.volume-info {
-  flex: 1;
-  margin: 0 8px;
-  
-  .volume-bars {
-    position: relative;
-    height: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 2px;
-    overflow: hidden;
-    
-    .buy-bar, .sell-bar {
-      position: absolute;
-      height: 100%;
-      transition: width 0.3s ease;
-    }
-    
-    .buy-bar {
-      background: rgba(0, 200, 83, 0.6);
-      left: 0;
-    }
-    
-    .sell-bar {
-      background: rgba(255, 23, 68, 0.6);
-      right: 0;
-    }
-  }
-  
-  .volume-text {
+  .price-level {
     display: flex;
-    justify-content: space-between;
-    margin-top: 2px;
-    font-size: 9px;
+    align-items: center;
+    padding: 4px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-family: 'Times New Roman', Times, serif;
     
-    .buy-volume {
-      color: $buy-color;
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
     }
     
-    .sell-volume {
-      color: $sell-color;
+    .price-info {
+      width: 80px;
+      
+      .price-value {
+        font-weight: bold;
+        font-family: 'Courier New', monospace;
+        
+        &.text-up {
+          color: $price-up;
+        }
+        
+        &.text-down {
+          color: $price-down;
+        }
+      }
     }
     
-    .total-volume {
-      color: $text-secondary;
+    .volume-info {
+      flex: 1;
+      margin: 0 12px;
+      
+      .volume-bars {
+        display: flex;
+        height: 16px;
+        margin-bottom: 2px;
+        
+        .buy-bar {
+          background: $buy-color;
+          height: 100%;
+          transition: width 0.2s ease;
+        }
+        
+        .sell-bar {
+          background: $sell-color;
+          height: 100%;
+          transition: width 0.2s ease;
+        }
+      }
+      
+      .volume-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: $font-size-xs;
+        
+        .buy-volume {
+          color: $buy-color;
+          font-family: 'Courier New', monospace;
+        }
+        
+        .total-volume {
+          color: $text-secondary;
+          font-family: 'Courier New', monospace;
+        }
+        
+        .sell-volume {
+          color: $sell-color;
+          font-family: 'Courier New', monospace;
+        }
+      }
     }
-  }
-}
-
-.delta-info {
-  width: 50px;
-  text-align: center;
-  font-size: $font-size-xs;
-  font-weight: bold;
-  
-  &.positive-delta {
-    color: $buy-color;
-  }
-  
-  &.negative-delta {
-    color: $sell-color;
-  }
-  
-  &.neutral-delta {
-    color: $text-muted;
+    
+    .delta-info {
+      width: 60px;
+      text-align: right;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      
+      &.text-up {
+        color: $price-up;
+      }
+      
+      &.text-down {
+        color: $price-down;
+      }
+    }
   }
 }
 </style>
