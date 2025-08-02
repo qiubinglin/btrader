@@ -1,43 +1,249 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
+# C++ 构建产物
+build/
+bin/
+lib/
 *.o
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
 *.so
-*.dylib
 *.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
+*.dylib
 *.a
 *.lib
-
-# Executables
 *.exe
 *.out
 *.app
 
-build
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
 
-# vscode dir
-.vscode
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.vcxproj.filters
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+Debug/
+Release/
+x64/
+x86/
+*.pdb
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
 
-# usr running config dir
-usrconf
+# Code::Blocks
+*.depend
+*.layout
+*.cbp
 
-# jupyter notebook checkpoints
+# CodeLite
+*.codelite-workspace
+*.codelite
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+!default.pbxuser
+!default.mode1v3
+!default.mode2v3
+!default.perspectivev3
+
+# Python 缓存 (如果有Python集成)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib64/
+share/python-wheels/
+
+# Jupyter Notebook
 .ipynb_checkpoints
+
+# 环境文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 日志文件
+*.log
+logs/
+*.out
+
+# 配置文件 (可能包含敏感信息)
+config/local.json
+config/production.json
+config/development.json
+*.local.json
+api-keys.json
+secrets.json
+
+# 交易数据和缓存
+data/
+cache/
+*.db
+*.sqlite
+*.sqlite3
+
+# 临时文件
+*.tmp
+*.temp
+*~
+.#*
+
+# 操作系统
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 备份文件
+*.bak
+*.backup
+*.orig
+
+# Core dumps
+core
+core.*
+
+# GDB history
+.gdb_history
+
+# Valgrind
+*.valgrind
+
+# 第三方库构建产物
+thirdparty/*/build/
+thirdparty/*/lib/
+thirdparty/*/bin/
+
+# nanomsg 相关
+*.nanomsg
+
+# 测试结果
+test-results/
+*.test
+*_test
+
+# 性能分析
+*.prof
+perf.data*
+gmon.out
+
+# 文档生成
+docs/_build/
+docs/html/
+docs/latex/
+
+# IDE 项目文件
+*.pro.user*
+*.creator.user*
+
+# Qt
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+*.o
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+Makefile*
+*build-*
+
+# Conan
+conanfile.txt.user
+conaninfo.txt
+conanbuildinfo.*
+conan.lock

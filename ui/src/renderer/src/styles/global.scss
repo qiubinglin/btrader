@@ -1,0 +1,185 @@
+@import './variables.scss';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: $bg-primary;
+  color: $text-primary;
+  overflow: hidden;
+}
+
+#app {
+  height: 100vh;
+}
+
+// Element Plus 主题覆盖
+.el-table {
+  background: transparent !important;
+  
+  .el-table__header-wrapper {
+    background: $bg-tertiary;
+  }
+  
+  .el-table__body-wrapper {
+    background: transparent;
+  }
+  
+  th, td {
+    background: transparent !important;
+    border-color: $border-color !important;
+    color: $text-primary !important;
+  }
+  
+  .el-table__row:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+}
+
+.el-tabs {
+  .el-tabs__header {
+    background: $bg-secondary;
+    margin: 0;
+    border-bottom: 1px solid $border-color;
+  }
+  
+  .el-tabs__nav-wrap::after {
+    background: $border-color;
+  }
+  
+  .el-tabs__item {
+    color: $text-secondary;
+    
+    &.is-active {
+      color: $text-primary;
+    }
+    
+    &:hover {
+      color: $text-primary;
+    }
+  }
+  
+  .el-tabs__active-bar {
+    background: $info-color;
+  }
+}
+
+.el-form {
+  .el-form-item__label {
+    color: $text-primary !important;
+  }
+  
+  .el-input__inner {
+    background: $bg-tertiary !important;
+    border-color: $border-color !important;
+    color: $text-primary !important;
+    
+    &:focus {
+      border-color: $info-color !important;
+    }
+  }
+  
+  .el-select .el-input__inner {
+    background: $bg-tertiary !important;
+  }
+}
+
+.el-button {
+  &.el-button--primary {
+    background: $info-color;
+    border-color: $info-color;
+    
+    &:hover {
+      background: lighten($info-color, 10%);
+    }
+  }
+  
+  &.buy-button {
+    background: $buy-color;
+    border-color: $buy-color;
+    color: white;
+    
+    &:hover {
+      background: lighten($buy-color, 10%);
+    }
+  }
+  
+  &.sell-button {
+    background: $sell-color;
+    border-color: $sell-color;
+    color: white;
+    
+    &:hover {
+      background: lighten($sell-color, 10%);
+    }
+  }
+}
+
+// 自定义滚动条
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $border-color;
+  border-radius: 3px;
+  
+  &:hover {
+    background: $border-hover;
+  }
+}
+
+// 通用类
+.text-up {
+  color: $price-up !important;
+}
+
+.text-down {
+  color: $price-down !important;
+}
+
+.text-equal {
+  color: $price-equal !important;
+}
+
+.bg-buy {
+  background: $buy-bg !important;
+}
+
+.bg-sell {
+  background: $sell-bg !important;
+}
+
+.monospace {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.price-cell {
+  font-weight: bold;
+  text-align: right;
+}
+
+.volume-cell {
+  text-align: right;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

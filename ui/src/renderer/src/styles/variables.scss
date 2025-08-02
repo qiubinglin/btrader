@@ -1,0 +1,41 @@
+// 颜色变量
+$bg-primary: #1a1a1a;
+$bg-secondary: #2d2d2d;
+$bg-tertiary: #3d3d3d;
+
+$text-primary: #ffffff;
+$text-secondary: #cccccc;
+$text-muted: #999999;
+
+$border-color: #404040;
+$border-hover: #606060;
+
+// 交易相关颜色
+$buy-color: #00c853;
+$sell-color: #ff1744;
+$buy-bg: rgba(0, 200, 83, 0.1);
+$sell-bg: rgba(255, 23, 68, 0.1);
+
+// 价格变化颜色
+$price-up: #00c853;
+$price-down: #ff1744;
+$price-equal: #ffc107;
+
+// 状态颜色
+$success-color: #4caf50;
+$warning-color: #ff9800;
+$error-color: #f44336;
+$info-color: #2196f3;
+
+// 尺寸变量
+$header-height: 50px;
+$sidebar-width: 300px;
+$panel-padding: 16px;
+$border-radius: 4px;
+
+// 字体大小
+$font-size-xs: 10px;
+$font-size-sm: 12px;
+$font-size-md: 14px;
+$font-size-lg: 16px;
+$font-size-xl: 18px;

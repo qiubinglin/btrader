@@ -1,0 +1,68 @@
+{
+  "name": "btrader-ui",
+  "version": "1.0.0",
+  "description": "BTrader订单流交易界面",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "build:win": "electron-vite build && electron-builder --win",
+    "build:mac": "electron-vite build && electron-builder --mac",
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "preview": "electron-vite preview",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/utils": "^3.0.0",
+    "ws": "^8.18.0",
+    "electron-updater": "^6.1.7"
+  },
+  "devDependencies": {
+    "@electron-toolkit/eslint-config": "^1.0.2",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@rushstack/eslint-patch": "^1.10.3",
+    "@types/node": "^20.14.8",
+    "@vitejs/plugin-vue": "^5.0.5",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
+    "electron": "^31.0.2",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.26.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2",
+    "vite": "^5.3.1",
+    "vue": "^3.4.29",
+    "vue-tsc": "^2.0.21",
+    "echarts": "^5.4.3",
+    "vue-echarts": "^6.6.1",
+    "element-plus": "^2.7.6",
+    "@element-plus/icons-vue": "^2.3.1",
+    "vuex": "^4.1.0",
+    "sass": "^1.77.6"
+  },
+  "author": "BTrader",
+  "license": "MIT",
+  "build": {
+    "appId": "com.btrader.ui",
+    "productName": "BTrader UI",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "out/**/*",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.finance"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

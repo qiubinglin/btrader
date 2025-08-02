@@ -1,0 +1,27 @@
+# 构建产物
+dist/
+dist-ssr/
+dist_electron/
+out/
+build/
+
+# 依赖
+node_modules/
+
+# 生成的文件
+*.d.ts
+*.map
+
+# 配置文件
+package-lock.json
+yarn.lock
+
+# 第三方代码
+public/libs/
+src/assets/libs/
+
+# 日志文件
+*.log
+
+# 环境文件
+.env*

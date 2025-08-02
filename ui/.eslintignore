@@ -1,0 +1,26 @@
+# 构建产物
+dist/
+dist-ssr/
+dist_electron/
+out/
+build/
+
+# 依赖
+node_modules/
+
+# 生成的文件
+*.d.ts
+*.map
+
+# 第三方库
+public/libs/
+src/assets/libs/
+
+# 配置文件
+*.config.js
+*.config.ts
+!vite.config.ts
+!electron.vite.config.ts
+
+# 演示数据生成器
+scripts/demo-data-generator.js
