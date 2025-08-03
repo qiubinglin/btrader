@@ -1,18 +1,18 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include <QObject>
 #include <QGuiApplication>
+#include <QObject>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
 
 // 包含模型头文件
 #include "candlestickmodel.h"
-#include "ticktrademodel.h"
-#include "orderbookmodel.h"
 #include "footprintmodel.h"
 #include "microorderbookmodel.h"
+#include "orderbookmodel.h"
+#include "ticktrademodel.h"
 
 // 前向声明
 class DataManager;
@@ -20,19 +20,18 @@ class UIManager;
 
 /**
  * @brief 订单流交易系统主应用类
- * 
+ *
  * 负责管理整个应用程序的生命周期，包括：
  * - 初始化Qt应用
  * - 创建和管理数据模型
  * - 管理UI界面
  * - 处理应用事件
  */
-class Application : public QObject
-{
+class Application : public QObject {
     Q_OBJECT
 
 public:
-    explicit Application(int argc, char *argv[], QObject *parent = nullptr);
+    explicit Application(int argc, char* argv[], QObject* parent = nullptr);
     ~Application();
 
     /**
@@ -128,20 +127,20 @@ private:
     void setupApplicationInfo();
 
 private:
-    QGuiApplication* m_app;                    ///< Qt应用程序实例
-    QQmlApplicationEngine* m_qmlEngine;        ///< QML引擎
-    DataManager* m_dataManager;                ///< 数据管理器
-    UIManager* m_uiManager;                    ///< UI管理器
+    QGuiApplication* m_app;             ///< Qt应用程序实例
+    QQmlApplicationEngine* m_qmlEngine; ///< QML引擎
+    DataManager* m_dataManager;         ///< 数据管理器
+    UIManager* m_uiManager;             ///< UI管理器
 
     // 数据模型
-    CandlestickModel* m_candlestickModel;      ///< K线数据模型
-    TickTradeModel* m_tickTradeModel;          ///< 逐笔成交模型
-    OrderBookModel* m_orderBookModel;          ///< 买卖档位模型
-    FootprintModel* m_footprintModel;          ///< 足迹图模型
+    CandlestickModel* m_candlestickModel;       ///< K线数据模型
+    TickTradeModel* m_tickTradeModel;           ///< 逐笔成交模型
+    OrderBookModel* m_orderBookModel;           ///< 买卖档位模型
+    FootprintModel* m_footprintModel;           ///< 足迹图模型
     MicroOrderBookModel* m_microOrderBookModel; ///< 微盘口模型
 
-    int m_argc;                                ///< 命令行参数数量
-    char** m_argv;                             ///< 命令行参数数组
+    int m_argc;    ///< 命令行参数数量
+    char** m_argv; ///< 命令行参数数组
 };
 
-#endif // APPLICATION_H 
+#endif // APPLICATION_H

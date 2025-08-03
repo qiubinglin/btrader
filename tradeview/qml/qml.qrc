@@ -17,5 +17,6 @@
         <file>components/NavigationBar.qml</file>
         <file>components/DataTable.qml</file>
         <file>components/FootprintChart.qml</file>
+        <file>components/DataPanel.qml</file>
     </qresource>
 </RCC> 

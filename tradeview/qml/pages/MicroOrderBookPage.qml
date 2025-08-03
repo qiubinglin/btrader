@@ -8,7 +8,7 @@ Page {
         color: "#1e1e1e"
     }
 
-    // 工具栏
+    // Toolbar
     Rectangle {
         id: toolbar
         anchors.top: parent.top
@@ -24,7 +24,7 @@ Page {
             anchors.margins: 10
             spacing: 10
 
-            // 交易对选择
+            // Symbol selection
             ComboBox {
                 id: symbolComboBox
                 model: ["BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT"]
@@ -47,7 +47,7 @@ Page {
                 }
             }
 
-            // 档位数量设置
+            // Max levels setting
             SpinBox {
                 id: maxLevelsSpinBox
                 from: 3
@@ -61,17 +61,17 @@ Page {
                     radius: 4
                 }
                 textFromValue: function(value) {
-                    return "档位数: " + value
+                    return "Levels: " + value
                 }
                 valueFromText: function(text) {
-                    return parseInt(text.replace("档位数: ", ""))
+                    return parseInt(text.replace("Levels: ", ""))
                 }
                 onValueChanged: {
                     microOrderBookModel.setMaxLevels(value)
                 }
             }
 
-            // 高亮阈值设置
+            // Highlight threshold setting
             SpinBox {
                 id: highlightThresholdSpinBox
                 from: 1
@@ -85,17 +85,17 @@ Page {
                     radius: 4
                 }
                 textFromValue: function(value) {
-                    return "高亮阈值: " + value + "%"
+                    return "Highlight: " + value + "%"
                 }
                 valueFromText: function(text) {
-                    return parseInt(text.replace("高亮阈值: ", "").replace("%", ""))
+                    return parseInt(text.replace("Highlight: ", "").replace("%", ""))
                 }
                 onValueChanged: {
                     microOrderBookModel.setHighlightThreshold(value / 100)
                 }
             }
 
-            // 成交量阈值设置
+            // Volume threshold setting
             SpinBox {
                 id: volumeThresholdSpinBox
                 from: 100
@@ -109,19 +109,19 @@ Page {
                     radius: 4
                 }
                 textFromValue: function(value) {
-                    return "成交量阈值: " + value
+                    return "Volume Threshold: " + value
                 }
                 valueFromText: function(text) {
-                    return parseInt(text.replace("成交量阈值: ", ""))
+                    return parseInt(text.replace("Volume Threshold: ", ""))
                 }
                 onValueChanged: {
                     microOrderBookModel.setVolumeThreshold(value)
                 }
             }
 
-            // 刷新按钮
+            // Refresh button
             Button {
-                text: "刷新"
+                text: "Refresh"
                 background: Rectangle {
                     color: parent.pressed ? "#404040" : 
                            parent.hovered ? "#353535" : "#2d2d2d"
@@ -138,10 +138,10 @@ Page {
                 onClicked: loadMicroOrderBookData()
             }
 
-            // 自动刷新开关
+            // Auto refresh checkbox
             CheckBox {
                 id: autoRefreshCheckBox
-                text: "自动刷新"
+                text: "Auto Refresh"
                 checked: true
                 indicator: Rectangle {
                     width: 16
@@ -166,28 +166,28 @@ Page {
 
             Item { Layout.fillWidth: true }
 
-            // 统计信息
+            // Statistics
             Text {
-                text: "最佳买价: " + (microOrderBookModel.bestBid || "0.00")
+                text: "Best Bid: " + (microOrderBookModel.bestBid || "0.00")
                 color: "#00ff00"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "最佳卖价: " + (microOrderBookModel.bestAsk || "0.00")
+                text: "Best Ask: " + (microOrderBookModel.bestAsk || "0.00")
                 color: "#ff0000"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "价差: " + (microOrderBookModel.spread || "0.00")
+                text: "Spread: " + (microOrderBookModel.spread || "0.00")
                 color: "#ffffff"
                 font.pixelSize: 12
             }
         }
     }
 
-    // 微盘口显示区域
+    // Micro order book display area
     Rectangle {
         id: microOrderBookArea
         anchors.top: toolbar.bottom
@@ -199,19 +199,19 @@ Page {
         border.color: "#404040"
         border.width: 1
 
-        // 标题
+        // Title
         Text {
             id: microOrderBookTitle
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.margins: 10
-            text: symbolComboBox.currentText + " 微盘口"
+            text: symbolComboBox.currentText + " Micro Order Book"
             color: "#ffffff"
             font.pixelSize: 16
             font.bold: true
         }
 
-        // 列标题
+        // Column headers
         Rectangle {
             id: columnHeader
             anchors.top: microOrderBookTitle.bottom
@@ -229,7 +229,7 @@ Page {
                 spacing: 10
 
                 Text {
-                    text: "价格"
+                    text: "Price"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -237,7 +237,7 @@ Page {
                 }
 
                 Text {
-                    text: "数量"
+                    text: "Volume"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -245,7 +245,7 @@ Page {
                 }
 
                 Text {
-                    text: "订单数"
+                    text: "Orders"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -253,15 +253,7 @@ Page {
                 }
 
                 Text {
-                    text: "百分比"
-                    color: "#ffffff"
-                    font.pixelSize: 12
-                    font.bold: true
-                    Layout.preferredWidth: 80
-                }
-
-                Text {
-                    text: "累计"
+                    text: "Cumulative"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -269,7 +261,7 @@ Page {
                 }
 
                 Text {
-                    text: "状态"
+                    text: "Depth %"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -278,7 +270,7 @@ Page {
             }
         }
 
-        // 微盘口列表
+        // Micro order book list
         ListView {
             id: microOrderBookListView
             anchors.top: columnHeader.bottom
@@ -292,68 +284,63 @@ Page {
 
             delegate: Rectangle {
                 width: microOrderBookListView.width
-                height: 35
-                color: model.isHighlighted ? "#353535" : (index % 2 === 0 ? "#1e1e1e" : "#252525")
-                border.color: model.isHighlighted ? "#00ff00" : "#404040"
-                border.width: model.isHighlighted ? 2 : 0.5
+                height: 30
+                color: index % 2 === 0 ? "#1e1e1e" : "#252525"
+                border.color: "#404040"
+                border.width: 0.5
 
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 10
                     spacing: 10
 
-                    // 价格
+                    // Price
                     Text {
-                        text: model.price.toFixed(2)
+                        text: model.price ? model.price.toFixed(2) : "0.00"
                         color: model.isBid ? "#00ff00" : "#ff0000"
                         font.pixelSize: 11
                         font.bold: true
                         Layout.preferredWidth: 100
                     }
 
-                    // 数量
+                    // Volume
                     Text {
-                        text: model.volume.toLocaleString()
+                        text: model.volume ? model.volume.toLocaleString() : "0"
                         color: "#ffffff"
                         font.pixelSize: 11
                         Layout.preferredWidth: 100
                     }
 
-                    // 订单数
+                    // Order count
                     Text {
-                        text: model.orderCount
+                        text: model.orderCount ? model.orderCount : "0"
                         color: "#cccccc"
                         font.pixelSize: 11
                         Layout.preferredWidth: 80
                     }
 
-                    // 百分比
+                    // Cumulative volume
                     Text {
-                        text: model.percentage.toFixed(1) + "%"
-                        color: "#ffffff"
-                        font.pixelSize: 11
-                        Layout.preferredWidth: 80
-                    }
-
-                    // 累计数量
-                    Text {
-                        text: model.cumulativeVolume.toLocaleString()
+                        text: model.cumulativeVolume ? model.cumulativeVolume.toLocaleString() : "0"
                         color: "#ffffff"
                         font.pixelSize: 11
                         Layout.preferredWidth: 100
                     }
 
-                    // 状态指示器
+                    // Depth percentage bar
                     Rectangle {
                         Layout.fillWidth: true
-                        height: 20
-                        color: "transparent"
+                        height: 15
+                        color: "#2d2d2d"
+                        border.color: "#404040"
+                        border.width: 1
+                        radius: 2
 
                         Rectangle {
                             anchors.left: parent.left
                             anchors.top: parent.top
                             anchors.bottom: parent.bottom
-                            width: parent.width * (model.percentage / 100)
+                            width: parent.width * ((model.depthPercentage ? model.depthPercentage : 0) / 100)
                             color: model.isBid ? "#00ff00" : "#ff0000"
                             opacity: 0.3
                             radius: 2
@@ -361,32 +348,27 @@ Page {
 
                         Text {
                             anchors.centerIn: parent
-                            text: model.isHighlighted ? "★" : ""
-                            color: "#ffff00"
-                            font.pixelSize: 12
-                            font.bold: true
+                            text: (model.depthPercentage ? model.depthPercentage.toFixed(1) : "0.0") + "%"
+                            color: "#ffffff"
+                            font.pixelSize: 9
                         }
                     }
                 }
 
-                // 鼠标悬停效果
+                // Mouse hover effect
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        if (!model.isHighlighted) {
-                            parent.color = "#353535"
-                        }
+                        parent.color = "#353535"
                     }
                     onExited: {
-                        if (!model.isHighlighted) {
-                            parent.color = index % 2 === 0 ? "#1e1e1e" : "#252525"
-                        }
+                        parent.color = index % 2 === 0 ? "#1e1e1e" : "#252525"
                     }
                 }
             }
 
-            // 滚动条
+            // Scrollbar
             ScrollBar.vertical: ScrollBar {
                 active: true
                 background: Rectangle {
@@ -402,63 +384,29 @@ Page {
         }
     }
 
-    // 自动刷新定时器
+    // Auto refresh timer
     Timer {
         id: autoRefreshTimer
-        interval: 2000  // 2秒刷新一次
+        interval: 1000  // Refresh every second
         running: autoRefreshCheckBox.checked
         repeat: true
         onTriggered: {
             if (autoRefreshCheckBox.checked) {
-                updateMicroOrderBookData()
+                // Data is automatically updated by DataManager, no manual update needed
+                console.log("Micro order book data refreshed by DataManager")
             }
         }
     }
 
-    // 更新微盘口数据的函数
-    function updateMicroOrderBookData() {
-        const basePrice = 50000 + Math.random() * 1000
-        const bids = []
-        const asks = []
-
-        // 生成买单数据
-        for (let i = 0; i < maxLevelsSpinBox.value; i++) {
-            const price = basePrice - (i + 1) * 10
-            const volume = Math.floor(Math.random() * 1000) + 100
-            const orderCount = Math.floor(Math.random() * 50) + 1
-
-            bids.push({
-                price: price,
-                volume: volume,
-                orderCount: orderCount,
-                side: "bid"
-            })
-        }
-
-        // 生成卖单数据
-        for (let i = 0; i < maxLevelsSpinBox.value; i++) {
-            const price = basePrice + (i + 1) * 10
-            const volume = Math.floor(Math.random() * 1000) + 100
-            const orderCount = Math.floor(Math.random() * 50) + 1
-
-            asks.push({
-                price: price,
-                volume: volume,
-                orderCount: orderCount,
-                side: "ask"
-            })
-        }
-
-        microOrderBookModel.updateMicroOrderBook(bids, asks)
-    }
-
-    // 加载初始数据的函数
+    // Function to load initial data
     function loadMicroOrderBookData() {
-        updateMicroOrderBookData()
+        // Data will be provided by DataManager
+        console.log("Loading micro order book data...")
     }
 
-    // 页面加载时初始化数据
+    // Initialize data when page loads
     Component.onCompleted: {
         loadMicroOrderBookData()
     }
+} 
 } 

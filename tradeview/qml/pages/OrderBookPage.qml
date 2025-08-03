@@ -8,7 +8,7 @@ Page {
         color: "#1e1e1e"
     }
 
-    // 工具栏
+    // Toolbar
     Rectangle {
         id: toolbar
         anchors.top: parent.top
@@ -24,7 +24,7 @@ Page {
             anchors.margins: 10
             spacing: 10
 
-            // 交易对选择
+            // Symbol selection
             ComboBox {
                 id: symbolComboBox
                 model: ["BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT"]
@@ -47,7 +47,7 @@ Page {
                 }
             }
 
-            // 档位数量设置
+            // Max levels setting
             SpinBox {
                 id: maxLevelsSpinBox
                 from: 5
@@ -61,19 +61,19 @@ Page {
                     radius: 4
                 }
                 textFromValue: function(value) {
-                    return "档位数: " + value
+                    return "Levels: " + value
                 }
                 valueFromText: function(text) {
-                    return parseInt(text.replace("档位数: ", ""))
+                    return parseInt(text.replace("Levels: ", ""))
                 }
                 onValueChanged: {
                     orderBookModel.setMaxLevels(value)
                 }
             }
 
-            // 刷新按钮
+            // Refresh button
             Button {
-                text: "刷新"
+                text: "Refresh"
                 background: Rectangle {
                     color: parent.pressed ? "#404040" : 
                            parent.hovered ? "#353535" : "#2d2d2d"
@@ -88,15 +88,15 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onClicked: {
-                    // 数据由DataManager自动更新，这里只是记录日志
+                    // Data is automatically updated by DataManager, just log here
                     console.log("Manual refresh requested, but data is managed by DataManager")
                 }
             }
 
-            // 自动刷新开关
+            // Auto refresh checkbox
             CheckBox {
                 id: autoRefreshCheckBox
-                text: "自动刷新"
+                text: "Auto Refresh"
                 checked: true
                 indicator: Rectangle {
                     width: 16
@@ -121,28 +121,28 @@ Page {
 
             Item { Layout.fillWidth: true }
 
-            // 统计信息
+            // Statistics
             Text {
-                text: "最佳买价: " + (orderBookModel.bestBid || "0.00")
+                text: "Best Bid: " + (orderBookModel.bestBid || "0.00")
                 color: "#00ff00"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "最佳卖价: " + (orderBookModel.bestAsk || "0.00")
+                text: "Best Ask: " + (orderBookModel.bestAsk || "0.00")
                 color: "#ff0000"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "价差: " + (orderBookModel.spread || "0.00")
+                text: "Spread: " + (orderBookModel.spread || "0.00")
                 color: "#ffffff"
                 font.pixelSize: 12
             }
         }
     }
 
-    // 订单簿显示区域
+    // Order book display area
     Rectangle {
         id: orderBookArea
         anchors.top: toolbar.bottom
@@ -154,19 +154,19 @@ Page {
         border.color: "#404040"
         border.width: 1
 
-        // 标题
+        // Title
         Text {
             id: orderBookTitle
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.margins: 10
-            text: symbolComboBox.currentText + " 订单簿"
+            text: symbolComboBox.currentText + " Order Book"
             color: "#ffffff"
             font.pixelSize: 16
             font.bold: true
         }
 
-        // 列标题
+        // Column headers
         Rectangle {
             id: columnHeader
             anchors.top: orderBookTitle.bottom
@@ -184,7 +184,7 @@ Page {
                 spacing: 10
 
                 Text {
-                    text: "价格"
+                    text: "Price"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -192,7 +192,7 @@ Page {
                 }
 
                 Text {
-                    text: "数量"
+                    text: "Volume"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -200,7 +200,7 @@ Page {
                 }
 
                 Text {
-                    text: "订单数"
+                    text: "Orders"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -208,7 +208,7 @@ Page {
                 }
 
                 Text {
-                    text: "累计"
+                    text: "Cumulative"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -216,7 +216,7 @@ Page {
                 }
 
                 Text {
-                    text: "深度%"
+                    text: "Depth %"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -225,7 +225,7 @@ Page {
             }
         }
 
-        // 订单簿列表
+        // Order book list
         ListView {
             id: orderBookListView
             anchors.top: columnHeader.bottom
@@ -251,40 +251,40 @@ Page {
                     anchors.margins: 10
                     spacing: 10
 
-                    // 价格
+                    // Price
                     Text {
-                        text: model.price.toFixed(2)
+                        text: model.price ? model.price.toFixed(2) : "0.00"
                         color: model.isBid ? "#00ff00" : "#ff0000"
                         font.pixelSize: 11
                         font.bold: true
                         Layout.preferredWidth: 100
                     }
 
-                    // 数量
+                    // Volume
                     Text {
-                        text: model.volume.toLocaleString()
+                        text: model.volume ? model.volume.toLocaleString() : "0"
                         color: "#ffffff"
                         font.pixelSize: 11
                         Layout.preferredWidth: 100
                     }
 
-                    // 订单数
+                    // Order count
                     Text {
-                        text: model.orderCount
+                        text: model.orderCount ? model.orderCount : "0"
                         color: "#cccccc"
                         font.pixelSize: 11
                         Layout.preferredWidth: 80
                     }
 
-                    // 累计数量
+                    // Cumulative volume
                     Text {
-                        text: model.cumulativeVolume.toLocaleString()
+                        text: model.cumulativeVolume ? model.cumulativeVolume.toLocaleString() : "0"
                         color: "#ffffff"
                         font.pixelSize: 11
                         Layout.preferredWidth: 100
                     }
 
-                    // 深度百分比条
+                    // Depth percentage bar
                     Rectangle {
                         Layout.fillWidth: true
                         height: 15
@@ -297,7 +297,7 @@ Page {
                             anchors.left: parent.left
                             anchors.top: parent.top
                             anchors.bottom: parent.bottom
-                            width: parent.width * (model.depthPercentage / 100)
+                            width: parent.width * ((model.depthPercentage ? model.depthPercentage : 0) / 100)
                             color: model.isBid ? "#00ff00" : "#ff0000"
                             opacity: 0.3
                             radius: 2
@@ -305,14 +305,14 @@ Page {
 
                         Text {
                             anchors.centerIn: parent
-                            text: model.depthPercentage.toFixed(1) + "%"
+                            text: (model.depthPercentage ? model.depthPercentage.toFixed(1) : "0.0") + "%"
                             color: "#ffffff"
                             font.pixelSize: 9
                         }
                     }
                 }
 
-                // 鼠标悬停效果
+                // Mouse hover effect
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
@@ -325,7 +325,7 @@ Page {
                 }
             }
 
-            // 滚动条
+            // Scrollbar
             ScrollBar.vertical: ScrollBar {
                 active: true
                 background: Rectangle {
@@ -341,21 +341,21 @@ Page {
         }
     }
 
-    // 自动刷新定时器
+    // Auto refresh timer
     Timer {
         id: autoRefreshTimer
-        interval: 2000  // 2秒刷新一次
+        interval: 2000  // Refresh every 2 seconds
         running: autoRefreshCheckBox.checked
         repeat: true
         onTriggered: {
             if (autoRefreshCheckBox.checked) {
-                // 数据由DataManager自动更新，这里不需要手动更新
+                // Data is automatically updated by DataManager, no manual update needed
                 console.log("Order book data refreshed by DataManager")
             }
         }
     }
 
-    // 页面加载时初始化数据
+    // Initialize data when page loads
     Component.onCompleted: {
         console.log("OrderBookPage loaded, data will be provided by DataManager")
     }

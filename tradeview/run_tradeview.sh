@@ -6,11 +6,11 @@
 echo "🚀 启动订单流交易系统..."
 
 # 检查可执行文件
-APP_PATH="../build/tradeview_app"
+APP_PATH="$(dirname "$0")/tradeview_app"
 if [ ! -f "$APP_PATH" ]; then
     echo "❌ 错误: 可执行文件不存在: $APP_PATH"
     echo "请先构建应用程序:"
-    echo "  cd tradeview"
+    echo "  cd btrader"
     echo "  mkdir -p build && cd build"
     echo "  cmake .. && make -j4"
     exit 1

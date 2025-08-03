@@ -1,203 +1,248 @@
-# 订单流交易系统 QML UI 组件
+# TradeView QML 多页面系统使用指南
 
 ## 概述
 
-这是一个基于Qt Quick (QML)的订单流交易系统用户界面，提供了现代化的深色主题设计和丰富的交易数据可视化功能。
+TradeView 使用以 `main.qml` 为主入口的多页面架构，通过 StackView 实现页面导航和数据共享。
 
-## 项目结构
+## 架构设计
 
 ```
-tradeview/qml/
-├── main.qml                 # 主窗口
-├── pages/                   # 页面组件
-│   ├── CandlestickPage.qml  # K线图表页面
-│   ├── FootprintPage.qml    # 足迹图页面
-│   ├── MicroOrderBookPage.qml # 微盘口页面
-│   ├── OrderBookPage.qml    # 买卖档位页面
-│   ├── TickTradePage.qml    # 逐笔成交页面
-│   └── SettingsPage.qml     # 设置页面
-├── components/              # 可复用组件
-│   ├── ChartToolbar.qml     # 图表工具栏
-│   ├── StatusBar.qml        # 状态栏
-│   ├── NavigationBar.qml    # 导航栏
-│   ├── DataTable.qml        # 数据表格
-│   └── FootprintChart.qml   # 足迹图组件
-├── resources/               # 资源文件
-│   └── qml.qrc             # QML资源文件
-└── README.md               # 本文档
+main.qml (主入口)
+├── NavigationBar (左侧导航栏)
+├── StackView (中间内容区域)
+│   ├── CandlestickPage.qml (K线图表页面)
+│   ├── TickTradePage.qml (逐笔成交页面)
+│   ├── OrderBookPage.qml (订单簿页面)
+│   ├── FootprintPage.qml (足迹图页面)
+│   ├── MicroOrderBookPage.qml (微盘口页面)
+│   └── SettingsPage.qml (设置页面)
+└── DataPanel (右侧数据面板)
 ```
-
-## 主要功能
-
-### 1. 主窗口 (main.qml)
-- 集成了所有页面和组件
-- 提供统一的导航和状态显示
-- 支持页面切换和状态管理
-
-### 2. 页面组件
-
-#### K线图表页面 (CandlestickPage.qml)
-- 显示K线图表
-- 支持多种时间周期
-- 实时数据更新
-
-#### 足迹图页面 (FootprintPage.qml)
-- 显示订单流足迹图
-- 买卖压力可视化
-- Delta值分析
-
-#### 逐笔成交页面 (TickTradePage.qml)
-- 实时逐笔成交数据
-- 成交明细表格
-- 价格和成交量统计
-
-#### 买卖档位页面 (OrderBookPage.qml)
-- 买卖盘口数据
-- 深度图显示
-- 实时更新
-
-#### 微盘口页面 (MicroOrderBookPage.qml)
-- 微级别盘口数据
-- 高频更新
-- 详细档位信息
-
-#### 设置页面 (SettingsPage.qml)
-- 系统配置选项
-- 连接设置
-- 显示设置
-- 交易设置
-
-### 3. 可复用组件
-
-#### ChartToolbar (ChartToolbar.qml)
-```qml
-ChartToolbar {
-    symbolModel: ["BTC/USDT", "ETH/USDT"]
-    timeframeModel: ["1m", "5m", "15m"]
-    currentSymbol: "BTC/USDT"
-    currentTimeframe: "1m"
-    autoRefresh: true
-    
-    onSymbolChanged: function(symbol) {
-        // 处理交易对切换
-    }
-    
-    onTimeframeChanged: function(timeframe) {
-        // 处理时间周期切换
-    }
-}
-```
-
-#### StatusBar (StatusBar.qml)
-```qml
-StatusBar {
-    isConnected: true
-    latestPrice: "50000.00"
-    totalVolume: "1000000"
-}
-```
-
-#### NavigationBar (NavigationBar.qml)
-```qml
-NavigationBar {
-    currentPage: "CandlestickPage"
-    onPageChanged: function(page) {
-        // 处理页面切换
-    }
-}
-```
-
-#### DataTable (DataTable.qml)
-```qml
-DataTable {
-    model: dataModel
-    headers: ["时间", "价格", "成交量", "方向"]
-    columnWidths: [150, 100, 100, 80]
-    
-    onRowClicked: function(index, rowData) {
-        // 处理行点击
-    }
-}
-```
-
-#### FootprintChart (FootprintChart.qml)
-```qml
-FootprintChart {
-    model: footprintModel
-    cellWidth: 120
-    cellHeight: 80
-    showVolume: true
-    showDelta: true
-    showPercent: true
-    
-    onCellClicked: function(index, cellData) {
-        // 处理单元格点击
-    }
-}
-```
-
-## 主题设计
-
-### 颜色方案
-- 主背景: `#1e1e1e`
-- 次要背景: `#2d2d2d`
-- 边框: `#404040`
-- 文字: `#ffffff`
-- 买入: `#00ff00`
-- 卖出: `#ff0000`
-
-### 设计特点
-- 深色主题，适合长时间使用
-- 现代化的圆角设计
-- 清晰的视觉层次
-- 响应式布局
-
-## 数据模型
-
-系统使用C++模型与QML进行数据绑定：
-
-- `candlestickModel`: K线数据模型
-- `tickTradeModel`: 逐笔成交模型
-- `orderBookModel`: 买卖档位模型
-- `footprintModel`: 足迹图模型
-- `microOrderBookModel`: 微盘口模型
 
 ## 使用方法
 
-1. 确保Qt6环境已正确安装
-2. 编译C++模型库
-3. 运行QML应用程序
-4. 通过导航栏切换不同页面
-5. 使用工具栏调整显示参数
+### 1. 页面导航
 
-## 扩展开发
+通过左侧导航栏可以切换不同的页面：
 
-### 添加新页面
-1. 在`pages/`目录下创建新的QML文件
-2. 在`NavigationBar.qml`中添加导航项
-3. 在`qml.qrc`中注册新文件
+```qml
+// 在 NavigationBar 中点击按钮
+Button {
+    onClicked: {
+        navigationBar.currentPage = "pages/OrderBookPage.qml"
+        pageChanged("pages/OrderBookPage.qml")
+    }
+}
+```
 
-### 添加新组件
-1. 在`components/`目录下创建新的QML文件
-2. 在`qml.qrc`中注册新文件
-3. 在其他页面中引用新组件
+### 2. 页面切换
 
-### 自定义主题
-1. 修改颜色常量
-2. 调整字体大小和样式
-3. 更新组件样式
+StackView 会自动处理页面切换：
 
-## 注意事项
+```qml
+// 在 main.qml 中处理页面切换
+onPageChanged: function(page) {
+    switch(page) {
+        case "pages/OrderBookPage.qml":
+            stackView.replace("pages/OrderBookPage.qml")
+            break
+        // ... 其他页面
+    }
+}
+```
 
-- 确保所有QML文件都在资源文件中注册
-- 注意组件的信号和槽连接
-- 保持代码的一致性和可维护性
-- 测试不同屏幕尺寸下的显示效果
+### 3. 数据共享
 
-## 技术栈
+所有页面都可以访问通过 C++ 注册的数据模型：
 
-- Qt 6.x
-- Qt Quick (QML)
-- Qt Quick Controls 2
-- Qt Quick Layouts
-- C++ (数据模型) 
+```qml
+// 在任何页面中都可以使用
+ListView {
+    model: orderBookModel  // C++ 注册的模型
+    delegate: Rectangle {
+        Text { text: model.price }
+    }
+}
+```
+
+## 组件说明
+
+### NavigationBar
+- **位置**: 左侧导航栏
+- **功能**: 页面导航、当前页面高亮
+- **文件**: `components/NavigationBar.qml`
+
+### StackView
+- **位置**: 中间内容区域
+- **功能**: 页面管理、切换动画
+- **配置**: 在 `main.qml` 中配置
+
+### DataPanel
+- **位置**: 右侧数据面板
+- **功能**: 显示实时市场数据
+- **文件**: `components/DataPanel.qml`
+
+## 添加新页面
+
+### 1. 创建页面文件
+
+```qml
+// pages/NewPage.qml
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+
+Page {
+    id: newPage
+    
+    // 页面内容
+    Rectangle {
+        anchors.fill: parent
+        color: "#1e1e1e"
+        
+        Text {
+            text: "新页面"
+            color: "#ffffff"
+            anchors.centerIn: parent
+        }
+    }
+}
+```
+
+### 2. 更新资源文件
+
+```xml
+<!-- qml.qrc -->
+<file>pages/NewPage.qml</file>
+```
+
+### 3. 添加到导航
+
+```qml
+// components/NavigationBar.qml
+property var pageModel: [
+    // ... 现有页面
+    { name: "新页面", page: "pages/NewPage.qml", icon: "🆕" }
+]
+```
+
+### 4. 添加切换逻辑
+
+```qml
+// main.qml
+onPageChanged: function(page) {
+    switch(page) {
+        // ... 现有页面
+        case "pages/NewPage.qml":
+            stackView.replace("pages/NewPage.qml")
+            break
+    }
+}
+```
+
+## 数据模型
+
+### 可用的 C++ 模型
+
+- `candlestickModel`: K线数据模型
+- `tickTradeModel`: 逐笔成交模型
+- `orderBookModel`: 订单簿模型
+- `footprintModel`: 足迹图模型
+- `microOrderBookModel`: 微盘口模型
+
+### 在页面中使用模型
+
+```qml
+// 在任何页面中
+ListView {
+    model: candlestickModel
+    delegate: Rectangle {
+        Text { text: model.open }
+        Text { text: model.close }
+    }
+}
+```
+
+## 样式和主题
+
+### 颜色方案
+
+- 主背景: `#1e1e1e`
+- 面板背景: `#2d2d2d`
+- 边框: `#404040`
+- 文字: `#ffffff`
+- 绿色: `#00ff00` (买单/上涨)
+- 红色: `#ff0000` (卖单/下跌)
+
+### 布局尺寸
+
+- 导航栏宽度: 200px
+- 数据面板宽度: 300px
+- 主内容区域: 自适应
+
+## 性能优化
+
+### 1. 页面懒加载
+
+StackView 支持页面懒加载，只有在需要时才创建页面实例。
+
+### 2. 数据更新
+
+C++ 模型通过信号槽机制自动更新 QML 界面，无需手动刷新。
+
+### 3. 内存管理
+
+Qt 的对象树自动管理内存，页面切换时会自动清理不需要的对象。
+
+## 调试和开发
+
+### 控制台输出
+
+```qml
+// 在页面中添加调试信息
+Component.onCompleted: {
+    console.log("页面加载完成")
+}
+```
+
+### 错误处理
+
+```qml
+// 在 main.qml 中处理页面加载错误
+StackView {
+    onStatusChanged: {
+        if (status === StackView.Error) {
+            console.error("页面加载失败:", error)
+        }
+    }
+}
+```
+
+## 扩展建议
+
+### 1. 添加页面缓存
+
+```qml
+StackView {
+    // 缓存页面实例
+    cache: true
+}
+```
+
+### 2. 添加页面参数传递
+
+```qml
+// 在页面切换时传递参数
+stackView.replace("pages/OrderBookPage.qml", {
+    symbol: "BTC/USDT",
+    timeframe: "1m"
+})
+```
+
+### 3. 添加页面状态保存
+
+```qml
+// 保存页面状态
+property var pageStates: ({})
+```
+
+这个多页面系统提供了灵活、可扩展的架构，便于添加新功能和页面。 

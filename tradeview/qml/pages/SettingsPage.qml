@@ -8,7 +8,7 @@ Page {
         color: "#1e1e1e"
     }
 
-    // 工具栏
+    // Toolbar
     Rectangle {
         id: toolbar
         anchors.top: parent.top
@@ -25,7 +25,7 @@ Page {
             spacing: 10
 
             Text {
-                text: "系统设置"
+                text: "System Settings"
                 font.pixelSize: 18
                 font.bold: true
                 color: "#ffffff"
@@ -34,7 +34,7 @@ Page {
             Item { Layout.fillWidth: true }
 
             Button {
-                text: "保存设置"
+                text: "Save Settings"
                 background: Rectangle {
                     color: parent.pressed ? "#404040" : 
                            parent.hovered ? "#353535" : "#2d2d2d"
@@ -53,7 +53,7 @@ Page {
         }
     }
 
-    // 设置内容
+    // Settings content
     ScrollView {
         anchors.top: toolbar.bottom
         anchors.left: parent.left
@@ -65,7 +65,7 @@ Page {
             width: parent.width
             spacing: 20
 
-            // 连接设置
+            // Connection settings
             Rectangle {
                 Layout.fillWidth: true
                 height: 200
@@ -80,7 +80,7 @@ Page {
                     spacing: 10
 
                     Text {
-                        text: "连接设置"
+                        text: "Connection Settings"
                         font.pixelSize: 16
                         font.bold: true
                         color: "#ffffff"
@@ -93,15 +93,15 @@ Page {
                         columnSpacing: 10
 
                         Text {
-                            text: "服务器地址:"
+                            text: "Server Address:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         TextField {
                             id: serverAddressField
-                            text: "ws://localhost:8080"
                             Layout.fillWidth: true
+                            text: "wss://stream.binance.com:9443/ws/btcusdt@trade"
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
@@ -113,16 +113,16 @@ Page {
                         }
 
                         Text {
-                            text: "API密钥:"
+                            text: "API Key:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         TextField {
                             id: apiKeyField
+                            Layout.fillWidth: true
                             text: ""
                             echoMode: TextInput.Password
-                            Layout.fillWidth: true
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
@@ -134,7 +134,7 @@ Page {
                         }
 
                         Text {
-                            text: "自动重连:"
+                            text: "Auto Reconnect:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
@@ -161,7 +161,7 @@ Page {
                 }
             }
 
-            // 显示设置
+            // Display settings
             Rectangle {
                 Layout.fillWidth: true
                 height: 250
@@ -176,7 +176,7 @@ Page {
                     spacing: 10
 
                     Text {
-                        text: "显示设置"
+                        text: "Display Settings"
                         font.pixelSize: 16
                         font.bold: true
                         color: "#ffffff"
@@ -189,16 +189,16 @@ Page {
                         columnSpacing: 10
 
                         Text {
-                            text: "主题:"
+                            text: "Theme:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         ComboBox {
                             id: themeComboBox
-                            model: ["深色主题", "浅色主题", "自动"]
-                            currentIndex: 0
                             Layout.fillWidth: true
+                            model: ["Dark Theme", "Light Theme", "Auto"]
+                            currentIndex: 0
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
@@ -214,39 +214,45 @@ Page {
                         }
 
                         Text {
-                            text: "字体大小:"
+                            text: "Font Size:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         SpinBox {
                             id: fontSizeSpinBox
+                            Layout.fillWidth: true
                             from: 8
-                            to: 20
+                            to: 24
                             value: 12
                             stepSize: 1
-                            Layout.fillWidth: true
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
                                 border.width: 1
                                 radius: 4
                             }
+                            textFromValue: function(value) {
+                                return value + "px"
+                            }
+                            valueFromText: function(text) {
+                                return parseInt(text.replace("px", ""))
+                            }
                         }
 
                         Text {
-                            text: "刷新间隔(秒):"
+                            text: "Refresh Interval (s):"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         SpinBox {
                             id: refreshIntervalSpinBox
+                            Layout.fillWidth: true
                             from: 1
                             to: 60
                             value: 5
                             stepSize: 1
-                            Layout.fillWidth: true
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
@@ -256,7 +262,7 @@ Page {
                         }
 
                         Text {
-                            text: "显示网格:"
+                            text: "Show Grid:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
@@ -281,7 +287,7 @@ Page {
                         }
 
                         Text {
-                            text: "显示成交量:"
+                            text: "Show Volume:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
@@ -308,7 +314,7 @@ Page {
                 }
             }
 
-            // 交易设置
+            // Trading settings
             Rectangle {
                 Layout.fillWidth: true
                 height: 200
@@ -323,7 +329,7 @@ Page {
                     spacing: 10
 
                     Text {
-                        text: "交易设置"
+                        text: "Trading Settings"
                         font.pixelSize: 16
                         font.bold: true
                         color: "#ffffff"
@@ -336,16 +342,16 @@ Page {
                         columnSpacing: 10
 
                         Text {
-                            text: "默认交易对:"
+                            text: "Default Symbol:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         ComboBox {
                             id: defaultSymbolComboBox
+                            Layout.fillWidth: true
                             model: ["BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT"]
                             currentIndex: 0
-                            Layout.fillWidth: true
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
@@ -361,16 +367,16 @@ Page {
                         }
 
                         Text {
-                            text: "默认时间周期:"
+                            text: "Default Timeframe:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         ComboBox {
                             id: defaultTimeframeComboBox
+                            Layout.fillWidth: true
                             model: ["1m", "5m", "15m", "1h", "4h", "1d"]
                             currentIndex: 0
-                            Layout.fillWidth: true
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
@@ -386,18 +392,18 @@ Page {
                         }
 
                         Text {
-                            text: "价格精度:"
+                            text: "Price Precision:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         SpinBox {
                             id: pricePrecisionSpinBox
+                            Layout.fillWidth: true
                             from: 0
                             to: 8
                             value: 2
                             stepSize: 1
-                            Layout.fillWidth: true
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
@@ -407,18 +413,18 @@ Page {
                         }
 
                         Text {
-                            text: "数量精度:"
+                            text: "Volume Precision:"
                             color: "#ffffff"
                             font.pixelSize: 12
                         }
 
                         SpinBox {
-                            id: quantityPrecisionSpinBox
+                            id: volumePrecisionSpinBox
+                            Layout.fillWidth: true
                             from: 0
                             to: 8
-                            value: 4
+                            value: 2
                             stepSize: 1
-                            Layout.fillWidth: true
                             background: Rectangle {
                                 color: "#353535"
                                 border.color: "#404040"
@@ -432,9 +438,14 @@ Page {
         }
     }
 
-    // 保存设置函数
+    // Function to save settings
     function saveSettings() {
-        // 这里可以添加保存设置的逻辑
-        console.log("设置已保存")
+        console.log("Settings saved")
+        // Here you would typically save the settings to a configuration file or database
+    }
+
+    // Initialize settings when page loads
+    Component.onCompleted: {
+        console.log("SettingsPage loaded")
     }
 } 

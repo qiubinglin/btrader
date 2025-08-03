@@ -8,7 +8,7 @@ Page {
         color: "#1e1e1e"
     }
 
-    // 工具栏
+    // Toolbar
     Rectangle {
         id: toolbar
         anchors.top: parent.top
@@ -24,7 +24,7 @@ Page {
             anchors.margins: 10
             spacing: 10
 
-            // 交易对选择
+            // Symbol selection
             ComboBox {
                 id: symbolComboBox
                 model: ["BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT"]
@@ -47,7 +47,7 @@ Page {
                 }
             }
 
-            // 最大记录数设置
+            // Max records setting
             SpinBox {
                 id: maxRecordsSpinBox
                 from: 100
@@ -61,19 +61,19 @@ Page {
                     radius: 4
                 }
                 textFromValue: function(value) {
-                    return "最大记录: " + value
+                    return "Max Records: " + value
                 }
                 valueFromText: function(text) {
-                    return parseInt(text.replace("最大记录: ", ""))
+                    return parseInt(text.replace("Max Records: ", ""))
                 }
                 onValueChanged: {
                     tickTradeModel.setMaxCount(value)
                 }
             }
 
-            // 清空按钮
+            // Clear button
             Button {
-                text: "清空"
+                text: "Clear"
                 background: Rectangle {
                     color: parent.pressed ? "#404040" : 
                            parent.hovered ? "#353535" : "#2d2d2d"
@@ -90,10 +90,10 @@ Page {
                 onClicked: tickTradeModel.clear()
             }
 
-            // 自动刷新开关
+            // Auto refresh checkbox
             CheckBox {
                 id: autoRefreshCheckBox
-                text: "自动刷新"
+                text: "Auto Refresh"
                 checked: true
                 indicator: Rectangle {
                     width: 16
@@ -118,30 +118,30 @@ Page {
 
             Item { Layout.fillWidth: true }
 
-            // 统计信息
+            // Statistics
             Text {
-                text: "最新价格: " + (tickTradeModel.latestPrice || "0.00")
+                text: "Latest Price: " + (tickTradeModel.latestPrice || "0.00")
+                color: "#ffff00"
+                font.pixelSize: 12
+            }
+
+            Text {
+                text: "Total Volume: " + (tickTradeModel.totalVolume || "0")
                 color: "#ffffff"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "总成交量: " + (tickTradeModel.totalVolume || "0")
-                color: "#ffffff"
-                font.pixelSize: 12
-            }
-
-            Text {
-                text: "记录数: " + tickTradeModel.count
-                color: "#ffffff"
+                text: "Records: " + (tickTradeModel.count || "0")
+                color: "#cccccc"
                 font.pixelSize: 12
             }
         }
     }
 
-    // 逐笔成交列表
+    // Tick trade display area
     Rectangle {
-        id: tickTradeList
+        id: tickTradeArea
         anchors.top: toolbar.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -151,13 +151,26 @@ Page {
         border.color: "#404040"
         border.width: 1
 
-        // 列表标题
-        Rectangle {
-            id: listHeader
+        // Title
+        Text {
+            id: tickTradeTitle
             anchors.top: parent.top
             anchors.left: parent.left
+            anchors.margins: 10
+            text: symbolComboBox.currentText + " Tick Trades"
+            color: "#ffffff"
+            font.pixelSize: 16
+            font.bold: true
+        }
+
+        // Column headers
+        Rectangle {
+            id: columnHeader
+            anchors.top: tickTradeTitle.bottom
+            anchors.left: parent.left
             anchors.right: parent.right
-            height: 40
+            anchors.margins: 10
+            height: 30
             color: "#2d2d2d"
             border.color: "#404040"
             border.width: 1
@@ -168,15 +181,7 @@ Page {
                 spacing: 10
 
                 Text {
-                    text: "时间"
-                    color: "#ffffff"
-                    font.pixelSize: 12
-                    font.bold: true
-                    Layout.preferredWidth: 120
-                }
-
-                Text {
-                    text: "价格"
+                    text: "Time"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -184,7 +189,7 @@ Page {
                 }
 
                 Text {
-                    text: "数量"
+                    text: "Price"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -192,7 +197,7 @@ Page {
                 }
 
                 Text {
-                    text: "方向"
+                    text: "Volume"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -200,15 +205,15 @@ Page {
                 }
 
                 Text {
-                    text: "成交额"
+                    text: "Direction"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
-                    Layout.preferredWidth: 120
+                    Layout.preferredWidth: 80
                 }
 
                 Text {
-                    text: "成交ID"
+                    text: "Amount"
                     color: "#ffffff"
                     font.pixelSize: 12
                     font.bold: true
@@ -217,20 +222,21 @@ Page {
             }
         }
 
-        // 成交数据列表
+        // Tick trade list
         ListView {
             id: tickTradeListView
-            anchors.top: listHeader.bottom
+            anchors.top: columnHeader.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
+            anchors.margins: 10
             model: tickTradeModel
             clip: true
             spacing: 1
 
             delegate: Rectangle {
                 width: tickTradeListView.width
-                height: 35
+                height: 30
                 color: index % 2 === 0 ? "#1e1e1e" : "#252525"
                 border.color: "#404040"
                 border.width: 0.5
@@ -240,66 +246,50 @@ Page {
                     anchors.margins: 10
                     spacing: 10
 
-                    // 时间
+                    // Time
                     Text {
-                        text: new Date(model.timestamp).toLocaleTimeString()
-                        color: "#cccccc"
+                        text: model.timestamp ? new Date(model.timestamp).toLocaleTimeString() : ""
+                        color: "#888888"
                         font.pixelSize: 11
-                        Layout.preferredWidth: 120
+                        Layout.preferredWidth: 100
                     }
 
-                    // 价格
+                    // Price
                     Text {
-                        text: model.price.toFixed(2)
-                        color: model.isBuy ? "#00ff00" : "#ff0000"
+                        text: model.price ? model.price.toFixed(2) : ""
+                        color: model.direction === "buy" ? "#00ff00" : "#ff0000"
                         font.pixelSize: 11
                         font.bold: true
                         Layout.preferredWidth: 100
                     }
 
-                    // 数量
+                    // Volume
                     Text {
-                        text: model.volume.toLocaleString()
+                        text: model.volume ? model.volume.toLocaleString() : ""
                         color: "#ffffff"
                         font.pixelSize: 11
-                        Layout.preferredWidth: 100
+                        Layout.preferredWidth: 80
                     }
 
-                    // 方向
-                    Rectangle {
-                        width: 60
-                        height: 20
-                        radius: 10
-                        color: model.isBuy ? "#00ff00" : "#ff0000"
-                        opacity: 0.8
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: model.isBuy ? "买入" : "卖出"
-                            color: "#ffffff"
-                            font.pixelSize: 10
-                            font.bold: true
-                        }
-                    }
-
-                    // 成交额
+                    // Direction
                     Text {
-                        text: (model.price * model.volume).toFixed(2)
-                        color: "#ffffff"
+                        text: model.direction ? model.direction.toUpperCase() : ""
+                        color: model.direction === "buy" ? "#00ff00" : "#ff0000"
                         font.pixelSize: 11
-                        Layout.preferredWidth: 120
+                        font.bold: true
+                        Layout.preferredWidth: 80
                     }
 
-                    // 成交ID
+                    // Amount
                     Text {
-                        text: model.tradeId || "N/A"
+                        text: model.amount ? model.amount.toLocaleString() : ""
                         color: "#cccccc"
                         font.pixelSize: 11
                         Layout.fillWidth: true
                     }
                 }
 
-                // 鼠标悬停效果
+                // Mouse hover effect
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
@@ -312,7 +302,7 @@ Page {
                 }
             }
 
-            // 滚动条
+            // Scrollbar
             ScrollBar.vertical: ScrollBar {
                 active: true
                 background: Rectangle {
@@ -328,49 +318,22 @@ Page {
         }
     }
 
-    // 自动刷新定时器
+    // Auto refresh timer
     Timer {
         id: autoRefreshTimer
-        interval: 1000  // 1秒刷新一次
+        interval: 1000  // Refresh every second
         running: autoRefreshCheckBox.checked
         repeat: true
         onTriggered: {
             if (autoRefreshCheckBox.checked) {
-                addRandomTickTrade()
+                // Data is automatically updated by DataManager, no manual update needed
+                console.log("Tick trade data refreshed by DataManager")
             }
         }
     }
 
-    // 添加随机成交数据的函数
-    function addRandomTickTrade() {
-        const basePrice = 50000 + Math.random() * 1000
-        const price = basePrice + (Math.random() - 0.5) * 100
-        const volume = Math.floor(Math.random() * 100) + 1
-        const direction = Math.random() > 0.5 ? "buy" : "sell"
-        const tradeId = "T" + Date.now() + Math.floor(Math.random() * 1000)
-
-        const tickTradeData = {
-            timestamp: new Date(),
-            price: price,
-            volume: volume,
-            direction: direction,
-            tradeId: tradeId,
-            symbol: symbolComboBox.currentText
-        }
-
-        tickTradeModel.addTickTrade(tickTradeData)
-    }
-
-    // 加载初始数据的函数
-    function loadTickTradeData() {
-        // 添加一些初始数据
-        for (let i = 0; i < 50; i++) {
-            addRandomTickTrade()
-        }
-    }
-
-    // 页面加载时初始化数据
+    // Initialize data when page loads
     Component.onCompleted: {
-        loadTickTradeData()
+        console.log("TickTradePage loaded, data will be provided by DataManager")
     }
 } 

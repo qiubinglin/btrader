@@ -9,17 +9,17 @@ Rectangle {
     border.color: "#404040"
     border.width: 1
 
-    // 属性
+    // Properties
     property string currentPage: "CandlestickPage"
     property var pageModel: [
-        { name: "K线图表", page: "pages/CandlestickPage.qml", icon: "📈" },
-        { name: "逐笔成交", page: "pages/TickTradePage.qml", icon: "📊" },
-        { name: "买卖档位", page: "pages/OrderBookPage.qml", icon: "📋" },
-        { name: "足迹图", page: "pages/FootprintPage.qml", icon: "👣" },
-        { name: "微盘口", page: "pages/MicroOrderBookPage.qml", icon: "🔍" }
+        { name: "Candlestick Chart", page: "pages/CandlestickPage.qml", icon: "📈" },
+        { name: "Tick Trades", page: "pages/TickTradePage.qml", icon: "📊" },
+        { name: "Order Book", page: "pages/OrderBookPage.qml", icon: "📋" },
+        { name: "Footprint", page: "pages/FootprintPage.qml", icon: "👣" },
+        { name: "Micro Order Book", page: "pages/MicroOrderBookPage.qml", icon: "🔍" }
     ]
 
-    // 信号
+    // Signals
     signal pageChanged(string page)
 
     ColumnLayout {
@@ -27,23 +27,23 @@ Rectangle {
         anchors.margins: 10
         spacing: 5
 
-        // 标题
+        // Title
         Text {
-            text: "交易视图"
+            text: "Trading View"
             font.pixelSize: 18
             font.bold: true
             color: "#ffffff"
             Layout.alignment: Qt.AlignHCenter
         }
 
-        // 分隔线
+        // Separator
         Rectangle {
             Layout.fillWidth: true
             height: 1
             color: "#404040"
         }
 
-        // 导航按钮
+        // Navigation buttons
         Repeater {
             model: navigationBar.pageModel
 
@@ -72,16 +72,16 @@ Rectangle {
             }
         }
 
-        // 分隔线
+        // Separator
         Rectangle {
             Layout.fillWidth: true
             height: 1
             color: "#404040"
         }
 
-        // 设置按钮
+        // Settings button
         Button {
-            text: "⚙️ 设置"
+            text: "⚙️ Settings"
             Layout.fillWidth: true
             height: 40
             background: Rectangle {

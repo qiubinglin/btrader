@@ -8,7 +8,7 @@ Page {
         color: "#1e1e1e"
     }
 
-    // 工具栏
+    // Toolbar
     ChartToolbar {
         id: toolbar
         anchors.top: parent.top
@@ -38,7 +38,7 @@ Page {
             autoRefreshTimer.running = enabled
         }
 
-        // 添加价格步长设置
+        // Add price step setting
         SpinBox {
             anchors.right: parent.right
             anchors.rightMargin: 10
@@ -54,17 +54,17 @@ Page {
                 radius: 4
             }
             textFromValue: function(value) {
-                return "价格步长: " + value
+                return "Price Step: " + value
             }
             valueFromText: function(text) {
-                return parseInt(text.replace("价格步长: ", ""))
+                return parseInt(text.replace("Price Step: ", ""))
             }
             onValueChanged: {
                 footprintModel.set_price_step(value)
             }
         }
 
-        // 统计信息
+        // Statistics
         RowLayout {
             anchors.right: parent.right
             anchors.rightMargin: 200
@@ -72,13 +72,13 @@ Page {
             spacing: 10
 
             Text {
-                text: "总买入量: " + (footprintModel.count > 0 ? footprintModel.get_footprint_bar(footprintModel.count - 1).totalBuyVolume : "0")
+                text: "Total Buy: " + (footprintModel.count > 0 ? footprintModel.get_footprint_bar(footprintModel.count - 1).totalBuyVolume : "0")
                 color: "#00ff00"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "总卖出量: " + (footprintModel.count > 0 ? footprintModel.get_footprint_bar(footprintModel.count - 1).totalSellVolume : "0")
+                text: "Total Sell: " + (footprintModel.count > 0 ? footprintModel.get_footprint_bar(footprintModel.count - 1).totalSellVolume : "0")
                 color: "#ff0000"
                 font.pixelSize: 12
             }
@@ -91,7 +91,7 @@ Page {
         }
     }
 
-    // 足迹图显示区域
+    // Footprint chart display area
     FootprintChart {
         id: footprintArea
         anchors.top: toolbar.bottom
@@ -107,18 +107,18 @@ Page {
         showPercent: true
 
         onCellClicked: function(index, cellData) {
-            console.log("点击足迹图单元格:", index, cellData)
+            console.log("Footprint chart cell clicked:", index, cellData)
         }
 
         onCellHovered: function(index, cellData) {
-            // 可以在这里显示详细信息
+            // Can show detailed information here
         }
     }
 
-    // 自动刷新定时器
+    // Auto refresh timer
     Timer {
         id: autoRefreshTimer
-        interval: 5000  // 5秒刷新一次
+        interval: 5000  // Refresh every 5 seconds
         running: autoRefreshCheckBox.checked
         repeat: true
         onTriggered: {
@@ -128,7 +128,7 @@ Page {
         }
     }
 
-    // 添加随机足迹图数据的函数
+    // Function to add random footprint data
     function addRandomFootprintData() {
         const basePrice = 50000 + Math.random() * 1000
         const open = basePrice
@@ -136,7 +136,7 @@ Page {
         const high = Math.max(open, close) + Math.random() * 50
         const low = Math.min(open, close) - Math.random() * 50
 
-        // 添加一些价格单元格数据
+        // Add some price cell data
         for (let i = 0; i < 10; i++) {
             const price = basePrice + (i - 5) * priceStepSpinBox.value
             const buyVolume = Math.floor(Math.random() * 1000) + 100
@@ -147,15 +147,15 @@ Page {
         }
     }
 
-    // 加载初始数据的函数
+    // Function to load initial data
     function loadFootprintData() {
-        // 添加一些初始数据
+        // Add some initial data
         for (let i = 0; i < 20; i++) {
             addRandomFootprintData()
         }
     }
 
-    // 页面加载时初始化数据
+    // Initialize data when page loads
     Component.onCompleted: {
         loadFootprintData()
     }

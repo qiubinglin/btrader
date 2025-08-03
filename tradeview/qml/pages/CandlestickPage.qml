@@ -9,7 +9,7 @@ Page {
         color: "#1e1e1e"
     }
 
-    // 工具栏
+    // Toolbar
     Rectangle {
         id: toolbar
         anchors.top: parent.top
@@ -25,7 +25,7 @@ Page {
             anchors.margins: 10
             spacing: 10
 
-            // 交易对选择
+            // Symbol selection
             ComboBox {
                 id: symbolComboBox
                 model: ["BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT"]
@@ -43,13 +43,13 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onCurrentTextChanged: {
-                    // 切换交易对时重新加载数据
+                    // Reload data when symbol changes
                     candlestickModel.clear()
                     loadCandlestickData()
                 }
             }
 
-            // 时间周期选择
+            // Timeframe selection
             ComboBox {
                 id: timeframeComboBox
                 model: ["1m", "5m", "15m", "1h", "4h", "1d"]
@@ -71,9 +71,9 @@ Page {
                 }
             }
 
-            // 刷新按钮
+            // Refresh button
             Button {
-                text: "刷新"
+                text: "Refresh"
                 background: Rectangle {
                     color: parent.pressed ? "#404040" : 
                            parent.hovered ? "#353535" : "#2d2d2d"
@@ -87,13 +87,16 @@ Page {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: loadCandlestickData()
+                onClicked: {
+                    loadCandlestickData()
+                    candlestickCanvas.requestPaint()
+                }
             }
 
-            // 自动刷新开关
+            // Auto refresh checkbox
             CheckBox {
                 id: autoRefreshCheckBox
-                text: "自动刷新"
+                text: "Auto Refresh"
                 checked: true
                 indicator: Rectangle {
                     width: 16
@@ -118,30 +121,55 @@ Page {
 
             Item { Layout.fillWidth: true }
 
-            // 统计信息
+            // Statistics
             Text {
-                text: "最高: " + (candlestickModel.count > 0 ? candlestickModel.get_candlestick(candlestickModel.count - 1).high.toFixed(2) : "0.00")
+                text: "High: " + (function() {
+                    if (candlestickModel && candlestickModel.count > 0) {
+                        let candlestick = candlestickModel.get_candlestick(candlestickModel.count - 1)
+                        return candlestick && candlestick.high ? candlestick.high.toFixed(2) : "0.00"
+                    }
+                    return "0.00"
+                })()
                 color: "#00ff00"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "最低: " + (candlestickModel.count > 0 ? candlestickModel.get_candlestick(candlestickModel.count - 1).low.toFixed(2) : "0.00")
+                text: "Low: " + (function() {
+                    if (candlestickModel && candlestickModel.count > 0) {
+                        let candlestick = candlestickModel.get_candlestick(candlestickModel.count - 1)
+                        return candlestick && candlestick.low ? candlestick.low.toFixed(2) : "0.00"
+                    }
+                    return "0.00"
+                })()
                 color: "#ff0000"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "成交量: " + (candlestickModel.count > 0 ? candlestickModel.get_candlestick(candlestickModel.count - 1).volume : "0")
+                text: "Volume: " + (function() {
+                    if (candlestickModel && candlestickModel.count > 0) {
+                        let candlestick = candlestickModel.get_candlestick(candlestickModel.count - 1)
+                        return candlestick && candlestick.volume ? candlestick.volume : "0"
+                    }
+                    return "0"
+                })()
                 color: "#ffffff"
+                font.pixelSize: 12
+            }
+
+            // Debug info
+            Text {
+                text: "Count: " + (candlestickModel ? candlestickModel.count : "0")
+                color: "#ffff00"
                 font.pixelSize: 12
             }
         }
     }
 
-    // K线图表区域
+    // Candlestick chart area
     Rectangle {
-        id: chartArea
+        id: candlestickArea
         anchors.top: toolbar.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -151,94 +179,169 @@ Page {
         border.color: "#404040"
         border.width: 1
 
-        // 图表标题
+        // Chart title
         Text {
             id: chartTitle
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.margins: 10
-            text: symbolComboBox.currentText + " - " + timeframeComboBox.currentText + " K线图"
+            text: symbolComboBox.currentText + " - " + timeframeComboBox.currentText + " Candlestick Chart"
             color: "#ffffff"
             font.pixelSize: 16
             font.bold: true
         }
 
-        // K线图表
-        ListView {
-            id: candlestickListView
+        // Debug info
+        Text {
+            id: debugInfo
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.margins: 10
+            text: "Canvas: " + candlestickCanvas.width + "x" + candlestickCanvas.height
+            color: "#ffff00"
+            font.pixelSize: 10
+        }
+
+        // Candlestick chart
+        Canvas {
+            id: candlestickCanvas
             anchors.top: chartTitle.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.margins: 10
-            orientation: ListView.Horizontal
-            model: candlestickModel
-            clip: true
+            width: parent.width - 20
+            height: parent.height - 20
+            antialiasing: true
 
-            delegate: Rectangle {
-                width: 20
-                height: candlestickListView.height - 20
-                color: "transparent"
-
-                // K线实体
-                Rectangle {
-                    id: body
-                    anchors.centerIn: parent
-                    width: 12
-                    height: Math.max(2, Math.abs(model.close - model.open) * 100)
-                    color: model.isUp ? "#00ff00" : "#ff0000"
-                    border.color: model.isUp ? "#00cc00" : "#cc0000"
-                    border.width: 1
+            onPaint: {
+                console.log("Canvas paint triggered, model count:", candlestickModel ? candlestickModel.count : "undefined")
+                
+                if (!candlestickModel || candlestickModel.count === 0) {
+                    console.log("No candlestick data available")
+                    return
                 }
 
-                // 上影线
-                Rectangle {
-                    anchors.bottom: body.top
-                    anchors.horizontalCenter: body.horizontalCenter
-                    width: 2
-                    height: Math.max(0, (model.high - Math.max(model.open, model.close)) * 100)
-                    color: "#ffffff"
-                }
+                let ctx = getContext("2d")
+                ctx.reset()
 
-                // 下影线
-                Rectangle {
-                    anchors.top: body.bottom
-                    anchors.horizontalCenter: body.horizontalCenter
-                    width: 2
-                    height: Math.max(0, (Math.min(model.open, model.close) - model.low) * 100)
-                    color: "#ffffff"
-                }
-
-                // 价格标签
-                Text {
-                    anchors.top: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: model.close.toFixed(2)
-                    color: model.isUp ? "#00ff00" : "#ff0000"
-                    font.pixelSize: 10
-                    visible: mouseArea.containsMouse
-                }
-
-                // 鼠标悬停效果
-                MouseArea {
-                    id: mouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: {
-                        body.scale = 1.2
-                    }
-                    onExited: {
-                        body.scale = 1.0
+                // Calculate price range
+                let minPrice = Number.MAX_VALUE
+                let maxPrice = Number.MIN_VALUE
+                let barsToShow = Math.min(candlestickModel.count, 100)
+                
+                console.log("Processing", barsToShow, "candlesticks")
+                
+                for (let i = 0; i < barsToShow; i++) {
+                    let candlestick = getCandlestickData(i)
+                    if (candlestick && candlestick.low !== undefined && candlestick.high !== undefined) {
+                        minPrice = Math.min(minPrice, candlestick.low)
+                        maxPrice = Math.max(maxPrice, candlestick.high)
                     }
                 }
 
-                // 动画效果
-                Behavior on scale {
-                    NumberAnimation { duration: 100 }
+                if (minPrice === Number.MAX_VALUE || maxPrice === Number.MIN_VALUE) {
+                    console.log("No valid price range found")
+                    return
+                }
+
+                console.log("Price range:", minPrice, "to", maxPrice)
+
+                let priceRange = maxPrice - minPrice
+                if (priceRange === 0) priceRange = 1
+
+                // Draw grid lines
+                ctx.strokeStyle = "#404040"
+                ctx.lineWidth = 1
+                
+                // Horizontal grid lines
+                for (let i = 0; i <= 5; i++) {
+                    let y = (i / 5) * height
+                    ctx.beginPath()
+                    ctx.moveTo(0, y)
+                    ctx.lineTo(width, y)
+                    ctx.stroke()
+                }
+
+                // Vertical grid lines
+                for (let i = 0; i <= 10; i++) {
+                    let x = (i / 10) * width
+                    ctx.beginPath()
+                    ctx.moveTo(x, 0)
+                    ctx.lineTo(x, height)
+                    ctx.stroke()
+                }
+
+                // Draw candlesticks
+                let barWidth = Math.max(2, (width - 20) / barsToShow - 2)
+                let barSpacing = 2
+                let totalWidth = barsToShow * (barWidth + barSpacing)
+                let startX = (width - totalWidth) / 2
+
+                console.log("Drawing", barsToShow, "candlesticks with bar width:", barWidth)
+
+                for (let i = 0; i < barsToShow; i++) {
+                    let candlestick = getCandlestickData(i)
+                    if (!candlestick || candlestick.open === undefined || candlestick.close === undefined || 
+                        candlestick.high === undefined || candlestick.low === undefined) {
+                        console.log("Skipping invalid candlestick at index", i)
+                        continue
+                    }
+
+                    let x = startX + i * (barWidth + barSpacing)
+                    let openY = height - ((candlestick.open - minPrice) / priceRange) * height
+                    let closeY = height - ((candlestick.close - minPrice) / priceRange) * height
+                    let highY = height - ((candlestick.high - minPrice) / priceRange) * height
+                    let lowY = height - ((candlestick.low - minPrice) / priceRange) * height
+
+                    // Ensure valid coordinates
+                    openY = Math.max(0, Math.min(height, openY))
+                    closeY = Math.max(0, Math.min(height, closeY))
+                    highY = Math.max(0, Math.min(height, highY))
+                    lowY = Math.max(0, Math.min(height, lowY))
+
+                    // Draw candlestick body
+                    let bodyHeight = Math.abs(closeY - openY)
+                    if (bodyHeight < 1) bodyHeight = 1
+
+                    let bodyY = candlestick.close >= candlestick.open ? closeY : openY
+                    
+                    if (candlestick.close >= candlestick.open) {
+                        ctx.fillStyle = "#00ff00"
+                    } else {
+                        ctx.fillStyle = "#ff0000"
+                    }
+
+                    ctx.fillRect(x, bodyY, barWidth, bodyHeight)
+                    
+                    // Draw upper shadow
+                    ctx.strokeStyle = candlestick.close >= candlestick.open ? "#00cc00" : "#cc0000"
+                    ctx.lineWidth = 1
+                    ctx.beginPath()
+                    ctx.moveTo(x + barWidth/2, bodyY)
+                    ctx.lineTo(x + barWidth/2, highY)
+                    ctx.stroke()
+
+                    // Draw lower shadow
+                    ctx.beginPath()
+                    ctx.moveTo(x + barWidth/2, bodyY + bodyHeight)
+                    ctx.lineTo(x + barWidth/2, lowY)
+                    ctx.stroke()
+                }
+
+                console.log("Canvas painting completed")
+            }
+
+            // Mouse hover effect
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onPositionChanged: {
+                    // Can add tooltip or highlight functionality here
                 }
             }
 
-            // 滚动条
+            // Scrollbar
             ScrollBar.horizontal: ScrollBar {
                 active: true
                 background: Rectangle {
@@ -253,74 +356,139 @@ Page {
             }
         }
 
-        // 成交量图表
+        // Volume chart
         Rectangle {
-            id: volumeChart
+            id: volumeArea
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 80
-            color: "transparent"
+            height: 100
+            color: "#1a1a1a"
             border.color: "#404040"
             border.width: 1
 
-            ListView {
+            Canvas {
+                id: volumeCanvas
                 anchors.fill: parent
                 anchors.margins: 5
-                orientation: ListView.Horizontal
-                model: candlestickModel
-                clip: true
+                antialiasing: true
 
-                delegate: Rectangle {
-                    width: 20
-                    height: volumeChart.height - 10
-                    color: "transparent"
+                onPaint: {
+                    if (!candlestickModel || candlestickModel.count === 0) return
 
-                    Rectangle {
-                        anchors.bottom: parent.bottom
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: 12
-                        height: Math.max(2, model.volume / 1000)
-                        color: model.isUp ? "#00ff00" : "#ff0000"
-                        opacity: 0.7
+                    let ctx = getContext("2d")
+                    ctx.reset()
+
+                    let barsToShow = Math.min(candlestickModel.count, 100)
+                    let maxVolume = 0
+                    
+                    for (let i = 0; i < barsToShow; i++) {
+                        let candlestick = candlestickModel.get_candlestick(i)
+                        if (candlestick && candlestick.volume !== undefined) {
+                            maxVolume = Math.max(maxVolume, candlestick.volume)
+                        }
+                    }
+
+                    if (maxVolume === 0) return
+
+                    let barWidth = Math.max(2, (width - 20) / barsToShow - 2)
+                    let barSpacing = 2
+                    let totalWidth = barsToShow * (barWidth + barSpacing)
+                    let startX = (width - totalWidth) / 2
+
+                    for (let i = 0; i < barsToShow; i++) {
+                        let candlestick = candlestickModel.get_candlestick(i)
+                        if (!candlestick || candlestick.volume === undefined || candlestick.close === undefined || candlestick.open === undefined) continue
+
+                        let x = startX + i * (barWidth + barSpacing)
+                        let volumeHeight = (candlestick.volume / maxVolume) * height
+                        let volumeY = height - volumeHeight
+
+                        ctx.fillStyle = candlestick.close >= candlestick.open ? "#00ff00" : "#ff0000"
+                        ctx.fillRect(x, volumeY, barWidth, volumeHeight)
                     }
                 }
             }
         }
     }
 
-    // 自动刷新定时器
+    // Auto refresh timer
     Timer {
         id: autoRefreshTimer
-        interval: 5000  // 5秒刷新一次
+        interval: 5000  // Refresh every 5 seconds
         running: autoRefreshCheckBox.checked
         repeat: true
         onTriggered: {
             if (autoRefreshCheckBox.checked) {
-                loadCandlestickData()
+                console.log("Auto refresh triggered")
+                candlestickCanvas.requestPaint()
+                volumeCanvas.requestPaint()
             }
         }
     }
 
-    // 加载K线数据的函数
-    function loadCandlestickData() {
-        // 这里应该调用C++后端API获取数据
-        // 目前使用模拟数据
-        for (let i = 0; i < 100; i++) {
-            const basePrice = 50000 + Math.random() * 1000
-            const open = basePrice
-            const close = basePrice + (Math.random() - 0.5) * 100
-            const high = Math.max(open, close) + Math.random() * 50
-            const low = Math.min(open, close) - Math.random() * 50
-            const volume = Math.floor(Math.random() * 1000) + 100
-
-            // 暂时注释掉数据添加，避免类型转换错误
-            // candlestickModel.add_candlestick(candlestickData)
+    // Canvas update timer
+    Timer {
+        id: canvasUpdateTimer
+        interval: 1000  // Update canvas every second
+        running: true
+        repeat: true
+        onTriggered: {
+            candlestickCanvas.requestPaint()
+            volumeCanvas.requestPaint()
         }
     }
 
-    // 页面加载时初始化数据
+    // Function to load initial data
+    function loadCandlestickData() {
+        console.log("Loading candlestick data for symbol:", symbolComboBox.currentText)
+        
+        // Clear existing data and let C++ DataManager handle data generation
+        if (candlestickModel) {
+            candlestickModel.clear()
+            console.log("Cleared existing candlestick data, waiting for C++ data generation...")
+        }
+    }
+
+    // Helper function to safely get candlestick data
+    function getCandlestickData(index) {
+        if (!candlestickModel || index < 0 || index >= candlestickModel.count) {
+            return null
+        }
+        
+        // Use get method which returns QVariantMap
+        let data = candlestickModel.get(index)
+        if (data && data.open !== undefined) {
+            return data
+        }
+        
+        return null
+    }
+
+    // Initialize data when page loads
     Component.onCompleted: {
+        console.log("CandlestickPage loaded")
         loadCandlestickData()
+        
+        // Force initial paint
+        candlestickCanvas.requestPaint()
+        volumeCanvas.requestPaint()
+    }
+    
+    // Listen for data changes from C++ model
+    Connections {
+        target: candlestickModel
+        
+        function onDataChanged() {
+            console.log("Candlestick data changed, count:", candlestickModel.count)
+            candlestickCanvas.requestPaint()
+            volumeCanvas.requestPaint()
+        }
+        
+        function onCandlestickAdded() {
+            console.log("New candlestick added, total count:", candlestickModel.count)
+            candlestickCanvas.requestPaint()
+            volumeCanvas.requestPaint()
+        }
     }
 } 
