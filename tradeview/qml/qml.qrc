@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <!-- 主文件 -->
+        <file>main.qml</file>
+        
+        <!-- 页面 -->
+        <file>pages/CandlestickPage.qml</file>
+        <file>pages/FootprintPage.qml</file>
+        <file>pages/MicroOrderBookPage.qml</file>
+        <file>pages/OrderBookPage.qml</file>
+        <file>pages/TickTradePage.qml</file>
+        <file>pages/SettingsPage.qml</file>
+        
+        <!-- 组件 -->
+        <file>components/ChartToolbar.qml</file>
+        <file>components/StatusBar.qml</file>
+        <file>components/NavigationBar.qml</file>
+        <file>components/DataTable.qml</file>
+        <file>components/FootprintChart.qml</file>
+    </qresource>
+</RCC> 

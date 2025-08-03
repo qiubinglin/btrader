@@ -1,11 +1,23 @@
 # Build
 First install the dependencies.
 
-On ubuntu:
+## Install deps on ubuntu
+### Core trading system deps
 ```
 sudo apt install libboost-dev libfmt-dev libssl-dev libspdlog-dev python3-dev pybind11-dev
 ```
 
+### GUI deps
+Install Qt6.8.3:
+```
+cmake -GNinja       -DCMAKE_BUILD_TYPE=Release       -DQT_BUILD_EXAMPLES=OFF       -DQT_BUILD_TESTS=OFF       -DQT_FEATURE_openssl=ON -DQT_FEATURE_xcb=ON -DQT_FEATURE_xlib=ON -DQT_FEATURE_xkbcommon=ON /path-to-qt-src
+
+cmake --build . --parallel $(nproc)
+
+sudo cmake --install .
+```
+
+## Build
 Then enter the source directory.
 ```
 mkdir build

@@ -6,6 +6,9 @@ include(FetchContent)
 #   GIT_TAG        b9b59b2b164489f3788223fec5821f77f7962d43) # v20.71.0
 # FetchContent_MakeAvailable(uWebSockets)
 
+# Set Qt6 installation path
+set(CMAKE_PREFIX_PATH "/usr/local/Qt-6.8.3")
+
 find_package(fmt)
 
 # OpenSSL
