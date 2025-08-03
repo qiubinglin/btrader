@@ -145,6 +145,6 @@ private:
     char** m_argv; ///< 命令行参数数组
 };
 
-}
+} // namespace btra::gui
 
 #endif // APPLICATION_H

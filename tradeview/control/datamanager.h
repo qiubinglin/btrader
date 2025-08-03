@@ -1,11 +1,11 @@
 #ifndef DATAMANAGER_H
 #define DATAMANAGER_H
 
-#include <QObject>
-#include <QTimer>
 #include <QDateTime>
 #include <QMap>
+#include <QObject>
 #include <QString>
+#include <QTimer>
 
 namespace btra::gui {
 
@@ -18,19 +18,18 @@ class MicroOrderBookModel;
 
 /**
  * @brief 数据管理器类
- * 
+ *
  * 负责管理所有交易数据的获取、处理和分发，包括：
  * - 实时数据订阅
  * - 数据预处理和转换
  * - 数据分发到各个模型
  * - 数据缓存管理
  */
-class DataManager : public QObject
-{
+class DataManager : public QObject {
     Q_OBJECT
 
 public:
-    explicit DataManager(QObject *parent = nullptr);
+    explicit DataManager(QObject* parent = nullptr);
     ~DataManager();
 
     /**
@@ -47,11 +46,8 @@ public:
      * @param footprintModel 足迹图模型
      * @param microOrderBookModel 微盘口模型
      */
-    void setModels(CandlestickModel* candlestickModel,
-                   TickTradeModel* tickTradeModel,
-                   OrderBookModel* orderBookModel,
-                   FootprintModel* footprintModel,
-                   MicroOrderBookModel* microOrderBookModel);
+    void setModels(CandlestickModel* candlestickModel, TickTradeModel* tickTradeModel, OrderBookModel* orderBookModel,
+                   FootprintModel* footprintModel, MicroOrderBookModel* microOrderBookModel);
 
     /**
      * @brief 连接数据源
@@ -165,26 +161,26 @@ private:
 
 private:
     // 数据模型
-    CandlestickModel* m_candlestickModel;      ///< K线数据模型
-    TickTradeModel* m_tickTradeModel;          ///< 逐笔成交模型
-    OrderBookModel* m_orderBookModel;          ///< 买卖档位模型
-    FootprintModel* m_footprintModel;          ///< 足迹图模型
+    CandlestickModel* m_candlestickModel;       ///< K线数据模型
+    TickTradeModel* m_tickTradeModel;           ///< 逐笔成交模型
+    OrderBookModel* m_orderBookModel;           ///< 买卖档位模型
+    FootprintModel* m_footprintModel;           ///< 足迹图模型
     MicroOrderBookModel* m_microOrderBookModel; ///< 微盘口模型
 
     // 连接状态
-    bool m_isConnected;                        ///< 是否已连接
-    QString m_dataSource;                      ///< 数据源地址
-    QStringList m_subscribedSymbols;           ///< 已订阅的交易对列表
+    bool m_isConnected;              ///< 是否已连接
+    QString m_dataSource;            ///< 数据源地址
+    QStringList m_subscribedSymbols; ///< 已订阅的交易对列表
 
     // 定时器
-    QTimer* m_simulationTimer;                 ///< 模拟数据更新定时器
-    QTimer* m_connectionTimer;                 ///< 连接超时定时器
+    QTimer* m_simulationTimer; ///< 模拟数据更新定时器
+    QTimer* m_connectionTimer; ///< 连接超时定时器
 
     // 模拟数据
     QMap<QString, double> m_lastPrices;        ///< 最新价格缓存
     QMap<QString, QDateTime> m_lastUpdateTime; ///< 最后更新时间
 };
 
-}
+} // namespace btra::gui
 
-#endif // DATAMANAGER_H 
+#endif // DATAMANAGER_H

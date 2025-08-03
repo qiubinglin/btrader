@@ -2,31 +2,31 @@
 #define MICROORDERBOOKMODEL_H
 
 #include <QAbstractListModel>
-#include <QObject>
 #include <QDateTime>
+#include <QObject>
 #include <QVector>
 
 namespace btra::gui {
 
 /**
  * @brief 微盘口档位数据结构
- * 
+ *
  * 包含微盘口中单个价格档位的信息，支持高亮显示
  */
 struct MicroOrderBookLevel {
-    double price;         ///< 价格档位
-    qint64 volume;        ///< 挂单量
-    int orderCount;       ///< 订单数量
-    QString side;         ///< 买卖方向 ("bid" 或 "ask")
-    double percentage;    ///< 占总量的百分比
-    bool isHighlighted;   ///< 是否高亮显示（用于突出重要档位）
-    
+    double price;       ///< 价格档位
+    qint64 volume;      ///< 挂单量
+    int orderCount;     ///< 订单数量
+    QString side;       ///< 买卖方向 ("bid" 或 "ask")
+    double percentage;  ///< 占总量的百分比
+    bool isHighlighted; ///< 是否高亮显示（用于突出重要档位）
+
     /**
      * @brief 默认构造函数
      * 初始化所有成员变量为0或false
      */
     MicroOrderBookLevel() : price(0), volume(0), orderCount(0), percentage(0), isHighlighted(false) {}
-    
+
     /**
      * @brief 带参数构造函数
      * @param p 价格档位
@@ -34,12 +34,11 @@ struct MicroOrderBookLevel {
      * @param count 订单数量
      * @param s 买卖方向
      */
-    MicroOrderBookLevel(double p, qint64 vol, int count, const QString& s)
+    MicroOrderBookLevel(double p, qint64 vol, int count, const QString &s)
         : price(p), volume(vol), orderCount(count), side(s), percentage(0), isHighlighted(false) {}
 };
 
-class MicroOrderBookModel : public QAbstractListModel
-{
+class MicroOrderBookModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
@@ -64,7 +63,8 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     // Public methods
-    Q_INVOKABLE void updateMicroOrderBook(const QVector<MicroOrderBookLevel> &bids, const QVector<MicroOrderBookLevel> &asks);
+    Q_INVOKABLE void updateMicroOrderBook(const QVector<MicroOrderBookLevel> &bids,
+                                          const QVector<MicroOrderBookLevel> &asks);
     Q_INVOKABLE void clear();
     Q_INVOKABLE void setMaxLevels(int levels);
     Q_INVOKABLE int getMaxLevels() const;
@@ -107,6 +107,6 @@ private:
     QString getDepthColor(int index) const;
 };
 
-}
+} // namespace btra::gui
 
-#endif // MICROORDERBOOKMODEL_H 
+#endif // MICROORDERBOOKMODEL_H

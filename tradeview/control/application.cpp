@@ -184,4 +184,4 @@ void Application::setupApplicationInfo() {
     m_app->setOrganizationDomain("btrader.com");
 }
 
-}
+} // namespace btra::gui

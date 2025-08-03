@@ -11,19 +11,18 @@ namespace btra::gui {
 
 /**
  * @brief UI管理器类
- * 
+ *
  * 负责管理用户界面的创建、配置和交互，包括：
  * - QML引擎管理
  * - 界面组件注册
  * - 主题和样式设置
  * - 窗口管理
  */
-class UIManager : public QObject
-{
+class UIManager : public QObject {
     Q_OBJECT
 
 public:
-    explicit UIManager(QObject *parent = nullptr);
+    explicit UIManager(QObject* parent = nullptr);
     ~UIManager();
 
     /**
@@ -165,14 +164,14 @@ private:
     void setupWindowProperties();
 
 private:
-    QQmlApplicationEngine* m_qmlEngine;        ///< QML引擎
-    QWindow* m_mainWindow;                     ///< 主窗口
-    QString m_currentStyle;                    ///< 当前样式
-    QString m_currentTheme;                    ///< 当前主题
-    int m_fontSize;                           ///< 字体大小
+    QQmlApplicationEngine* m_qmlEngine;            ///< QML引擎
+    QWindow* m_mainWindow;                         ///< 主窗口
+    QString m_currentStyle;                        ///< 当前样式
+    QString m_currentTheme;                        ///< 当前主题
+    int m_fontSize;                                ///< 字体大小
     QMap<QString, QString> m_registeredComponents; ///< 已注册的组件
 };
 
-}
+} // namespace btra::gui
 
-#endif // UIMANAGER_H 
+#endif // UIMANAGER_H

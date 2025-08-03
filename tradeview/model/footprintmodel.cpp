@@ -1,64 +1,55 @@
 #include "footprintmodel.h"
+
 #include <QDebug>
 #include <QTime>
 
 namespace btra::gui {
 
-FootprintModel::FootprintModel(QObject *parent)
-    : QAbstractListModel(parent)
-    , m_timeframe("1m")
-    , m_priceStep(0.01)
-{
-}
+FootprintModel::FootprintModel(QObject *parent) : QAbstractListModel(parent), m_timeframe("1m"), m_priceStep(0.01) {}
 
-int FootprintModel::rowCount(const QModelIndex &parent) const
-{
-    if (parent.isValid())
-        return 0;
+int FootprintModel::rowCount(const QModelIndex &parent) const {
+    if (parent.isValid()) return 0;
     return m_footprintBars.size();
 }
 
-QVariant FootprintModel::data(const QModelIndex &index, int role) const
-{
-    if (!index.isValid() || index.row() >= m_footprintBars.size())
-        return QVariant();
+QVariant FootprintModel::data(const QModelIndex &index, int role) const {
+    if (!index.isValid() || index.row() >= m_footprintBars.size()) return QVariant();
 
     const FootprintBar &bar = m_footprintBars[index.row()];
 
     switch (role) {
-    case TimestampRole:
-        return bar.timestamp;
-    case OpenRole:
-        return bar.open;
-    case HighRole:
-        return bar.high;
-    case LowRole:
-        return bar.low;
-    case CloseRole:
-        return bar.close;
-    case IsUpRole:
-        return bar.close >= bar.open;
-    case IsDownRole:
-        return bar.close < bar.open;
-    case CellsRole:
-        return QVariant::fromValue(bar.cells);
-    case TotalBuyVolumeRole:
-        return calculateTotalBuyVolume(bar);
-    case TotalSellVolumeRole:
-        return calculateTotalSellVolume(bar);
-    case TotalVolumeRole:
-        return calculateTotalVolume(bar);
-    case DeltaRole:
-        return calculateDelta(bar);
-    case DeltaPercentRole:
-        return calculateDeltaPercent(bar);
-    default:
-        return QVariant();
+        case TimestampRole:
+            return bar.timestamp;
+        case OpenRole:
+            return bar.open;
+        case HighRole:
+            return bar.high;
+        case LowRole:
+            return bar.low;
+        case CloseRole:
+            return bar.close;
+        case IsUpRole:
+            return bar.close >= bar.open;
+        case IsDownRole:
+            return bar.close < bar.open;
+        case CellsRole:
+            return QVariant::fromValue(bar.cells);
+        case TotalBuyVolumeRole:
+            return calculateTotalBuyVolume(bar);
+        case TotalSellVolumeRole:
+            return calculateTotalSellVolume(bar);
+        case TotalVolumeRole:
+            return calculateTotalVolume(bar);
+        case DeltaRole:
+            return calculateDelta(bar);
+        case DeltaPercentRole:
+            return calculateDeltaPercent(bar);
+        default:
+            return QVariant();
     }
 }
 
-QHash<int, QByteArray> FootprintModel::roleNames() const
-{
+QHash<int, QByteArray> FootprintModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[TimestampRole] = "timestamp";
     roles[OpenRole] = "open";
@@ -76,8 +67,7 @@ QHash<int, QByteArray> FootprintModel::roleNames() const
     return roles;
 }
 
-void FootprintModel::addFootprintBar(const FootprintBar &bar)
-{
+void FootprintModel::addFootprintBar(const FootprintBar &bar) {
     beginInsertRows(QModelIndex(), m_footprintBars.size(), m_footprintBars.size());
     m_footprintBars.append(bar);
     endInsertRows();
@@ -86,8 +76,7 @@ void FootprintModel::addFootprintBar(const FootprintBar &bar)
     emit footprintBarAdded();
 }
 
-void FootprintModel::updateFootprintBar(const FootprintBar &bar)
-{
+void FootprintModel::updateFootprintBar(const FootprintBar &bar) {
     // Find the bar with the same timestamp
     for (int i = 0; i < m_footprintBars.size(); ++i) {
         if (m_footprintBars[i].timestamp == bar.timestamp) {
@@ -100,16 +89,13 @@ void FootprintModel::updateFootprintBar(const FootprintBar &bar)
     }
 }
 
-void FootprintModel::addTickData(const QDateTime &timestamp, double price, qint64 volume, const QString &direction)
-{
+void FootprintModel::addTickData(const QDateTime &timestamp, double price, qint64 volume, const QString &direction) {
     QDateTime barStartTime = getBarStartTime(timestamp);
     updateCurrentBar(barStartTime, price, volume, direction);
 }
 
-void FootprintModel::clear()
-{
-    if (m_footprintBars.isEmpty())
-        return;
+void FootprintModel::clear() {
+    if (m_footprintBars.isEmpty()) return;
 
     beginResetModel();
     m_footprintBars.clear();
@@ -119,50 +105,37 @@ void FootprintModel::clear()
     emit dataChanged();
 }
 
-void FootprintModel::setTimeframe(const QString &timeframe)
-{
+void FootprintModel::setTimeframe(const QString &timeframe) {
     if (m_timeframe != timeframe) {
         m_timeframe = timeframe;
         emit dataChanged();
     }
 }
 
-QString FootprintModel::getTimeframe() const
-{
-    return m_timeframe;
-}
+QString FootprintModel::getTimeframe() const { return m_timeframe; }
 
-void FootprintModel::setPriceStep(double step)
-{
+void FootprintModel::setPriceStep(double step) {
     if (m_priceStep != step) {
         m_priceStep = step;
         emit dataChanged();
     }
 }
 
-double FootprintModel::getPriceStep() const
-{
-    return m_priceStep;
-}
+double FootprintModel::getPriceStep() const { return m_priceStep; }
 
-int FootprintModel::getCount() const
-{
-    return m_footprintBars.size();
-}
+int FootprintModel::getCount() const { return m_footprintBars.size(); }
 
-FootprintBar FootprintModel::getFootprintBar(int index) const
-{
+FootprintBar FootprintModel::getFootprintBar(int index) const {
     if (index >= 0 && index < m_footprintBars.size()) {
         return m_footprintBars[index];
     }
     return FootprintBar();
 }
 
-QVariantList FootprintModel::getFootprintBars(int start, int count) const
-{
+QVariantList FootprintModel::getFootprintBars(int start, int count) const {
     QVariantList result;
     int end = qMin(start + count, m_footprintBars.size());
-    
+
     for (int i = start; i < end; ++i) {
         QVariantMap bar;
         const FootprintBar &footprintBar = m_footprintBars[i];
@@ -171,7 +144,7 @@ QVariantList FootprintModel::getFootprintBars(int start, int count) const
         bar["high"] = footprintBar.high;
         bar["low"] = footprintBar.low;
         bar["close"] = footprintBar.close;
-        
+
         QVariantList cells;
         for (const auto &cell : footprintBar.cells) {
             QVariantMap cellMap;
@@ -189,19 +162,19 @@ QVariantList FootprintModel::getFootprintBars(int start, int count) const
         bar["cells"] = cells;
         result.append(bar);
     }
-    
+
     return result;
 }
 
-void FootprintModel::updateCurrentBar(const QDateTime &timestamp, double price, qint64 volume, const QString &direction)
-{
+void FootprintModel::updateCurrentBar(const QDateTime &timestamp, double price, qint64 volume,
+                                      const QString &direction) {
     if (!m_currentBarMap.contains(timestamp)) {
         FootprintBar newBar(timestamp, price, price, price, price);
         m_currentBarMap[timestamp] = newBar;
     }
 
     FootprintBar &bar = m_currentBarMap[timestamp];
-    
+
     // Update OHLC
     if (price > bar.high) bar.high = price;
     if (price < bar.low) bar.low = price;
@@ -209,7 +182,7 @@ void FootprintModel::updateCurrentBar(const QDateTime &timestamp, double price, 
 
     // Round price to step
     double roundedPrice = roundToPriceStep(price);
-    
+
     // Find or create cell for this price
     FootprintCell *cell = nullptr;
     for (auto &existingCell : bar.cells) {
@@ -218,7 +191,7 @@ void FootprintModel::updateCurrentBar(const QDateTime &timestamp, double price, 
             break;
         }
     }
-    
+
     if (!cell) {
         bar.cells.append(FootprintCell(roundedPrice));
         cell = &bar.cells.last();
@@ -232,7 +205,7 @@ void FootprintModel::updateCurrentBar(const QDateTime &timestamp, double price, 
         cell->sellVolume += volume;
         cell->sellCount++;
     }
-    
+
     cell->totalVolume = cell->buyVolume + cell->sellVolume;
     cell->totalCount = cell->buyCount + cell->sellCount;
     cell->delta = cell->buyVolume - cell->sellVolume;
@@ -241,10 +214,9 @@ void FootprintModel::updateCurrentBar(const QDateTime &timestamp, double price, 
     calculateBarStatistics(bar);
 }
 
-QDateTime FootprintModel::getBarStartTime(const QDateTime &timestamp) const
-{
+QDateTime FootprintModel::getBarStartTime(const QDateTime &timestamp) const {
     QDateTime barStart = timestamp;
-    
+
     if (m_timeframe == "1m") {
         barStart.setTime(QTime(barStart.time().hour(), barStart.time().minute(), 0, 0));
     } else if (m_timeframe == "5m") {
@@ -258,25 +230,19 @@ QDateTime FootprintModel::getBarStartTime(const QDateTime &timestamp) const
     } else if (m_timeframe == "1h") {
         barStart.setTime(QTime(barStart.time().hour(), 0, 0, 0));
     }
-    
+
     return barStart;
 }
 
-double FootprintModel::roundToPriceStep(double price) const
-{
-    return qRound(price / m_priceStep) * m_priceStep;
-}
+double FootprintModel::roundToPriceStep(double price) const { return qRound(price / m_priceStep) * m_priceStep; }
 
-void FootprintModel::calculateBarStatistics(FootprintBar &bar)
-{
+void FootprintModel::calculateBarStatistics(FootprintBar &bar) {
     // Sort cells by price
-    std::sort(bar.cells.begin(), bar.cells.end(), [](const FootprintCell &a, const FootprintCell &b) {
-        return a.price < b.price;
-    });
+    std::sort(bar.cells.begin(), bar.cells.end(),
+              [](const FootprintCell &a, const FootprintCell &b) { return a.price < b.price; });
 }
 
-qint64 FootprintModel::calculateTotalBuyVolume(const FootprintBar &bar) const
-{
+qint64 FootprintModel::calculateTotalBuyVolume(const FootprintBar &bar) const {
     qint64 total = 0;
     for (const auto &cell : bar.cells) {
         total += cell.buyVolume;
@@ -284,8 +250,7 @@ qint64 FootprintModel::calculateTotalBuyVolume(const FootprintBar &bar) const
     return total;
 }
 
-qint64 FootprintModel::calculateTotalSellVolume(const FootprintBar &bar) const
-{
+qint64 FootprintModel::calculateTotalSellVolume(const FootprintBar &bar) const {
     qint64 total = 0;
     for (const auto &cell : bar.cells) {
         total += cell.sellVolume;
@@ -293,21 +258,18 @@ qint64 FootprintModel::calculateTotalSellVolume(const FootprintBar &bar) const
     return total;
 }
 
-qint64 FootprintModel::calculateTotalVolume(const FootprintBar &bar) const
-{
+qint64 FootprintModel::calculateTotalVolume(const FootprintBar &bar) const {
     return calculateTotalBuyVolume(bar) + calculateTotalSellVolume(bar);
 }
 
-double FootprintModel::calculateDelta(const FootprintBar &bar) const
-{
+double FootprintModel::calculateDelta(const FootprintBar &bar) const {
     return calculateTotalBuyVolume(bar) - calculateTotalSellVolume(bar);
 }
 
-double FootprintModel::calculateDeltaPercent(const FootprintBar &bar) const
-{
+double FootprintModel::calculateDeltaPercent(const FootprintBar &bar) const {
     qint64 totalVolume = calculateTotalVolume(bar);
     if (totalVolume == 0) return 0;
     return (calculateDelta(bar) / totalVolume) * 100.0;
-} 
-
 }
+
+} // namespace btra::gui
