@@ -16,6 +16,8 @@
 #include <QDateTime>
 #include <QVector>
 
+namespace btra::gui {
+
 /**
  * @brief 订单簿档位数据结构
  * 
@@ -365,5 +367,7 @@ private:
      */
     double calculateDepthPercentage(int index) const;
 };
+
+}
 
 #endif // ORDERBOOKMODEL_H 

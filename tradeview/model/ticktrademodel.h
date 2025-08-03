@@ -6,6 +6,8 @@
 #include <QDateTime>
 #include <QVector>
 
+namespace btra::gui {
+
 /**
  * @brief 逐笔成交数据结构
  * 
@@ -88,5 +90,7 @@ private:
     void updateLatestPrice();
     void updateTotalVolume();
 };
+
+}
 
 #endif // TICKTRADEMODEL_H 

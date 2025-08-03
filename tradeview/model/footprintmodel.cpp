@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <QTime>
 
+namespace btra::gui {
+
 FootprintModel::FootprintModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_timeframe("1m")
@@ -307,3 +309,5 @@ double FootprintModel::calculateDeltaPercent(const FootprintBar &bar) const
     if (totalVolume == 0) return 0;
     return (calculateDelta(bar) / totalVolume) * 100.0;
 } 
+
+}

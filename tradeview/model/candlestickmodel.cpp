@@ -1,6 +1,8 @@
 #include "candlestickmodel.h"
 #include <QDebug>
 
+namespace btra::gui {
+
 /**
  * @brief 构造函数
  * @param parent 父对象指针
@@ -264,3 +266,5 @@ void CandlestickModel::update_volume_range() {
     m_max_volume = qMax(m_max_volume, data.volume);
   }
 } 
+
+}

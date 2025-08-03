@@ -7,6 +7,8 @@
 #include <QVector>
 #include <QMap>
 
+namespace btra::gui {
+
 /**
  * @brief 足迹图单元格数据结构
  * 
@@ -131,5 +133,7 @@ private:
     double calculateDelta(const FootprintBar &bar) const;
     double calculateDeltaPercent(const FootprintBar &bar) const;
 };
+
+}
 
 #endif // FOOTPRINTMODEL_H 

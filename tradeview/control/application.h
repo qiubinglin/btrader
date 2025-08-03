@@ -14,6 +14,8 @@
 #include "orderbookmodel.h"
 #include "ticktrademodel.h"
 
+namespace btra::gui {
+
 // 前向声明
 class DataManager;
 class UIManager;
@@ -142,5 +144,7 @@ private:
     int m_argc;    ///< 命令行参数数量
     char** m_argv; ///< 命令行参数数组
 };
+
+}
 
 #endif // APPLICATION_H

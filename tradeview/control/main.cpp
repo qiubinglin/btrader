@@ -10,7 +10,7 @@
 int main(int argc, char *argv[])
 {
     // 创建应用程序实例
-    Application app(argc, argv);
+    btra::gui::Application app(argc, argv);
     
     // 初始化应用程序
     if (!app.initialize()) {

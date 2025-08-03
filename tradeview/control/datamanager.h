@@ -7,6 +7,8 @@
 #include <QMap>
 #include <QString>
 
+namespace btra::gui {
+
 // 前向声明
 class CandlestickModel;
 class TickTradeModel;
@@ -182,5 +184,7 @@ private:
     QMap<QString, double> m_lastPrices;        ///< 最新价格缓存
     QMap<QString, QDateTime> m_lastUpdateTime; ///< 最后更新时间
 };
+
+}
 
 #endif // DATAMANAGER_H 

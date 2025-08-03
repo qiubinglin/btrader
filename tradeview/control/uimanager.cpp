@@ -6,6 +6,8 @@
 #include <QWindow>
 #include <QDebug>
 
+namespace btra::gui {
+
 UIManager::UIManager(QObject *parent)
     : QObject(parent)
     , m_qmlEngine(nullptr)
@@ -215,3 +217,5 @@ void UIManager::setupWindowProperties()
         qDebug() << "Window properties configured";
     }
 } 
+
+}

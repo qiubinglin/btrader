@@ -1,6 +1,8 @@
 #include "ticktrademodel.h"
 #include <QDebug>
 
+namespace btra::gui {
+
 TickTradeModel::TickTradeModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_maxCount(1000)
@@ -179,3 +181,5 @@ void TickTradeModel::updateTotalVolume()
         m_totalVolume += data.volume;
     }
 } 
+
+}

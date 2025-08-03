@@ -10,6 +10,8 @@
 #include <QDebug>
 #include <QRandomGenerator>
 
+namespace btra::gui {
+
 DataManager::DataManager(QObject *parent)
     : QObject(parent)
     , m_candlestickModel(nullptr)
@@ -303,3 +305,5 @@ void DataManager::updateConnectionStatus(bool connected)
         }
     }
 } 
+
+}

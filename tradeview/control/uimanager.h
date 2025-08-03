@@ -7,6 +7,8 @@
 #include <QQuickStyle>
 #include <QWindow>
 
+namespace btra::gui {
+
 /**
  * @brief UI管理器类
  * 
@@ -170,5 +172,7 @@ private:
     int m_fontSize;                           ///< 字体大小
     QMap<QString, QString> m_registeredComponents; ///< 已注册的组件
 };
+
+}
 
 #endif // UIMANAGER_H 

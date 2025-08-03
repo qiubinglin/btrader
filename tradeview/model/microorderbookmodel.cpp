@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <algorithm>
 
+namespace btra::gui {
+
 MicroOrderBookModel::MicroOrderBookModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_maxLevels(10)
@@ -361,3 +363,5 @@ QString MicroOrderBookModel::getDepthColor(int index) const
     
     return "#808080";  // Gray
 } 
+
+}

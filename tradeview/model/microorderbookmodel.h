@@ -6,6 +6,8 @@
 #include <QDateTime>
 #include <QVector>
 
+namespace btra::gui {
+
 /**
  * @brief 微盘口档位数据结构
  * 
@@ -104,5 +106,7 @@ private:
     qint64 calculateCumulativeVolume(int index) const;
     QString getDepthColor(int index) const;
 };
+
+}
 
 #endif // MICROORDERBOOKMODEL_H 

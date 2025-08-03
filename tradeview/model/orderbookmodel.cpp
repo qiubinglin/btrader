@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <algorithm>
 
+namespace btra::gui {
+
 OrderBookModel::OrderBookModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_maxLevels(20)
@@ -295,3 +297,5 @@ double OrderBookModel::calculateDepthPercentage(int index) const
     // Return cumulative depth percentage
     return (double)cumulativeVolume / totalVolume * 100.0;
 } 
+
+}

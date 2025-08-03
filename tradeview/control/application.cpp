@@ -10,6 +10,8 @@
 #include "datamanager.h"
 #include "uimanager.h"
 
+namespace btra::gui {
+
 Application::Application(int argc, char *argv[], QObject *parent)
     : QObject(parent),
       m_app(nullptr),
@@ -180,4 +182,6 @@ void Application::setupApplicationInfo() {
     m_app->setApplicationVersion("1.0.0");
     m_app->setOrganizationName("BTrader");
     m_app->setOrganizationDomain("btrader.com");
+}
+
 }

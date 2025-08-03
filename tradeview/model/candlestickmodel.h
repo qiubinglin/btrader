@@ -6,6 +6,8 @@
 #include <QDateTime>
 #include <QVector>
 
+namespace btra::gui {
+
 /**
  * @brief K线数据结构
  * 
@@ -219,5 +221,7 @@ class CandlestickModel : public QAbstractListModel {
    */
   void update_volume_range();
 };
+
+}
 
 #endif // CANDLESTICKMODEL_H 
