@@ -87,7 +87,10 @@ Page {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: loadOrderBookData()
+                onClicked: {
+                    // 数据由DataManager自动更新，这里只是记录日志
+                    console.log("Manual refresh requested, but data is managed by DataManager")
+                }
             }
 
             // 自动刷新开关
@@ -240,6 +243,8 @@ Page {
                 color: index % 2 === 0 ? "#1e1e1e" : "#252525"
                 border.color: "#404040"
                 border.width: 0.5
+                
+
 
                 RowLayout {
                     anchors.fill: parent
@@ -344,55 +349,14 @@ Page {
         repeat: true
         onTriggered: {
             if (autoRefreshCheckBox.checked) {
-                updateOrderBookData()
+                // 数据由DataManager自动更新，这里不需要手动更新
+                console.log("Order book data refreshed by DataManager")
             }
         }
     }
 
-    // 更新订单簿数据的函数
-    function updateOrderBookData() {
-        const basePrice = 50000 + Math.random() * 1000
-        const bids = []
-        const asks = []
-
-        // 生成买单数据
-        for (let i = 0; i < maxLevelsSpinBox.value; i++) {
-            const price = basePrice - (i + 1) * 10
-            const volume = Math.floor(Math.random() * 1000) + 100
-            const orderCount = Math.floor(Math.random() * 50) + 1
-
-            bids.push({
-                price: price,
-                volume: volume,
-                orderCount: orderCount,
-                side: "bid"
-            })
-        }
-
-        // 生成卖单数据
-        for (let i = 0; i < maxLevelsSpinBox.value; i++) {
-            const price = basePrice + (i + 1) * 10
-            const volume = Math.floor(Math.random() * 1000) + 100
-            const orderCount = Math.floor(Math.random() * 50) + 1
-
-            asks.push({
-                price: price,
-                volume: volume,
-                orderCount: orderCount,
-                side: "ask"
-            })
-        }
-
-        orderBookModel.updateOrderBook(bids, asks)
-    }
-
-    // 加载初始数据的函数
-    function loadOrderBookData() {
-        updateOrderBookData()
-    }
-
     // 页面加载时初始化数据
     Component.onCompleted: {
-        loadOrderBookData()
+        console.log("OrderBookPage loaded, data will be provided by DataManager")
     }
 } 

@@ -204,12 +204,12 @@ void OrderBookModel::updateCombinedOrderBook()
 {
     m_combinedOrderBook.clear();
     
-    // Add asks (in reverse order for display)
-    for (int i = m_asks.size() - 1; i >= 0; --i) {
-        m_combinedOrderBook.append(m_asks[i]);
+    // Add asks (in ascending order for display - lowest ask first)
+    for (const auto &ask : m_asks) {
+        m_combinedOrderBook.append(ask);
     }
     
-    // Add bids
+    // Add bids (in descending order for display - highest bid first)
     for (const auto &bid : m_bids) {
         m_combinedOrderBook.append(bid);
     }
@@ -246,14 +246,23 @@ qint64 OrderBookModel::calculateCumulativeVolume(int index) const
     const QString &side = m_combinedOrderBook[index].side;
     
     if (side == "ask") {
-        // For asks, sum from current level to best ask
-        for (int i = index; i < m_combinedOrderBook.size() && m_combinedOrderBook[i].side == "ask"; ++i) {
+        // For asks, sum from best ask (first ask) to current level
+        for (int i = 0; i <= index && m_combinedOrderBook[i].side == "ask"; ++i) {
             cumulative += m_combinedOrderBook[i].volume;
         }
     } else if (side == "bid") {
-        // For bids, sum from current level to best bid
-        for (int i = index; i >= 0 && m_combinedOrderBook[i].side == "bid"; --i) {
-            cumulative += m_combinedOrderBook[i].volume;
+        // For bids, sum from best bid (first bid after asks) to current level
+        int bidStartIndex = -1;
+        for (int i = 0; i < m_combinedOrderBook.size(); ++i) {
+            if (m_combinedOrderBook[i].side == "bid") {
+                bidStartIndex = i;
+                break;
+            }
+        }
+        if (bidStartIndex >= 0) {
+            for (int i = bidStartIndex; i <= index && m_combinedOrderBook[i].side == "bid"; ++i) {
+                cumulative += m_combinedOrderBook[i].volume;
+            }
         }
     }
     
@@ -280,5 +289,9 @@ double OrderBookModel::calculateDepthPercentage(int index) const
         return 0;
     }
     
-    return (double)m_combinedOrderBook[index].volume / totalVolume * 100.0;
+    // Calculate cumulative volume for this level
+    qint64 cumulativeVolume = calculateCumulativeVolume(index);
+    
+    // Return cumulative depth percentage
+    return (double)cumulativeVolume / totalVolume * 100.0;
 } 

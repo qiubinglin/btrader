@@ -168,14 +168,25 @@ void DataManager::generateSimulatedCandlestickData(const QString& symbol)
     
     // 生成模拟K线数据
     double basePrice = m_lastPrices[symbol];
+    if (basePrice <= 0) {
+        basePrice = 50000.0; // 重置为默认价格
+        m_lastPrices[symbol] = basePrice;
+    }
+    
     double change = (QRandomGenerator::global()->bounded(200) - 100) / 100.0; // -1% 到 +1%
     double newPrice = basePrice * (1 + change);
+    
+    // 确保新价格不会变成负数
+    if (newPrice <= 0) {
+        newPrice = basePrice; // 保持原价格
+    }
     
     // 更新最新价格
     m_lastPrices[symbol] = newPrice;
     
     // 创建K线数据
-    QDateTime timestamp = QDateTime::currentDateTime();
+    QDateTime endTime = QDateTime::currentDateTime();
+    QDateTime startTime = endTime.addSecs(-60); // 1分钟K线
     double open = basePrice;
     double close = newPrice;
     double high = qMax(open, close) + QRandomGenerator::global()->bounded(50.0);
@@ -183,7 +194,7 @@ void DataManager::generateSimulatedCandlestickData(const QString& symbol)
     qint64 volume = QRandomGenerator::global()->bounded(1000) + 100;
     double amount = volume * close;
     
-    CandlestickData candlestick(timestamp, open, high, low, close, volume, amount);
+    CandlestickData candlestick(startTime, endTime, open, high, low, close, volume, amount);
     m_candlestickModel->add_candlestick(candlestick);
     
     qDebug() << "Generated candlestick for" << symbol << ":" << open << high << low << close << volume;
@@ -195,6 +206,12 @@ void DataManager::generateSimulatedTickTradeData(const QString& symbol)
     
     // 生成模拟逐笔成交数据
     double price = m_lastPrices[symbol] + (QRandomGenerator::global()->bounded(200) - 100) / 100.0;
+    
+    // 确保价格不会变成负数
+    if (price <= 0) {
+        price = 50000.0; // 重置为默认价格
+    }
+    
     qint64 volume = QRandomGenerator::global()->bounded(100) + 1;
     bool isBuy = QRandomGenerator::global()->bounded(2) == 1;
     
@@ -218,26 +235,29 @@ void DataManager::generateSimulatedOrderBookData(const QString& symbol)
     
     // 生成模拟买卖档位数据
     double basePrice = m_lastPrices[symbol];
+    if (basePrice <= 0) {
+        basePrice = 50000.0; // 默认价格
+    }
     
     // 清空现有数据
     m_orderBookModel->clear();
     
-    // 生成买单数据
+    // 生成买单数据（价格递减，最高价在最前面）
     QVector<OrderBookLevel> bids;
     for (int i = 0; i < 10; ++i) {
-        double price = basePrice - (i + 1) * 0.1;
-        qint64 volume = QRandomGenerator::global()->bounded(100) + 10;
-        int orderCount = QRandomGenerator::global()->bounded(20) + 1;
+        double price = basePrice - (i + 1) * 10.0; // 价格间隔10
+        qint64 volume = QRandomGenerator::global()->bounded(1000) + 100;
+        int orderCount = QRandomGenerator::global()->bounded(50) + 1;
         OrderBookLevel level(price, volume, orderCount, "bid");
         bids.append(level);
     }
     
-    // 生成卖单数据
+    // 生成卖单数据（价格递增，最低价在最前面）
     QVector<OrderBookLevel> asks;
     for (int i = 0; i < 10; ++i) {
-        double price = basePrice + (i + 1) * 0.1;
-        qint64 volume = QRandomGenerator::global()->bounded(100) + 10;
-        int orderCount = QRandomGenerator::global()->bounded(20) + 1;
+        double price = basePrice + (i + 1) * 10.0; // 价格间隔10
+        qint64 volume = QRandomGenerator::global()->bounded(1000) + 100;
+        int orderCount = QRandomGenerator::global()->bounded(50) + 1;
         OrderBookLevel level(price, volume, orderCount, "ask");
         asks.append(level);
     }
@@ -245,6 +265,7 @@ void DataManager::generateSimulatedOrderBookData(const QString& symbol)
     m_orderBookModel->updateOrderBook(bids, asks);
     
     qDebug() << "Generated order book for" << symbol << "with" << bids.size() << "bids and" << asks.size() << "asks";
+    qDebug() << "Base price:" << basePrice << "Best bid:" << (bids.isEmpty() ? 0 : bids.first().price) << "Best ask:" << (asks.isEmpty() ? 0 : asks.first().price);
 }
 
 void DataManager::generateSimulatedFootprintData(const QString& symbol)

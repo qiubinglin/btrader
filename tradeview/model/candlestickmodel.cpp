@@ -40,8 +40,10 @@ QVariant CandlestickModel::data(const QModelIndex& index, int role) const {
   const CandlestickData& data = m_candlesticks[index.row()];
 
   switch (role) {
-    case kTimestampRole:
-      return data.timestamp;                    // 返回时间戳
+    case kStartTimeRole:
+      return data.start_time;                   // 返回开始时间
+    case kEndTimeRole:
+      return data.end_time;                     // 返回结束时间
     case kOpenRole:
       return data.open;                         // 返回开盘价
     case kHighRole:
@@ -77,7 +79,8 @@ QVariant CandlestickModel::data(const QModelIndex& index, int role) const {
  */
 QHash<int, QByteArray> CandlestickModel::roleNames() const {
   QHash<int, QByteArray> roles;
-  roles[kTimestampRole] = "timestamp";      // 时间戳
+  roles[kStartTimeRole] = "start_time";     // 开始时间
+  roles[kEndTimeRole] = "end_time";         // 结束时间
   roles[kOpenRole] = "open";                // 开盘价
   roles[kHighRole] = "high";                // 最高价
   roles[kLowRole] = "low";                  // 最低价
@@ -113,9 +116,9 @@ void CandlestickModel::add_candlestick(const CandlestickData& data) {
  * @param data K线数据
  */
 void CandlestickModel::update_candlestick(const CandlestickData& data) {
-  // Find the candlestick with the same timestamp
+  // Find the candlestick with the same end_time
   for (int i = 0; i < m_candlesticks.size(); ++i) {
-    if (m_candlesticks[i].timestamp == data.timestamp) {
+    if (m_candlesticks[i].end_time == data.end_time) {
       m_candlesticks[i] = data;
       QModelIndex index = createIndex(i, 0);
       emit QAbstractListModel::dataChanged(index, index);
@@ -197,7 +200,8 @@ QVariantList CandlestickModel::get_candlesticks(int start, int count) const {
   for (int i = start; i < end; ++i) {
     QVariantMap candlestick;
     const CandlestickData& data = m_candlesticks[i];
-    candlestick["timestamp"] = data.timestamp;
+    candlestick["start_time"] = data.start_time;
+    candlestick["end_time"] = data.end_time;
     candlestick["open"] = data.open;
     candlestick["high"] = data.high;
     candlestick["low"] = data.low;
@@ -207,6 +211,27 @@ QVariantList CandlestickModel::get_candlesticks(int start, int count) const {
     result.append(candlestick);
   }
 
+  return result;
+}
+
+/**
+ * @brief 获取指定索引的K线数据（QML友好接口）
+ * @param index 索引
+ * @return K线数据对象
+ */
+QVariantMap CandlestickModel::get(int index) const {
+  QVariantMap result;
+  if (index >= 0 && index < m_candlesticks.size()) {
+    const CandlestickData& data = m_candlesticks[index];
+    result["start_time"] = data.start_time;
+    result["end_time"] = data.end_time;
+    result["open"] = data.open;
+    result["high"] = data.high;
+    result["low"] = data.low;
+    result["close"] = data.close;
+    result["volume"] = data.volume;
+    result["amount"] = data.amount;
+  }
   return result;
 }
 
