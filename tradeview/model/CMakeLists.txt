@@ -29,9 +29,6 @@ set_target_properties(tradeview_models PROPERTIES
     AUTORCC OFF     # 禁用资源编译器
 )
 
-# 查找Qt6组件
-find_package(Qt6 REQUIRED COMPONENTS Core)
-
 # 检查Qt6是否找到
 if(NOT Qt6_FOUND)
     message(FATAL_ERROR "Qt6 not found. Please check your Qt6 installation at ${CMAKE_PREFIX_PATH}")
@@ -46,15 +43,3 @@ target_link_libraries(tradeview_models
 target_include_directories(tradeview_models PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-# 安装规则
-install(TARGETS tradeview_models
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-)
-
-# 安装头文件
-install(FILES ${MODEL_HEADERS}
-    DESTINATION include/tradeview/model
-) 

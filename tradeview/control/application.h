@@ -9,6 +9,7 @@
 
 // 包含模型头文件
 #include "candlestickmodel.h"
+#include "coreagent.h"
 #include "footprintmodel.h"
 #include "microorderbookmodel.h"
 #include "orderbookmodel.h"
@@ -41,6 +42,12 @@ public:
      * @return 初始化是否成功
      */
     bool initialize();
+
+    /**
+     * @brief Register handlers of the message from core
+     *
+     */
+    void RegisterCoreMsgHandlers();
 
     /**
      * @brief 运行应用程序
@@ -133,6 +140,7 @@ private:
     QQmlApplicationEngine* m_qmlEngine; ///< QML引擎
     DataManager* m_dataManager;         ///< 数据管理器
     UIManager* m_uiManager;             ///< UI管理器
+    CoreAgent* coreagent_{nullptr};     /* Communication with core engine. */
 
     // 数据模型
     CandlestickModel* m_candlestickModel;       ///< K线数据模型

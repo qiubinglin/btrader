@@ -7,6 +7,7 @@
 #include <QQmlContext>
 #include <QQuickStyle>
 
+#include "control/coreagent.h"
 #include "datamanager.h"
 #include "uimanager.h"
 
@@ -79,9 +80,15 @@ bool Application::initialize() {
         return false;
     }
 
+    /* Create CoreAgent */
+    coreagent_ = new CoreAgent(this);
+
+    RegisterCoreMsgHandlers();
+
     // 注册管理器到QML上下文
     m_qmlEngine->rootContext()->setContextProperty("dataManager", m_dataManager);
     m_qmlEngine->rootContext()->setContextProperty("uiManager", m_uiManager);
+    m_qmlEngine->rootContext()->setContextProperty("coreagent", coreagent_);
 
     // 连接数据源并订阅交易对
     m_dataManager->connectDataSource("simulation");
@@ -93,6 +100,12 @@ bool Application::initialize() {
     emit initialized();
 
     return true;
+}
+
+void Application::RegisterCoreMsgHandlers() {
+    auto &corecomm = coreagent_->GetCoreComm();
+    auto data_mgr = this->m_dataManager;
+    corecomm.register_handler(MsgTag::Bar, [data_mgr](const EventSPtr &event) { data_mgr->handleBar(event); });
 }
 
 int Application::run() {

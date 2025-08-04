@@ -1,0 +1,27 @@
+#include "coreagent.h"
+
+#include <memory>
+
+#include "types.h"
+#include "workthread.h"
+
+namespace btra::gui {
+
+CoreAgent::CoreAgent(QObject* parent) : QObject(parent) {}
+
+CoreAgent::~CoreAgent() { StopListening(); }
+
+void CoreAgent::StartListening() {
+    listening_th_ = std::make_unique<WorkThread>();
+    listening_th_->setup([this] { this->corecomm_.listening(); });
+    listening_th_->start();
+}
+
+void CoreAgent::StopListening() {
+    /* Stop existing thread */
+    if (listening_th_) {
+        listening_th_->terminate();
+    }
+}
+
+} // namespace btra::gui

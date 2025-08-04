@@ -288,4 +288,6 @@ void DataManager::updateConnectionStatus(bool connected) {
     }
 }
 
+void DataManager::handleBar(const EventSPtr& event) {}
+
 } // namespace btra::gui

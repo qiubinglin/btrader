@@ -8,3 +8,6 @@ if(NOT CMAKE_BUILD_TYPE)
     # set(CMAKE_BUILD_TYPE RelWithDebInfo)  # -g -O2
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+# Use this to help clangd server to parse the project
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

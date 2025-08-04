@@ -7,6 +7,8 @@
 #include <QString>
 #include <QTimer>
 
+#include "core/event.h"
+
 namespace btra::gui {
 
 // 前向声明
@@ -158,6 +160,11 @@ private:
      * @param connected 是否已连接
      */
     void updateConnectionStatus(bool connected);
+
+public:
+    /* Functions to handle incoming message begin */
+    void handleBar(const EventSPtr &);
+    /* Functions to handle incoming message end */
 
 private:
     // 数据模型

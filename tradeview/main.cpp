@@ -5,7 +5,7 @@
 #include <QQmlContext>
 #include <QQuickStyle>
 
-#include "application.h"
+#include "control/application.h"
 
 int main(int argc, char *argv[]) {
     // 创建应用程序实例
