@@ -8,6 +8,9 @@ Page {
         color: "#1e1e1e"
     }
 
+    property string symbol: ""
+    property var orderBookModel: null
+
     // Toolbar
     Rectangle {
         id: toolbar
@@ -27,7 +30,14 @@ Page {
             // Symbol selection
             ComboBox {
                 id: symbolComboBox
-                model: ["BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT"]
+                model: {
+                    if (configManager && typeof configManager.getEnabledInstruments === 'function') {
+                        return configManager.getEnabledInstruments()
+                    } else {
+                        console.log("ConfigManager not available, using default symbols")
+                        return null
+                    }
+                }
                 currentIndex: 0
                 background: Rectangle {
                     color: "#353535"
@@ -42,8 +52,10 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onCurrentTextChanged: {
-                    orderBookModel.clear()
-                    loadOrderBookData()
+                    if (currentText !== "") {
+                        symbol = currentText
+                        loadOrderBookData()
+                    }
                 }
             }
 
@@ -67,7 +79,9 @@ Page {
                     return parseInt(text.replace("Levels: ", ""))
                 }
                 onValueChanged: {
-                    orderBookModel.setMaxLevels(value)
+                    if (orderBookModel) {
+                        orderBookModel.setMaxLevels(value)
+                    }
                 }
             }
 
@@ -88,8 +102,37 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onClicked: {
-                    // Data is automatically updated by DataManager, just log here
-                    console.log("Manual refresh requested, but data is managed by DataManager")
+                    console.log("Manual refresh requested")
+                    loadOrderBookData()
+                }
+            }
+
+            // Debug button
+            Button {
+                text: "Debug"
+                background: Rectangle {
+                    color: parent.pressed ? "#404040" : 
+                           parent.hovered ? "#353535" : "#2d2d2d"
+                    border.color: "#404040"
+                    border.width: 1
+                    radius: 4
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: "#ffffff"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked: {
+                    console.log("Debug button clicked")
+                    console.log("Symbol:", symbol)
+                    console.log("OrderBookModel:", orderBookModel)
+                    if (orderBookModel) {
+                        console.log("Row count:", orderBookModel.rowCount)
+                        console.log("Best bid:", orderBookModel.getBestBid())
+                        console.log("Best ask:", orderBookModel.getBestAsk())
+                        console.log("Spread:", orderBookModel.getSpread())
+                    }
                 }
             }
 
@@ -123,20 +166,26 @@ Page {
 
             // Statistics
             Text {
-                text: "Best Bid: " + (orderBookModel.bestBid || "0.00")
+                text: "Best Bid: " + (orderBookModel && orderBookModel.getBestBid ? orderBookModel.getBestBid().toFixed(2) : "0.00")
                 color: "#00ff00"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "Best Ask: " + (orderBookModel.bestAsk || "0.00")
+                text: "Best Ask: " + (orderBookModel && orderBookModel.getBestAsk ? orderBookModel.getBestAsk().toFixed(2) : "0.00")
                 color: "#ff0000"
                 font.pixelSize: 12
             }
 
             Text {
-                text: "Spread: " + (orderBookModel.spread || "0.00")
+                text: "Spread: " + (orderBookModel && orderBookModel.getSpread ? orderBookModel.getSpread().toFixed(2) : "0.00")
                 color: "#ffffff"
+                font.pixelSize: 12
+            }
+
+            Text {
+                text: "Rows: " + (orderBookModel ? orderBookModel.rowCount : "0")
+                color: "#ffff00"
                 font.pixelSize: 12
             }
         }
@@ -355,8 +404,78 @@ Page {
         }
     }
 
+    // Function to load order book data for a specific symbol
+    function loadOrderBookData() {
+        console.log("Loading order book data for symbol:", symbol)
+        
+        if (!symbol || symbol === "") {
+            console.log("No symbol specified, using default")
+            symbol = symbolComboBox.currentText
+        }
+        
+        if (typeof model_mgr !== 'undefined' && model_mgr) {
+            try {
+                // Get order book model from model manager
+                orderBookModel = model_mgr.reqOrderBookModel({"symbol": symbol})
+                
+                if (orderBookModel) {
+                    console.log("Successfully loaded order book model for symbol:", symbol)
+                    
+                    // Set max levels if spinbox has a value
+                    if (maxLevelsSpinBox.value > 0) {
+                        orderBookModel.setMaxLevels(maxLevelsSpinBox.value)
+                    }
+                    
+                    // Connect to model signals for real-time updates
+                    orderBookModel.dataChanged.connect(function() {
+                        console.log("Order book data changed for symbol:", symbol)
+                        // Force ListView refresh
+                        orderBookListView.model = null
+                        orderBookListView.model = orderBookModel
+                    })
+                    
+                    orderBookModel.orderBookUpdated.connect(function() {
+                        console.log("Order book updated for symbol:", symbol)
+                        // Force ListView refresh
+                        orderBookListView.model = null
+                        orderBookListView.model = orderBookModel
+                    })
+                    
+                } else {
+                    console.log("Failed to get order book model for symbol:", symbol)
+                }
+            } catch (error) {
+                console.error("Error loading order book data:", error)
+            }
+        } else {
+            console.log("Model manager not available")
+        }
+    }
+
     // Initialize data when page loads
     Component.onCompleted: {
-        console.log("OrderBookPage loaded, data will be provided by DataManager")
+        console.log("OrderBookPage loaded, initializing order book model")
+        
+        // Set initial symbol
+        if (symbolComboBox.count > 0) {
+            symbol = symbolComboBox.currentText
+        }
+        
+        // Load initial order book data
+        loadOrderBookData()
+        
+        // Force initial data generation if no data exists
+        if (orderBookModel && orderBookModel.rowCount() === 0) {
+            console.log("No order book data found, triggering initial data generation")
+            // Trigger a manual refresh to generate initial data
+            setTimeout(function() {
+                if (orderBookModel && orderBookModel.rowCount() === 0) {
+                    console.log("Still no data, forcing refresh")
+                    loadOrderBookData()
+                }
+            }, 1000)
+        }
+        
+        console.log("OrderBookPage initialization completed")
     }
 } 

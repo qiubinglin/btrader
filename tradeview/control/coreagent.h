@@ -5,7 +5,6 @@
 
 #include "control/workthread.h"
 #include "core/corecomm.h"
-#include "workthread.h"
 
 namespace btra::gui {
 
@@ -22,7 +21,7 @@ public:
     void StartListening();
     void StopListening();
 
-    CoreComm &GetCoreComm() { return corecomm_; }
+    CoreComm& GetCoreComm() { return corecomm_; }
 
 private:
     CoreComm corecomm_;

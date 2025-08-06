@@ -8,15 +8,10 @@
 #include <QTimer>
 
 #include "core/event.h"
+#include "guidb/database.h"
+#include "control/configmanager.h"
 
 namespace btra::gui {
-
-// 前向声明
-class CandlestickModel;
-class TickTradeModel;
-class OrderBookModel;
-class FootprintModel;
-class MicroOrderBookModel;
 
 /**
  * @brief 数据管理器类
@@ -31,7 +26,7 @@ class DataManager : public QObject {
     Q_OBJECT
 
 public:
-    explicit DataManager(QObject* parent = nullptr);
+    explicit DataManager(DatabaseSPtr database, ConfigManager *config_mgr, QObject* parent = nullptr);
     ~DataManager();
 
     /**
@@ -39,17 +34,6 @@ public:
      * @return 初始化是否成功
      */
     bool initialize();
-
-    /**
-     * @brief 设置数据模型
-     * @param candlestickModel K线数据模型
-     * @param tickTradeModel 逐笔成交模型
-     * @param orderBookModel 买卖档位模型
-     * @param footprintModel 足迹图模型
-     * @param microOrderBookModel 微盘口模型
-     */
-    void setModels(CandlestickModel* candlestickModel, TickTradeModel* tickTradeModel, OrderBookModel* orderBookModel,
-                   FootprintModel* footprintModel, MicroOrderBookModel* microOrderBookModel);
 
     /**
      * @brief 连接数据源
@@ -144,36 +128,19 @@ private:
     void generateSimulatedOrderBookData(const QString& symbol);
 
     /**
-     * @brief 生成模拟足迹图数据
-     * @param symbol 交易对符号
-     */
-    void generateSimulatedFootprintData(const QString& symbol);
-
-    /**
-     * @brief 生成模拟微盘口数据
-     * @param symbol 交易对符号
-     */
-    void generateSimulatedMicroOrderBookData(const QString& symbol);
-
-    /**
      * @brief 更新连接状态
      * @param connected 是否已连接
      */
     void updateConnectionStatus(bool connected);
 
 public:
+    void setDatabase(DatabaseSPtr ptr) { database_ = ptr; }
+
     /* Functions to handle incoming message begin */
-    void handleBar(const EventSPtr &);
+    void handleBar(const EventSPtr&);
     /* Functions to handle incoming message end */
 
 private:
-    // 数据模型
-    CandlestickModel* m_candlestickModel;       ///< K线数据模型
-    TickTradeModel* m_tickTradeModel;           ///< 逐笔成交模型
-    OrderBookModel* m_orderBookModel;           ///< 买卖档位模型
-    FootprintModel* m_footprintModel;           ///< 足迹图模型
-    MicroOrderBookModel* m_microOrderBookModel; ///< 微盘口模型
-
     // 连接状态
     bool m_isConnected;              ///< 是否已连接
     QString m_dataSource;            ///< 数据源地址
@@ -186,6 +153,9 @@ private:
     // 模拟数据
     QMap<QString, double> m_lastPrices;        ///< 最新价格缓存
     QMap<QString, QDateTime> m_lastUpdateTime; ///< 最后更新时间
+
+    DatabaseSPtr database_{nullptr};
+    ConfigManager *config_mgr_{nullptr};
 };
 
 } // namespace btra::gui

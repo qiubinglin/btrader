@@ -4,25 +4,20 @@
 #include <QDebug>
 #include <QRandomGenerator>
 #include <QTimer>
+#include <utility>
 
-#include "../model/candlestickmodel.h"
-#include "../model/footprintmodel.h"
-#include "../model/microorderbookmodel.h"
-#include "../model/orderbookmodel.h"
-#include "../model/ticktrademodel.h"
+#include "guidb/kline.h"
+#include "guidb/orderbookset.h"
 
 namespace btra::gui {
 
-DataManager::DataManager(QObject* parent)
+DataManager::DataManager(DatabaseSPtr database, ConfigManager* config_mgr, QObject* parent)
     : QObject(parent),
-      m_candlestickModel(nullptr),
-      m_tickTradeModel(nullptr),
-      m_orderBookModel(nullptr),
-      m_footprintModel(nullptr),
-      m_microOrderBookModel(nullptr),
       m_isConnected(false),
       m_simulationTimer(nullptr),
-      m_connectionTimer(nullptr) {}
+      m_connectionTimer(nullptr),
+      database_(database),
+      config_mgr_(config_mgr) {}
 
 DataManager::~DataManager() {
     if (m_simulationTimer) {
@@ -49,18 +44,11 @@ bool DataManager::initialize() {
     // 初始化模拟数据
     initializeSimulatedData();
 
+    // 自动连接并开始生成数据
+    connectDataSource("simulation");
+
     qDebug() << "DataManager initialized successfully";
     return true;
-}
-
-void DataManager::setModels(CandlestickModel* candlestickModel, TickTradeModel* tickTradeModel,
-                            OrderBookModel* orderBookModel, FootprintModel* footprintModel,
-                            MicroOrderBookModel* microOrderBookModel) {
-    m_candlestickModel = candlestickModel;
-    m_tickTradeModel = tickTradeModel;
-    m_orderBookModel = orderBookModel;
-    m_footprintModel = footprintModel;
-    m_microOrderBookModel = microOrderBookModel;
 }
 
 bool DataManager::connectDataSource(const QString& dataSource) {
@@ -121,8 +109,6 @@ void DataManager::onSimulateDataUpdate() {
         generateSimulatedCandlestickData(symbol);
         generateSimulatedTickTradeData(symbol);
         generateSimulatedOrderBookData(symbol);
-        generateSimulatedFootprintData(symbol);
-        generateSimulatedMicroOrderBookData(symbol);
 
         // 更新最后更新时间
         m_lastUpdateTime[symbol] = QDateTime::currentDateTime();
@@ -144,16 +130,15 @@ void DataManager::onConnectionTimeout() {
 
 void DataManager::initializeSimulatedData() {
     // 初始化默认交易对
-    QStringList defaultSymbols = {"BTC/USDT", "ETH/USDT", "BNB/USDT"};
+    QStringList defaultSymbols = config_mgr_->getEnabledInstruments();
     for (const QString& symbol : defaultSymbols) {
+        subscribeSymbol(symbol);
         m_lastPrices[symbol] = 50000.0 + QRandomGenerator::global()->bounded(1000.0);
         m_lastUpdateTime[symbol] = QDateTime::currentDateTime();
     }
 }
 
 void DataManager::generateSimulatedCandlestickData(const QString& symbol) {
-    if (!m_candlestickModel) return;
-
     // 生成模拟K线数据
     double basePrice = m_lastPrices[symbol];
     if (basePrice <= 0) {
@@ -182,15 +167,18 @@ void DataManager::generateSimulatedCandlestickData(const QString& symbol) {
     qint64 volume = QRandomGenerator::global()->bounded(1000) + 100;
     double amount = volume * close;
 
-    CandlestickData candlestick(startTime, endTime, open, high, low, close, volume, amount);
-    m_candlestickModel->add_candlestick(candlestick);
+    KLine candlestick(startTime, endTime, open, high, low, close, volume, amount);
+    auto dataset = database_->reqKlineDB(symbol.toStdString());
+    dataset->push_back(candlestick);
+    if (dataset->size() > 1000) {
+        dataset->pop_front();
+    }
+    dataset->notify_all(NotifyType::Update);
 
     qDebug() << "Generated candlestick for" << symbol << ":" << open << high << low << close << volume;
 }
 
 void DataManager::generateSimulatedTickTradeData(const QString& symbol) {
-    if (!m_tickTradeModel) return;
-
     // 生成模拟逐笔成交数据
     double price = m_lastPrices[symbol] + (QRandomGenerator::global()->bounded(200) - 100) / 100.0;
 
@@ -211,22 +199,21 @@ void DataManager::generateSimulatedTickTradeData(const QString& symbol) {
     QString tradeId = QString("T%1").arg(QDateTime::currentMSecsSinceEpoch());
 
     TickTradeData tickData(timestamp, price, volume, direction, tradeId, symbol);
-    m_tickTradeModel->addTickTrade(tickData);
+    
+    // 添加到数据库
+    auto dataset = database_->reqTickTradeBook(symbol.toStdString());
+    dataset->add(tickData);
+    dataset->notify_all(NotifyType::Update);
 
     qDebug() << "Generated tick trade for" << symbol << ":" << price << volume << (isBuy ? "BUY" : "SELL");
 }
 
 void DataManager::generateSimulatedOrderBookData(const QString& symbol) {
-    if (!m_orderBookModel) return;
-
     // 生成模拟买卖档位数据
     double basePrice = m_lastPrices[symbol];
     if (basePrice <= 0) {
         basePrice = 50000.0; // 默认价格
     }
-
-    // 清空现有数据
-    m_orderBookModel->clear();
 
     // 生成买单数据（价格递减，最高价在最前面）
     QVector<OrderBookLevel> bids;
@@ -248,31 +235,18 @@ void DataManager::generateSimulatedOrderBookData(const QString& symbol) {
         asks.append(level);
     }
 
-    m_orderBookModel->updateOrderBook(bids, asks);
-
     qDebug() << "Generated order book for" << symbol << "with" << bids.size() << "bids and" << asks.size() << "asks";
     qDebug() << "Base price:" << basePrice << "Best bid:" << (bids.isEmpty() ? 0 : bids.first().price)
              << "Best ask:" << (asks.isEmpty() ? 0 : asks.first().price);
-}
 
-void DataManager::generateSimulatedFootprintData(const QString& symbol) {
-    if (!m_footprintModel) return;
-
-    // 生成模拟足迹图数据
-    Q_UNUSED(symbol) // 暂时未使用，避免编译警告
-
-    // 这里可以调用模型的方法来添加数据
-    // m_footprintModel->addTickData(...);
-}
-
-void DataManager::generateSimulatedMicroOrderBookData(const QString& symbol) {
-    if (!m_microOrderBookModel) return;
-
-    // 生成模拟微盘口数据
-    Q_UNUSED(symbol) // 暂时未使用，避免编译警告
-
-    // 这里可以调用模型的方法来更新数据
-    // m_microOrderBookModel->updateMicroOrderBook(...);
+    auto dataset = database_->reqOrderBookSet(symbol.toStdString());
+    OrderBook book;
+    book.update(std::move(bids), std::move(asks), QDateTime::currentDateTime());
+    dataset->add_orderbook(std::move(book));
+    if (dataset->size() > 1000) {
+        dataset->pop_front();
+    }
+    dataset->notify_all(NotifyType::Update);
 }
 
 void DataManager::updateConnectionStatus(bool connected) {

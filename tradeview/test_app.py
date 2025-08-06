@@ -97,7 +97,7 @@ def test_qml_files():
     qml_files = [
         "qml/main.qml",
         "qml/qml.qrc",
-        "qml/pages/CandlestickPage.qml",
+        "qml/pages/OrderFlowPage.qml",
         "qml/pages/FootprintPage.qml",
         "qml/pages/OrderBookPage.qml",
         "qml/pages/TickTradePage.qml",

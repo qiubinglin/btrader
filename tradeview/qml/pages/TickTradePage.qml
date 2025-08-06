@@ -8,6 +8,9 @@ Page {
         color: "#1e1e1e"
     }
 
+    property string symbol: ""
+    property var tickTradeModel: null
+
     // Toolbar
     Rectangle {
         id: toolbar
@@ -27,7 +30,14 @@ Page {
             // Symbol selection
             ComboBox {
                 id: symbolComboBox
-                model: ["BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT"]
+                model: {
+                    if (configManager && typeof configManager.getEnabledInstruments === 'function') {
+                        return configManager.getEnabledInstruments()
+                    } else {
+                        console.log("ConfigManager not available, using default symbols")
+                        return null
+                    }
+                }
                 currentIndex: 0
                 background: Rectangle {
                     color: "#353535"
@@ -42,8 +52,10 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onCurrentTextChanged: {
-                    tickTradeModel.clear()
-                    loadTickTradeData()
+                    if (currentText !== "") {
+                        symbol = currentText
+                        loadTickTradeData()
+                    }
                 }
             }
 
@@ -69,25 +81,6 @@ Page {
                 onValueChanged: {
                     tickTradeModel.setMaxCount(value)
                 }
-            }
-
-            // Clear button
-            Button {
-                text: "Clear"
-                background: Rectangle {
-                    color: parent.pressed ? "#404040" : 
-                           parent.hovered ? "#353535" : "#2d2d2d"
-                    border.color: "#404040"
-                    border.width: 1
-                    radius: 4
-                }
-                contentItem: Text {
-                    text: parent.text
-                    color: "#ffffff"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                onClicked: tickTradeModel.clear()
             }
 
             // Auto refresh checkbox
@@ -335,5 +328,53 @@ Page {
     // Initialize data when page loads
     Component.onCompleted: {
         console.log("TickTradePage loaded, data will be provided by DataManager")
+    }
+
+    // Load tick trade data function
+    function loadTickTradeData() {
+        console.log("Loading tick trade data for symbol:", symbol)
+        
+        if (!symbol || symbol === "") {
+            console.log("No symbol specified, using default")
+            symbol = symbolComboBox.currentText
+        }
+        
+        if (typeof model_mgr !== 'undefined' && model_mgr) {
+            try {
+                // Get tick trade model from model manager
+                tickTradeModel = model_mgr.reqTickTradeModel({"symbol": symbol})
+                
+                if (tickTradeModel) {
+                    console.log("Successfully loaded tick trade model for symbol:", symbol)
+                    
+                    // Set max count if spinbox has a value
+                    if (maxRecordsSpinBox.value > 0) {
+                        tickTradeModel.setMaxCount(maxRecordsSpinBox.value)
+                    }
+                    
+                    // Connect to model signals for real-time updates
+                    tickTradeModel.dataChanged.connect(function() {
+                        console.log("Tick trade data changed for symbol:", symbol)
+                        // Force ListView refresh
+                        tickTradeListView.model = null
+                        tickTradeListView.model = tickTradeModel
+                    })
+                    
+                    tickTradeModel.tickTradeAdded.connect(function() {
+                        console.log("Tick trade added for symbol:", symbol)
+                        // Force ListView refresh
+                        tickTradeListView.model = null
+                        tickTradeListView.model = tickTradeModel
+                    })
+                    
+                } else {
+                    console.log("Failed to get tick trade model for symbol:", symbol)
+                }
+            } catch (error) {
+                console.error("Error loading tick trade data:", error)
+            }
+        } else {
+            console.log("Model manager not available")
+        }
     }
 } 

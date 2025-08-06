@@ -6,9 +6,12 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
+#include <memory>
 
 #include "control/coreagent.h"
 #include "datamanager.h"
+#include "guidb/database.h"
+#include "modelmgr.h"
 #include "uimanager.h"
 
 namespace btra::gui {
@@ -19,17 +22,14 @@ Application::Application(int argc, char *argv[], QObject *parent)
       m_qmlEngine(nullptr),
       m_dataManager(nullptr),
       m_uiManager(nullptr),
-      m_candlestickModel(nullptr),
-      m_tickTradeModel(nullptr),
-      m_orderBookModel(nullptr),
-      m_footprintModel(nullptr),
-      m_microOrderBookModel(nullptr),
+      m_configManager(nullptr),
       m_argc(argc),
       m_argv(argv) {}
 
 Application::~Application() {
     delete m_uiManager;
     delete m_dataManager;
+    delete m_configManager;
     delete m_qmlEngine;
     delete m_app;
 }
@@ -43,6 +43,15 @@ bool Application::initialize() {
         return false;
     }
 
+    // Initialize configuration manager
+    m_configManager = new ConfigManager(this);
+    if (!m_configManager->loadConfig("guiconfig.json")) {
+        qWarning() << "Failed to load guiconfig.json, using default settings";
+    }
+
+    /* Create gui database */
+    DatabaseSPtr db = std::make_shared<Database>();
+
     // 初始化数据模型
     if (!initializeModels()) {
         qCritical() << "Failed to initialize data models";
@@ -55,23 +64,14 @@ bool Application::initialize() {
         return false;
     }
 
-    // 注册模型到QML上下文
-    registerModelsToQml();
-
-    // 加载QML文件
-    if (!loadQmlFiles()) {
-        qCritical() << "Failed to load QML files";
-        return false;
-    }
-
     // 创建数据管理器
-    m_dataManager = new DataManager(this);
-    m_dataManager->setModels(m_candlestickModel, m_tickTradeModel, m_orderBookModel, m_footprintModel,
-                             m_microOrderBookModel);
+    m_dataManager = new DataManager(db, m_configManager, this);
     if (!m_dataManager->initialize()) {
         qCritical() << "Failed to initialize data manager";
         return false;
     }
+
+    model_mgr_->setDatabase(db);
 
     // 创建UI管理器
     m_uiManager = new UIManager(this);
@@ -85,10 +85,18 @@ bool Application::initialize() {
 
     RegisterCoreMsgHandlers();
 
-    // 注册管理器到QML上下文
+    // 注册所有对象到QML上下文（在加载QML文件之前）
+    registerModelsToQml();
     m_qmlEngine->rootContext()->setContextProperty("dataManager", m_dataManager);
     m_qmlEngine->rootContext()->setContextProperty("uiManager", m_uiManager);
     m_qmlEngine->rootContext()->setContextProperty("coreagent", coreagent_);
+    m_qmlEngine->rootContext()->setContextProperty("configManager", m_configManager);
+
+    // 加载QML文件（在所有对象注册之后）
+    if (!loadQmlFiles()) {
+        qCritical() << "Failed to load QML files";
+        return false;
+    }
 
     // 连接数据源并订阅交易对
     m_dataManager->connectDataSource("simulation");
@@ -142,11 +150,7 @@ bool Application::initializeQtApp() {
 
 bool Application::initializeModels() {
     // 创建数据模型
-    m_candlestickModel = new CandlestickModel(this);
-    m_tickTradeModel = new TickTradeModel(this);
-    m_orderBookModel = new OrderBookModel(this);
-    m_footprintModel = new FootprintModel(this);
-    m_microOrderBookModel = new MicroOrderBookModel(this);
+    model_mgr_ = new ModelMgr(this);
 
     return true;
 }
@@ -169,11 +173,7 @@ bool Application::initializeQmlEngine() {
 
 void Application::registerModelsToQml() {
     // 注册数据模型到QML上下文
-    m_qmlEngine->rootContext()->setContextProperty("candlestickModel", m_candlestickModel);
-    m_qmlEngine->rootContext()->setContextProperty("tickTradeModel", m_tickTradeModel);
-    m_qmlEngine->rootContext()->setContextProperty("orderBookModel", m_orderBookModel);
-    m_qmlEngine->rootContext()->setContextProperty("footprintModel", m_footprintModel);
-    m_qmlEngine->rootContext()->setContextProperty("microOrderBookModel", m_microOrderBookModel);
+    m_qmlEngine->rootContext()->setContextProperty("model_mgr", model_mgr_);
 }
 
 bool Application::loadQmlFiles() {

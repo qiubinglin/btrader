@@ -4,6 +4,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Quick QuickControls2 QuickLayouts)
 add_subdirectory(model)
 add_subdirectory(qml)
 add_subdirectory(control)
+add_subdirectory(guidb)
 
 # 创建主应用程序
 add_executable(tradeview_app
@@ -32,3 +33,5 @@ target_link_libraries(tradeview_app
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/tradeview/run_tradeview.sh DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/tradeview/guiconfig.json DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/tradeview/instruments.json DESTINATION ${CMAKE_BINARY_DIR})

@@ -15,3 +15,7 @@
 #define FORWARD_DECLARE_UPTR(name)                                                                                     \
     class name;                                                                                                        \
     DECLARE_UPTR(name);
+
+#define ACCESSFUNCS(type, func, var) \
+    type get_##func() const { return var; } \
+    void set_##func(type val) { var = val; }

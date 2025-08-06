@@ -1,21 +1,21 @@
 #include "candlestickmodel.h"
 
+#include <qdebug.h>
+#include <qlogging.h>
+
 #include <QDebug>
+
+#include "guidb/kline.h"
 
 namespace btra::gui {
 
 /**
  * @brief 构造函数
  * @param parent 父对象指针
- *
- * 初始化K线模型，设置默认时间周期为1分钟
  */
-CandlestickModel::CandlestickModel(QObject* parent)
-    : QAbstractListModel(parent),
-      m_timeframe("1m"), // 默认时间周期为1分钟
-      m_max_price(0),    // 初始化最高价格为0
-      m_min_price(0),    // 初始化最低价格为0
-      m_max_volume(0) {  // 初始化最大成交量为0
+CandlestickModel::CandlestickModel(const QString& name, KLineSetSPtr klineset, QObject* parent)
+    : QAbstractListModel(parent), name_(name), klineset_(klineset) {
+    klineset_->add_notice([this](NotifyType type) { emit this->dataChanged(); });
 }
 
 /**
@@ -24,8 +24,8 @@ CandlestickModel::CandlestickModel(QObject* parent)
  * @return K线数据的总数量
  */
 int CandlestickModel::rowCount(const QModelIndex& parent) const {
-    if (parent.isValid()) return 0;
-    return m_candlesticks.size();
+    if (parent.isValid() or not klineset_) return 0;
+    return klineset_->size();
 }
 
 /**
@@ -37,9 +37,9 @@ int CandlestickModel::rowCount(const QModelIndex& parent) const {
  * 根据不同的角色返回K线的不同属性值
  */
 QVariant CandlestickModel::data(const QModelIndex& index, int role) const {
-    if (!index.isValid() || index.row() >= m_candlesticks.size()) return QVariant();
+    if (!klineset_ || !index.isValid() || index.row() >= klineset_->count()) return QVariant();
 
-    const CandlestickData& data = m_candlesticks[index.row()];
+    const auto& data = klineset_->at(index.row());
 
     switch (role) {
         case kStartTimeRole:
@@ -98,91 +98,23 @@ QHash<int, QByteArray> CandlestickModel::roleNames() const {
 }
 
 /**
- * @brief 添加K线数据
- * @param data K线数据
- */
-void CandlestickModel::add_candlestick(const CandlestickData& data) {
-    beginInsertRows(QModelIndex(), m_candlesticks.size(), m_candlesticks.size());
-    m_candlesticks.append(data);
-    endInsertRows();
-
-    update_price_range();
-    update_volume_range();
-
-    emit dataChanged();
-    emit candlestickAdded();
-}
-
-/**
- * @brief 更新K线数据
- * @param data K线数据
- */
-void CandlestickModel::update_candlestick(const CandlestickData& data) {
-    // Find the candlestick with the same end_time
-    for (int i = 0; i < m_candlesticks.size(); ++i) {
-        if (m_candlesticks[i].end_time == data.end_time) {
-            m_candlesticks[i] = data;
-            QModelIndex index = createIndex(i, 0);
-            emit QAbstractListModel::dataChanged(index, index);
-            emit candlestickUpdated(i);
-            break;
-        }
-    }
-
-    update_price_range();
-    update_volume_range();
-}
-
-/**
- * @brief 清空所有数据
- */
-void CandlestickModel::clear() {
-    if (m_candlesticks.isEmpty()) return;
-
-    beginResetModel();
-    m_candlesticks.clear();
-    endResetModel();
-
-    m_max_price = 0;
-    m_min_price = 0;
-    m_max_volume = 0;
-
-    emit dataChanged();
-}
-
-/**
- * @brief 设置时间周期
- * @param timeframe 时间周期字符串
- */
-void CandlestickModel::set_timeframe(const QString& timeframe) {
-    if (m_timeframe != timeframe) {
-        m_timeframe = timeframe;
-        emit dataChanged();
-    }
-}
-
-/**
  * @brief 获取时间周期
  * @return 时间周期字符串
  */
-QString CandlestickModel::get_timeframe() const { return m_timeframe; }
+QString CandlestickModel::get_timeframe() const {
+    if (klineset_) {
+        return klineset_->get_timeframe();
+    }
+    return "";
+}
 
 /**
  * @brief 获取K线数量
  * @return K线数量
  */
-int CandlestickModel::get_count() const { return m_candlesticks.size(); }
-
-/**
- * @brief 获取指定索引的K线数据
- * @param index 索引
- * @return K线数据
- */
-CandlestickData CandlestickModel::get_candlestick(int index) const {
-    if (index >= 0 && index < m_candlesticks.size()) {
-        return m_candlesticks[index];
-    }
-    return CandlestickData();
+int CandlestickModel::get_count() const {
+    if (klineset_) return klineset_->count();
+    return 0;
 }
 
 /**
@@ -193,11 +125,12 @@ CandlestickData CandlestickModel::get_candlestick(int index) const {
  */
 QVariantList CandlestickModel::get_candlesticks(int start, int count) const {
     QVariantList result;
-    int end = qMin(start + count, m_candlesticks.size());
+    if (not klineset_) return result;
+    int end = qMin(start + count, klineset_->count());
 
     for (int i = start; i < end; ++i) {
         QVariantMap candlestick;
-        const CandlestickData& data = m_candlesticks[i];
+        const KLine& data = klineset_->at(i);
         candlestick["start_time"] = data.start_time;
         candlestick["end_time"] = data.end_time;
         candlestick["open"] = data.open;
@@ -219,8 +152,9 @@ QVariantList CandlestickModel::get_candlesticks(int start, int count) const {
  */
 QVariantMap CandlestickModel::get(int index) const {
     QVariantMap result;
-    if (index >= 0 && index < m_candlesticks.size()) {
-        const CandlestickData& data = m_candlesticks[index];
+    if (not klineset_) return result;
+    if (index >= 0 && index < klineset_->count()) {
+        const KLine& data = klineset_->at(index);
         result["start_time"] = data.start_time;
         result["end_time"] = data.end_time;
         result["open"] = data.open;
@@ -233,34 +167,8 @@ QVariantMap CandlestickModel::get(int index) const {
     return result;
 }
 
-/**
- * @brief 更新价格范围
- * 重新计算最高价和最低价
- */
-void CandlestickModel::update_price_range() {
-    if (m_candlesticks.isEmpty()) return;
+void CandlestickModel::setDisplayContent(const QVariantMap& indication) {}
 
-    m_max_price = m_candlesticks.first().high;
-    m_min_price = m_candlesticks.first().low;
-
-    for (const auto& data : m_candlesticks) {
-        m_max_price = qMax(m_max_price, data.high);
-        m_min_price = qMin(m_min_price, data.low);
-    }
-}
-
-/**
- * @brief 更新成交量范围
- * 重新计算最大成交量
- */
-void CandlestickModel::update_volume_range() {
-    if (m_candlesticks.isEmpty()) return;
-
-    m_max_volume = m_candlesticks.first().volume;
-
-    for (const auto& data : m_candlesticks) {
-        m_max_volume = qMax(m_max_volume, data.volume);
-    }
-}
+QString CandlestickModel::get_name() const { return name_; }
 
 } // namespace btra::gui

@@ -184,7 +184,7 @@ void UIManager::registerBuiltinComponents() {
 void UIManager::setupWindowProperties() {
     if (m_mainWindow) {
         // 设置窗口属性
-        m_mainWindow->setTitle("订单流交易系统");
+        m_mainWindow->setTitle("btrader GUI");
         m_mainWindow->resize(1400, 900);
         m_mainWindow->setMinimumSize(QSize(800, 600));
 

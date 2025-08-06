@@ -16,46 +16,9 @@
 #include <QObject>
 #include <QVector>
 
+#include "guidb/orderbookset.h"
+
 namespace btra::gui {
-
-/**
- * @brief 订单簿档位数据结构
- *
- * 包含订单簿中单个价格档位的信息，用于表示买卖盘中的每个价格层级。
- * 该结构体定义了订单簿中每个档位的基本属性，包括价格、挂单量、订单数量等。
- *
- * 典型用法：
- * @code
- * OrderBookLevel bid(50000.0, 1000, 5, "bid");  // 创建买单档位
- * OrderBookLevel ask(50001.0, 800, 3, "ask");   // 创建卖单档位
- * @endcode
- */
-struct OrderBookLevel {
-    double price;   ///< 价格档位，表示该档位的价格水平（如：50000.0）
-    qint64 volume;  ///< 挂单量，表示该价格档位的总挂单数量（如：1000）
-    int orderCount; ///< 订单数量，表示该价格档位的订单笔数（如：5）
-    QString side;   ///< 买卖方向，标识该档位是买单("bid")还是卖单("ask")
-
-    /**
-     * @brief 默认构造函数
-     *
-     * 初始化所有成员变量为0，创建一个空的订单簿档位。
-     * 适用于需要后续填充数据的场景。
-     */
-    OrderBookLevel() : price(0), volume(0), orderCount(0) {}
-
-    /**
-     * @brief 带参数构造函数
-     * @param p 价格档位，该档位的价格水平（必须大于0）
-     * @param vol 挂单量，该价格档位的总挂单数量（必须大于等于0）
-     * @param count 订单数量，该价格档位的订单笔数（必须大于等于0）
-     * @param s 买卖方向，必须是"bid"(买单)或"ask"(卖单)
-     *
-     * 创建一个完整的订单簿档位，所有参数都会被验证。
-     */
-    OrderBookLevel(double p, qint64 vol, int count, const QString &s)
-        : price(p), volume(vol), orderCount(count), side(s) {}
-};
 
 /**
  * @brief 订单簿模型（OrderBookModel）
@@ -86,10 +49,6 @@ struct OrderBookLevel {
  *     }
  * }
  *
- * // 在C++中使用
- * OrderBookModel* model = new OrderBookModel();
- * model->updateOrderBook(bids, asks);
- * double spread = model->getSpread();
  * @endcode
  */
 class OrderBookModel : public QAbstractListModel {
@@ -128,7 +87,7 @@ public:
      *
      * 初始化订单簿模型，设置默认的最大档位数和初始状态。
      */
-    explicit OrderBookModel(QObject *parent = nullptr);
+    explicit OrderBookModel(const QString &name, OrderBookSetSPtr orderbookset, QObject *parent = nullptr);
 
     // QAbstractListModel interface
     /**
@@ -159,32 +118,6 @@ public:
      * QML通过这个映射可以访问具体的数据属性。
      */
     QHash<int, QByteArray> roleNames() const override;
-
-    // Public methods - QML可调用的接口
-    /**
-     * @brief 更新订单簿数据
-     * @param bids 买单数据向量，按价格降序排列（最高价在前）
-     * @param asks 卖单数据向量，按价格升序排列（最低价在前）
-     *
-     * 该方法会触发模型数据更新，并发送相应的信号通知界面刷新。
-     * 买单和卖单数据会被分别存储，然后合并生成完整的订单簿视图。
-     *
-     * 使用示例：
-     * @code
-     * QVector<OrderBookLevel> bids, asks;
-     * // 填充买单和卖单数据
-     * model->updateOrderBook(bids, asks);
-     * @endcode
-     */
-    Q_INVOKABLE void updateOrderBook(const QVector<OrderBookLevel> &bids, const QVector<OrderBookLevel> &asks);
-
-    /**
-     * @brief 清空订单簿数据
-     *
-     * 清空所有买单、卖单和合并后的订单簿数据，并重置最佳价格。
-     * 该方法会触发模型重置，并发送dataChanged信号通知界面刷新。
-     */
-    Q_INVOKABLE void clear();
 
     /**
      * @brief 设置最大显示档位数
@@ -311,12 +244,10 @@ signals:
     void spreadChanged(double spread);
 
 private:
-    QVector<OrderBookLevel> m_bids; ///< 买单数据容器，存储所有买单档位，按价格降序排列
-    QVector<OrderBookLevel> m_asks; ///< 卖单数据容器，存储所有卖单档位，按价格升序排列
-    QVector<OrderBookLevel> m_combinedOrderBook; ///< 合并后的订单簿数据，按价格排序，用于ListView显示
+    QString name_;
+    OrderBookSetSPtr orderbookset_{nullptr};
     int m_maxLevels;                             ///< 最大显示档位数，用于控制数据量大小，默认为20
-    double m_bestBid;                            ///< 当前最佳买价（最高买价），用于快速访问
-    double m_bestAsk;                            ///< 当前最佳卖价（最低卖价），用于快速访问
+    QVector<OrderBookLevel> m_combinedOrderBook; ///< 合并后的订单簿数据，按价格排序，用于ListView显示
 
     /**
      * @brief 更新合并后的订单簿
@@ -333,20 +264,7 @@ private:
     void updateCombinedOrderBook();
 
     /**
-     * @brief 更新最佳价格
-     *
-     * 根据当前买单和卖单数据，计算并更新最佳买价和最佳卖价。
-     * 该方法在数据更新时被调用，确保价格信息的准确性。
-     *
-     * 计算逻辑：
-     * - 最佳买价：买单中的最高价格
-     * - 最佳卖价：卖单中的最低价格
-     * - 如果没有相应数据，则设置为0
-     */
-    void updateBestPrices();
-
-    /**
-     * @brief 计算累计成交量
+     * @brief 计算累计挂单量
      * @param index 档位索引，指向m_combinedOrderBook中的位置
      * @return 返回从该档位开始到最高/最低价的累计挂单量
      *

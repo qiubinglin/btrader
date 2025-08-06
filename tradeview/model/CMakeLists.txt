@@ -1,19 +1,11 @@
 # 订单流交易系统UI模型源文件列表
-set(MODEL_SOURCES
-    candlestickmodel.cpp      # K线数据模型
-    ticktrademodel.cpp        # 逐笔成交明细模型
-    orderbookmodel.cpp        # 买卖档位模型
-    footprintmodel.cpp        # 足迹图模型
-    microorderbookmodel.cpp   # 微盘口模型
+file(GLOB MODEL_SOURCES
+    *.cpp
 )
 
 # 订单流交易系统UI模型头文件列表
-set(MODEL_HEADERS
-    candlestickmodel.h        # K线数据模型头文件
-    ticktrademodel.h          # 逐笔成交明细模型头文件
-    orderbookmodel.h          # 买卖档位模型头文件
-    footprintmodel.h          # 足迹图模型头文件
-    microorderbookmodel.h     # 微盘口模型头文件
+file(GLOB MODEL_HEADERS
+    *.h
 )
 
 # 创建订单流交易系统UI模型静态库
@@ -37,9 +29,11 @@ endif()
 # 链接Qt6库
 target_link_libraries(tradeview_models
     Qt6::Core
+    guidb
 )
 
 # 设置包含目录
 target_include_directories(tradeview_models PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
 )

@@ -1,0 +1,5 @@
+{
+    "config": {
+        "instruments_file": "./instruments.json"
+    }
+}

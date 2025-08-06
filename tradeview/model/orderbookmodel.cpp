@@ -2,11 +2,27 @@
 
 #include <QDebug>
 #include <algorithm>
+#include <QtMath>
 
 namespace btra::gui {
 
-OrderBookModel::OrderBookModel(QObject *parent)
-    : QAbstractListModel(parent), m_maxLevels(20), m_bestBid(0), m_bestAsk(0) {}
+OrderBookModel::OrderBookModel(const QString &name, OrderBookSetSPtr orderbookset, QObject *parent)
+    : QAbstractListModel(parent), name_(name), orderbookset_(orderbookset), m_maxLevels(20) {
+    orderbookset_->add_notice([this](NotifyType type) { 
+        updateCombinedOrderBook();
+        beginResetModel();
+        endResetModel();
+        emit this->dataChanged();
+        emit orderBookUpdated();
+    });
+    
+    // Initialize with existing data if available
+    if (orderbookset_->size() > 0) {
+        updateCombinedOrderBook();
+        beginResetModel();
+        endResetModel();
+    }
+}
 
 int OrderBookModel::rowCount(const QModelIndex &parent) const {
     if (parent.isValid()) return 0;
@@ -53,61 +69,9 @@ QHash<int, QByteArray> OrderBookModel::roleNames() const {
     return roles;
 }
 
-void OrderBookModel::updateOrderBook(const QVector<OrderBookLevel> &bids, const QVector<OrderBookLevel> &asks) {
-    m_bids = bids;
-    m_asks = asks;
-
-    // Sort bids in descending order (highest first)
-    std::sort(m_bids.begin(), m_bids.end(),
-              [](const OrderBookLevel &a, const OrderBookLevel &b) { return a.price > b.price; });
-
-    // Sort asks in ascending order (lowest first)
-    std::sort(m_asks.begin(), m_asks.end(),
-              [](const OrderBookLevel &a, const OrderBookLevel &b) { return a.price < b.price; });
-
-    // Limit to max levels
-    if (m_bids.size() > m_maxLevels) {
-        m_bids.resize(m_maxLevels);
-    }
-    if (m_asks.size() > m_maxLevels) {
-        m_asks.resize(m_maxLevels);
-    }
-
-    updateCombinedOrderBook();
-    updateBestPrices();
-
-    beginResetModel();
-    endResetModel();
-
-    emit dataChanged();
-    emit orderBookUpdated();
-}
-
-void OrderBookModel::clear() {
-    beginResetModel();
-    m_bids.clear();
-    m_asks.clear();
-    m_combinedOrderBook.clear();
-    endResetModel();
-
-    m_bestBid = 0;
-    m_bestAsk = 0;
-
-    emit dataChanged();
-}
-
-void OrderBookModel::setMaxLevels(int levels) {
+void OrderBookModel::setMaxLevels(int levels) { 
     if (m_maxLevels != levels) {
         m_maxLevels = levels;
-
-        // Resize existing data
-        if (m_bids.size() > m_maxLevels) {
-            m_bids.resize(m_maxLevels);
-        }
-        if (m_asks.size() > m_maxLevels) {
-            m_asks.resize(m_maxLevels);
-        }
-
         updateCombinedOrderBook();
         beginResetModel();
         endResetModel();
@@ -117,46 +81,64 @@ void OrderBookModel::setMaxLevels(int levels) {
 
 int OrderBookModel::getMaxLevels() const { return m_maxLevels; }
 
-double OrderBookModel::getBestBid() const { return m_bestBid; }
+double OrderBookModel::getBestBid() const { 
+    if (orderbookset_ && !orderbookset_->empty()) {
+        return orderbookset_->last_orderbook().get_best_bid(); 
+    }
+    return 0.0;
+}
 
-double OrderBookModel::getBestAsk() const { return m_bestAsk; }
+double OrderBookModel::getBestAsk() const { 
+    if (orderbookset_ && !orderbookset_->empty()) {
+        return orderbookset_->last_orderbook().get_best_ask(); 
+    }
+    return 0.0;
+}
 
 double OrderBookModel::getSpread() const {
-    if (m_bestBid > 0 && m_bestAsk > 0) {
-        return m_bestAsk - m_bestBid;
+    auto best_bid = getBestBid();
+    auto best_ask = getBestAsk();
+    if (best_bid > 0 && best_ask > 0) {
+        return best_ask - best_bid;
     }
     return 0;
 }
 
 double OrderBookModel::getMidPrice() const {
-    if (m_bestBid > 0 && m_bestAsk > 0) {
-        return (m_bestBid + m_bestAsk) / 2.0;
+    auto best_bid = getBestBid();
+    auto best_ask = getBestAsk();
+    if (best_bid > 0 && best_ask > 0) {
+        return (best_bid + best_ask) / 2.0;
     }
     return 0;
 }
 
 QVariantList OrderBookModel::getBids() const {
     QVariantList result;
-    for (const auto &bid : m_bids) {
-        QVariantMap level;
-        level["price"] = bid.price;
-        level["volume"] = bid.volume;
-        level["orderCount"] = bid.orderCount;
-        level["side"] = bid.side;
-        result.append(level);
+    if (orderbookset_ && !orderbookset_->empty()) {
+        for (const auto &bid : orderbookset_->last_orderbook().get_bids()) {
+            QVariantMap level;
+            level["price"] = bid.price;
+            level["volume"] = bid.volume;
+            level["orderCount"] = bid.orderCount;
+            level["side"] = bid.side;
+            result.append(level);
+        }
     }
     return result;
 }
 
 QVariantList OrderBookModel::getAsks() const {
     QVariantList result;
-    for (const auto &ask : m_asks) {
-        QVariantMap level;
-        level["price"] = ask.price;
-        level["volume"] = ask.volume;
-        level["orderCount"] = ask.orderCount;
-        level["side"] = ask.side;
-        result.append(level);
+    if (orderbookset_ && !orderbookset_->empty()) {
+        for (const auto &ask : orderbookset_->last_orderbook().get_asks()) {
+            QVariantMap level;
+            level["price"] = ask.price;
+            level["volume"] = ask.volume;
+            level["orderCount"] = ask.orderCount;
+            level["side"] = ask.side;
+            result.append(level);
+        }
     }
     return result;
 }
@@ -177,34 +159,22 @@ QVariantList OrderBookModel::getOrderBook() const {
 void OrderBookModel::updateCombinedOrderBook() {
     m_combinedOrderBook.clear();
 
+    if (!orderbookset_ || orderbookset_->empty()) {
+        return;
+    }
+
     // Add asks (in ascending order for display - lowest ask first)
-    for (const auto &ask : m_asks) {
-        m_combinedOrderBook.append(ask);
+    const auto& asks = orderbookset_->last_orderbook().get_asks();
+    int askCount = m_maxLevels > 0 ? qMin(asks.size(), m_maxLevels) : asks.size();
+    for (int i = 0; i < askCount; ++i) {
+        m_combinedOrderBook.append(asks[i]);
     }
 
     // Add bids (in descending order for display - highest bid first)
-    for (const auto &bid : m_bids) {
-        m_combinedOrderBook.append(bid);
-    }
-}
-
-void OrderBookModel::updateBestPrices() {
-    double oldBestBid = m_bestBid;
-    double oldBestAsk = m_bestAsk;
-
-    m_bestBid = m_bids.isEmpty() ? 0 : m_bids.first().price;
-    m_bestAsk = m_asks.isEmpty() ? 0 : m_asks.first().price;
-
-    if (oldBestBid != m_bestBid) {
-        emit bestBidChanged(m_bestBid);
-    }
-    if (oldBestAsk != m_bestAsk) {
-        emit bestAskChanged(m_bestAsk);
-    }
-
-    double spread = getSpread();
-    if (spread > 0) {
-        emit spreadChanged(spread);
+    const auto& bids = orderbookset_->last_orderbook().get_bids();
+    int bidCount = m_maxLevels > 0 ? qMin(bids.size(), m_maxLevels) : bids.size();
+    for (int i = 0; i < bidCount; ++i) {
+        m_combinedOrderBook.append(bids[i]);
     }
 }
 

@@ -9,9 +9,11 @@
 
 // 包含模型头文件
 #include "candlestickmodel.h"
+#include "configmanager.h"
 #include "coreagent.h"
 #include "footprintmodel.h"
 #include "microorderbookmodel.h"
+#include "model/modelmgr.h"
 #include "orderbookmodel.h"
 #include "ticktrademodel.h"
 
@@ -72,6 +74,12 @@ public:
      * @return QML引擎指针
      */
     QQmlApplicationEngine* getQmlEngine() const { return m_qmlEngine; }
+
+    /**
+     * @brief 获取配置管理器
+     * @return 配置管理器指针
+     */
+    ConfigManager* getConfigManager() const { return m_configManager; }
 
 signals:
     /**
@@ -143,11 +151,8 @@ private:
     CoreAgent* coreagent_{nullptr};     /* Communication with core engine. */
 
     // 数据模型
-    CandlestickModel* m_candlestickModel;       ///< K线数据模型
-    TickTradeModel* m_tickTradeModel;           ///< 逐笔成交模型
-    OrderBookModel* m_orderBookModel;           ///< 买卖档位模型
-    FootprintModel* m_footprintModel;           ///< 足迹图模型
-    MicroOrderBookModel* m_microOrderBookModel; ///< 微盘口模型
+    ModelMgr* model_mgr_{nullptr};
+    ConfigManager* m_configManager; ///< 配置管理器
 
     int m_argc;    ///< 命令行参数数量
     char** m_argv; ///< 命令行参数数组

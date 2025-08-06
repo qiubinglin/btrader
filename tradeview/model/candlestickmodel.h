@@ -6,60 +6,9 @@
 #include <QObject>
 #include <QVector>
 
+#include "guidb/klineset.h"
+
 namespace btra::gui {
-
-/**
- * @brief K线数据结构
- *
- * 包含单根K线的所有数据信息，用于存储和传递K线数据
- */
-struct CandlestickData {
-    QDateTime start_time; ///< 开始时间
-    QDateTime end_time;   ///< 结束时间
-    double open;          ///< 开盘价
-    double high;          ///< 最高价
-    double low;           ///< 最低价
-    double close;         ///< 收盘价
-    qint64 volume;        ///< 成交量
-    double amount;        ///< 成交额
-
-    /**
-     * @brief 默认构造函数
-     * 初始化所有成员变量为0
-     */
-    CandlestickData() : open(0), high(0), low(0), close(0), volume(0), amount(0) {}
-
-    /**
-     * @brief 带参数构造函数（使用开始和结束时间）
-     * @param start 开始时间
-     * @param end 结束时间
-     * @param o 开盘价
-     * @param h 最高价
-     * @param l 最低价
-     * @param c 收盘价
-     * @param vol 成交量
-     * @param amt 成交额
-     */
-    CandlestickData(const QDateTime& start, const QDateTime& end, double o, double h, double l, double c, qint64 vol,
-                    double amt)
-        : start_time(start), end_time(end), open(o), high(h), low(l), close(c), volume(vol), amount(amt) {}
-
-    /**
-     * @brief 带参数构造函数（向后兼容，使用单个时间戳作为结束时间）
-     * @param ts 时间戳（作为结束时间）
-     * @param o 开盘价
-     * @param h 最高价
-     * @param l 最低价
-     * @param c 收盘价
-     * @param vol 成交量
-     * @param amt 成交额
-     */
-    CandlestickData(const QDateTime& ts, double o, double h, double l, double c, qint64 vol, double amt)
-        : end_time(ts), open(o), high(h), low(l), close(c), volume(vol), amount(amt) {
-        // 默认开始时间为结束时间减去1分钟
-        start_time = end_time.addSecs(-60);
-    }
-};
 
 /**
  * @brief K线数据模型类
@@ -92,11 +41,7 @@ public:
         kLowerShadowRole                   ///< 下影线长度角色
     };
 
-    /**
-     * @brief 构造函数
-     * @param parent 父对象指针
-     */
-    explicit CandlestickModel(QObject* parent = nullptr);
+    explicit CandlestickModel(const QString &name, KLineSetSPtr klineset, QObject* parent = nullptr);
 
     // QAbstractListModel interface
     /**
@@ -120,30 +65,6 @@ public:
      */
     QHash<int, QByteArray> roleNames() const override;
 
-    // Public methods
-    /**
-     * @brief 添加K线数据
-     * @param data K线数据
-     */
-    Q_INVOKABLE void add_candlestick(const CandlestickData& data);
-
-    /**
-     * @brief 更新K线数据
-     * @param data K线数据
-     */
-    Q_INVOKABLE void update_candlestick(const CandlestickData& data);
-
-    /**
-     * @brief 清空所有数据
-     */
-    Q_INVOKABLE void clear();
-
-    /**
-     * @brief 设置时间周期
-     * @param timeframe 时间周期字符串
-     */
-    Q_INVOKABLE void set_timeframe(const QString& timeframe);
-
     /**
      * @brief 获取时间周期
      * @return 时间周期字符串
@@ -163,13 +84,6 @@ public:
     Q_PROPERTY(int count READ get_count NOTIFY dataChanged)
 
     /**
-     * @brief 获取指定索引的K线数据
-     * @param index 索引
-     * @return K线数据
-     */
-    Q_INVOKABLE CandlestickData get_candlestick(int index) const;
-
-    /**
      * @brief 获取指定范围的K线数据
      * @param start 起始索引
      * @param count 数量
@@ -183,6 +97,14 @@ public:
      * @return K线数据对象
      */
     Q_INVOKABLE QVariantMap get(int index) const;
+
+    Q_INVOKABLE void setDisplayContent(const QVariantMap& indication);
+
+    Q_INVOKABLE QString get_name() const;
+
+    void debug_add_kline(const KLine &kline) {
+        klineset_->push_back(kline);
+    }
 
 signals:
     /**
@@ -204,23 +126,8 @@ signals:
     void candlestickUpdated(int index);
 
 private:
-    QVector<CandlestickData> m_candlesticks; ///< K线数据容器
-    QString m_timeframe;                     ///< 时间周期
-    double m_max_price;                      ///< 最高价格
-    double m_min_price;                      ///< 最低价格
-    qint64 m_max_volume;                     ///< 最大成交量
-
-    /**
-     * @brief 更新价格范围
-     * 重新计算最高价和最低价
-     */
-    void update_price_range();
-
-    /**
-     * @brief 更新成交量范围
-     * 重新计算最大成交量
-     */
-    void update_volume_range();
+    QString name_;
+    KLineSetSPtr klineset_{nullptr};
 };
 
 } // namespace btra::gui

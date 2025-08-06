@@ -4,10 +4,17 @@ import QtQuick.Layouts 1.15
 import QtQuick.Shapes 1.15
 
 Page {
-    id: candlestickPage
+    id: orderFlowPage
     background: Rectangle {
         color: "#1e1e1e"
     }
+
+    property string symbol: ""
+    property var candlestickModel: null
+
+    // Zoom factor property - controls the size of candlesticks
+    property real zoomFactor: 1.0
+    property int maxVisibleCandlesticks: 50  // Maximum number of candlesticks visible at once
 
     // Toolbar
     Rectangle {
@@ -28,7 +35,14 @@ Page {
             // Symbol selection
             ComboBox {
                 id: symbolComboBox
-                model: ["BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT"]
+                model: {
+                    if (configManager && typeof configManager.getEnabledInstruments === 'function') {
+                        return configManager.getEnabledInstruments()
+                    } else {
+                        console.log("ConfigManager not available, using default symbols")
+                        return null
+                    }
+                }
                 currentIndex: 0
                 background: Rectangle {
                     color: "#353535"
@@ -43,9 +57,9 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onCurrentTextChanged: {
-                    // Reload data when symbol changes
-                    candlestickModel.clear()
-                    loadCandlestickData()
+                    // Switch model and reload data when symbol changes
+                    console.log("Symbol changed to:", currentText)
+                    switchCandlestickModel(currentText)
                 }
             }
 
@@ -67,7 +81,13 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onCurrentTextChanged: {
-                    candlestickModel.set_timeframe(currentText)
+                    if (candlestickModel) {
+                        candlestickModel.set_timeframe(currentText)
+                        console.log("Timeframe changed to:", currentText)
+                        // Force repaint to show new timeframe data
+                        candlestickCanvas.requestPaint()
+                        volumeCanvas.requestPaint()
+                    }
                 }
             }
 
@@ -88,34 +108,53 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onClicked: {
-                    loadCandlestickData()
                     candlestickCanvas.requestPaint()
+                    volumeCanvas.requestPaint()
                 }
             }
 
-            // Auto refresh checkbox
-            CheckBox {
-                id: autoRefreshCheckBox
-                text: "Auto Refresh"
-                checked: true
-                indicator: Rectangle {
-                    width: 16
-                    height: 16
+            // Zoom controls
+            Button {
+                text: "Zoom In"
+                background: Rectangle {
+                    color: parent.pressed ? "#404040" : 
+                           parent.hovered ? "#353535" : "#2d2d2d"
                     border.color: "#404040"
                     border.width: 1
-                    radius: 2
-                    Rectangle {
-                        width: 12
-                        height: 12
-                        radius: 1
-                        color: parent.parent.checked ? "#00ff00" : "transparent"
-                        anchors.centerIn: parent
-                    }
+                    radius: 4
                 }
                 contentItem: Text {
                     text: parent.text
                     color: "#ffffff"
-                    font.pixelSize: 12
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked: {
+                    zoomFactor = Math.min(zoomFactor * 1.2, 5.0)
+                    candlestickCanvas.requestPaint()
+                    volumeCanvas.requestPaint()
+                }
+            }
+
+            Button {
+                text: "Zoom Out"
+                background: Rectangle {
+                    color: parent.pressed ? "#404040" : 
+                           parent.hovered ? "#353535" : "#2d2d2d"
+                    border.color: "#404040"
+                    border.width: 1
+                    radius: 4
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: "#ffffff"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked: {
+                    zoomFactor = Math.max(zoomFactor / 1.2, 0.2)
+                    candlestickCanvas.requestPaint()
+                    volumeCanvas.requestPaint()
                 }
             }
 
@@ -125,7 +164,7 @@ Page {
             Text {
                 text: "High: " + (function() {
                     if (candlestickModel && candlestickModel.count > 0) {
-                        let candlestick = candlestickModel.get_candlestick(candlestickModel.count - 1)
+                        let candlestick = getCandlestickData(candlestickModel.count - 1)
                         return candlestick && candlestick.high ? candlestick.high.toFixed(2) : "0.00"
                     }
                     return "0.00"
@@ -137,7 +176,7 @@ Page {
             Text {
                 text: "Low: " + (function() {
                     if (candlestickModel && candlestickModel.count > 0) {
-                        let candlestick = candlestickModel.get_candlestick(candlestickModel.count - 1)
+                        let candlestick = getCandlestickData(candlestickModel.count - 1)
                         return candlestick && candlestick.low ? candlestick.low.toFixed(2) : "0.00"
                     }
                     return "0.00"
@@ -149,7 +188,7 @@ Page {
             Text {
                 text: "Volume: " + (function() {
                     if (candlestickModel && candlestickModel.count > 0) {
-                        let candlestick = candlestickModel.get_candlestick(candlestickModel.count - 1)
+                        let candlestick = getCandlestickData(candlestickModel.count - 1)
                         return candlestick && candlestick.volume ? candlestick.volume : "0"
                     }
                     return "0"
@@ -162,6 +201,12 @@ Page {
             Text {
                 text: "Count: " + (candlestickModel ? candlestickModel.count : "0")
                 color: "#ffff00"
+                font.pixelSize: 12
+            }
+
+            Text {
+                text: "Zoom: " + zoomFactor.toFixed(1) + "x"
+                color: "#00ffff"
                 font.pixelSize: 12
             }
         }
@@ -218,23 +263,34 @@ Page {
                 console.log("Canvas paint triggered, model count:", candlestickModel ? candlestickModel.count : "undefined")
                 
                 if (!candlestickModel || candlestickModel.count === 0) {
-                    console.log("No candlestick data available")
+                    console.log("No candlestick data available, candlestickModel name: ", candlestickModel ? candlestickModel.get_name() : "undefined")
                     return
                 }
 
                 let ctx = getContext("2d")
                 ctx.reset()
 
-                // Calculate price range
+                // Calculate visible candlesticks based on zoom factor
+                let baseBarWidth = 8  // Base width of each candlestick
+                let barSpacing = 2    // Spacing between candlesticks
+                let effectiveBarWidth = baseBarWidth * zoomFactor
+                let totalBarWidth = effectiveBarWidth + barSpacing
+                
+                // Calculate how many candlesticks can fit in the canvas
+                let maxVisibleBars = Math.floor((width - 20) / totalBarWidth)
+                let barsToShow = Math.min(maxVisibleBars, maxVisibleCandlesticks)
+                
+                // Determine which candlesticks to show (sliding window from right)
+                let startIndex = Math.max(0, candlestickModel.count - barsToShow)
+                let endIndex = candlestickModel.count
+
+                // Calculate price range for visible candlesticks
                 let minPrice = Number.MAX_VALUE
                 let maxPrice = Number.MIN_VALUE
-                let barsToShow = Math.min(candlestickModel.count, 100)
                 
-                console.log("Processing", barsToShow, "candlesticks")
-                
-                for (let i = 0; i < barsToShow; i++) {
+                for (let i = startIndex; i < endIndex; i++) {
                     let candlestick = getCandlestickData(i)
-                    if (candlestick && candlestick.low !== undefined && candlestick.high !== undefined) {
+                    if (candlestick) {
                         minPrice = Math.min(minPrice, candlestick.low)
                         maxPrice = Math.max(maxPrice, candlestick.high)
                     }
@@ -272,23 +328,20 @@ Page {
                     ctx.stroke()
                 }
 
-                // Draw candlesticks
-                let barWidth = Math.max(2, (width - 20) / barsToShow - 2)
-                let barSpacing = 2
-                let totalWidth = barsToShow * (barWidth + barSpacing)
-                let startX = (width - totalWidth) / 2
+                // Draw candlesticks from left to right
+                let startX = 10  // Start from left margin
+                // console.log("Drawing", barsToShow, "candlesticks with bar width:", effectiveBarWidth)
 
-                console.log("Drawing", barsToShow, "candlesticks with bar width:", barWidth)
+                for (let i = 0; i < endIndex - startIndex; i++) {
+                    let dataIndex = startIndex + i
+                    let candlestick = getCandlestickData(dataIndex)
 
-                for (let i = 0; i < barsToShow; i++) {
-                    let candlestick = getCandlestickData(i)
-                    if (!candlestick || candlestick.open === undefined || candlestick.close === undefined || 
-                        candlestick.high === undefined || candlestick.low === undefined) {
-                        console.log("Skipping invalid candlestick at index", i)
+                    if (!candlestick) {
+                        console.log("Skipping null candlestick at index", dataIndex)
                         continue
                     }
 
-                    let x = startX + i * (barWidth + barSpacing)
+                    let x = startX + i * totalBarWidth
                     let openY = height - ((candlestick.open - minPrice) / priceRange) * height
                     let closeY = height - ((candlestick.close - minPrice) / priceRange) * height
                     let highY = height - ((candlestick.high - minPrice) / priceRange) * height
@@ -312,20 +365,23 @@ Page {
                         ctx.fillStyle = "#ff0000"
                     }
 
-                    ctx.fillRect(x, bodyY, barWidth, bodyHeight)
+                    // Debug: Log drawing coordinates
+                    console.log("Drawing candlestick at x:", x, "bodyY:", bodyY, "width:", effectiveBarWidth, "height:", bodyHeight)
+
+                    ctx.fillRect(x, bodyY, effectiveBarWidth, bodyHeight)
                     
                     // Draw upper shadow
                     ctx.strokeStyle = candlestick.close >= candlestick.open ? "#00cc00" : "#cc0000"
                     ctx.lineWidth = 1
                     ctx.beginPath()
-                    ctx.moveTo(x + barWidth/2, bodyY)
-                    ctx.lineTo(x + barWidth/2, highY)
+                    ctx.moveTo(x + effectiveBarWidth/2, bodyY)
+                    ctx.lineTo(x + effectiveBarWidth/2, highY)
                     ctx.stroke()
 
                     // Draw lower shadow
                     ctx.beginPath()
-                    ctx.moveTo(x + barWidth/2, bodyY + bodyHeight)
-                    ctx.lineTo(x + barWidth/2, lowY)
+                    ctx.moveTo(x + effectiveBarWidth/2, bodyY + bodyHeight)
+                    ctx.lineTo(x + effectiveBarWidth/2, lowY)
                     ctx.stroke()
                 }
 
@@ -379,11 +435,22 @@ Page {
                     let ctx = getContext("2d")
                     ctx.reset()
 
-                    let barsToShow = Math.min(candlestickModel.count, 100)
+                    // Use same logic as candlestick chart for consistency
+                    let baseBarWidth = 8
+                    let barSpacing = 2
+                    let effectiveBarWidth = baseBarWidth * zoomFactor
+                    let totalBarWidth = effectiveBarWidth + barSpacing
+                    
+                    let maxVisibleBars = Math.floor((width - 20) / totalBarWidth)
+                    let barsToShow = Math.min(maxVisibleBars, maxVisibleCandlesticks)
+                    
+                    let startIndex = Math.max(0, candlestickModel.count - barsToShow)
+                    let endIndex = candlestickModel.count
+                    
                     let maxVolume = 0
                     
-                    for (let i = 0; i < barsToShow; i++) {
-                        let candlestick = candlestickModel.get_candlestick(i)
+                    for (let i = startIndex; i < endIndex; i++) {
+                        let candlestick = getCandlestickData(i)
                         if (candlestick && candlestick.volume !== undefined) {
                             maxVolume = Math.max(maxVolume, candlestick.volume)
                         }
@@ -391,38 +458,21 @@ Page {
 
                     if (maxVolume === 0) return
 
-                    let barWidth = Math.max(2, (width - 20) / barsToShow - 2)
-                    let barSpacing = 2
-                    let totalWidth = barsToShow * (barWidth + barSpacing)
-                    let startX = (width - totalWidth) / 2
+                    let startX = 10
 
-                    for (let i = 0; i < barsToShow; i++) {
-                        let candlestick = candlestickModel.get_candlestick(i)
-                        if (!candlestick || candlestick.volume === undefined || candlestick.close === undefined || candlestick.open === undefined) continue
+                    for (let i = 0; i < endIndex - startIndex; i++) {
+                        let dataIndex = startIndex + i
+                        let candlestick = getCandlestickData(dataIndex)
+                        if (!candlestick || typeof candlestick.volume !== 'number') continue
 
-                        let x = startX + i * (barWidth + barSpacing)
+                        let x = startX + i * totalBarWidth
                         let volumeHeight = (candlestick.volume / maxVolume) * height
                         let volumeY = height - volumeHeight
 
                         ctx.fillStyle = candlestick.close >= candlestick.open ? "#00ff00" : "#ff0000"
-                        ctx.fillRect(x, volumeY, barWidth, volumeHeight)
+                        ctx.fillRect(x, volumeY, effectiveBarWidth, volumeHeight)
                     }
                 }
-            }
-        }
-    }
-
-    // Auto refresh timer
-    Timer {
-        id: autoRefreshTimer
-        interval: 5000  // Refresh every 5 seconds
-        running: autoRefreshCheckBox.checked
-        repeat: true
-        onTriggered: {
-            if (autoRefreshCheckBox.checked) {
-                console.log("Auto refresh triggered")
-                candlestickCanvas.requestPaint()
-                volumeCanvas.requestPaint()
             }
         }
     }
@@ -439,40 +489,54 @@ Page {
         }
     }
 
-    // Function to load initial data
-    function loadCandlestickData() {
-        console.log("Loading candlestick data for symbol:", symbolComboBox.currentText)
+    // Function to switch candlestick model for different symbol
+    function switchCandlestickModel(symbol) {
+        console.log("Switching candlestick model for symbol:", symbol)
         
-        // Clear existing data and let C++ DataManager handle data generation
+        // Get new model from model manager
+        candlestickModel = model_mgr.reqCandlestickModel({"symbol": symbol})
+        
+        // Clear existing data and reload
         if (candlestickModel) {
-            candlestickModel.clear()
-            console.log("Cleared existing candlestick data, waiting for C++ data generation...")
+            console.log("Switched to new model, cleared data, waiting for C++ data generation...")
+            
+            // Force canvas repaint with new model
+            candlestickCanvas.requestPaint()
+            volumeCanvas.requestPaint()
+        } else {
+            console.log("Failed to get model for symbol:", symbol)
         }
     }
 
     // Helper function to safely get candlestick data
     function getCandlestickData(index) {
         if (!candlestickModel || index < 0 || index >= candlestickModel.count) {
+            console.log("Invalid index or model:", index, "count:", candlestickModel ? candlestickModel.count : "null")
             return null
         }
         
-        // Use get method which returns QVariantMap
-        let data = candlestickModel.get(index)
-        if (data && data.open !== undefined) {
-            return data
+        // Use the get method which returns QVariantMap
+        let candlestick = candlestickModel.get(index)
+        
+        // Validate the data
+        if (candlestick && typeof candlestick.open === 'number' && typeof candlestick.close === 'number' && 
+            typeof candlestick.high === 'number' && typeof candlestick.low === 'number') {
+            return candlestick
         }
         
+        console.log("Invalid data returned for index", index, ":", candlestick)
         return null
     }
 
     // Initialize data when page loads
     Component.onCompleted: {
-        console.log("CandlestickPage loaded")
-        loadCandlestickData()
+        console.log("OrderFlowPage loaded")
         
-        // Force initial paint
-        candlestickCanvas.requestPaint()
-        volumeCanvas.requestPaint()
+        // Initialize with first symbol from config
+        if (symbolComboBox.count > 0) {
+            let initialSymbol = symbolComboBox.currentText
+            switchCandlestickModel(initialSymbol)
+        }
     }
     
     // Listen for data changes from C++ model
@@ -480,15 +544,46 @@ Page {
         target: candlestickModel
         
         function onDataChanged() {
-            console.log("Candlestick data changed, count:", candlestickModel.count)
-            candlestickCanvas.requestPaint()
-            volumeCanvas.requestPaint()
+            // Verify we're still connected to the current model
+            if (candlestickModel && candlestickModel === target) {
+                console.log("Candlestick data changed, count:", candlestickModel.count, "model name:", candlestickModel.get_name())
+                candlestickCanvas.requestPaint()
+                volumeCanvas.requestPaint()
+            } else {
+                console.log("Data changed but model connection may be stale")
+            }
         }
         
         function onCandlestickAdded() {
-            console.log("New candlestick added, total count:", candlestickModel.count)
-            candlestickCanvas.requestPaint()
-            volumeCanvas.requestPaint()
+            // Verify we're still connected to the current model
+            if (candlestickModel && candlestickModel === target) {
+                console.log("New candlestick added, total count:", candlestickModel.count, "model name:", candlestickModel.get_name())
+                candlestickCanvas.requestPaint()
+                volumeCanvas.requestPaint()
+            } else {
+                console.log("Candlestick added but model connection may be stale")
+            }
+        }
+    }
+
+    // Listen for config changes
+    Connections {
+        target: configManager
+        
+        function onConfigLoaded() {
+            console.log("Config loaded, updating symbol list")
+            // Force ComboBox to update its model
+            if (configManager && typeof configManager.getEnabledInstruments === 'function') {
+                symbolComboBox.model = configManager.getEnabledInstruments()
+                
+                // Initialize with first symbol if no model is set yet
+                if (!candlestickModel && symbolComboBox.count > 0) {
+                    let initialSymbol = symbolComboBox.currentText
+                    switchCandlestickModel(initialSymbol)
+                }
+            } else {
+                console.log("ConfigManager methods not available")
+            }
         }
     }
 } 

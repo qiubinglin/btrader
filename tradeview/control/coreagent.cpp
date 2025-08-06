@@ -1,10 +1,5 @@
 #include "coreagent.h"
 
-#include <memory>
-
-#include "types.h"
-#include "workthread.h"
-
 namespace btra::gui {
 
 CoreAgent::CoreAgent(QObject* parent) : QObject(parent) {}

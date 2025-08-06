@@ -24,6 +24,7 @@ target_link_libraries(tradeview_control
     Qt6::QuickLayouts
     tradeview_models
     core
+    guidb
 )
 
 target_include_directories(tradeview_control PUBLIC
