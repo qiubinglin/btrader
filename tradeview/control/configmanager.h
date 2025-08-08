@@ -2,13 +2,14 @@
 #define CONFIGMANAGER_H
 
 #include <qtmetamacros.h>
-#include <QObject>
+
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
+#include <QObject>
 #include <QStringList>
-#include <QVariantMap>
 #include <QVariantList>
+#include <QVariantMap>
 
 namespace btra::gui {
 
@@ -16,16 +17,16 @@ namespace btra::gui {
  * @brief Instrument configuration information structure
  */
 struct InstrumentConfig {
-    QString symbol;      ///< Instrument symbol
-    QString name;        ///< Instrument name
-    QString type;        ///< Instrument type
-    QString exchange;    ///< Exchange
-    bool enabled;        ///< Whether enabled
+    QString symbol;   ///< Instrument symbol
+    QString name;     ///< Instrument name
+    QString type;     ///< Instrument type
+    QString exchange; ///< Exchange
+    bool enabled;     ///< Whether enabled
 };
 
 /**
  * @brief Configuration manager class
- * 
+ *
  * Responsible for reading and managing guiconfig.json and instruments.json configuration files
  */
 class ConfigManager : public QObject {
@@ -41,6 +42,8 @@ public:
      * @return Whether loading was successful
      */
     bool loadConfig(const QString& configPath = "guiconfig.json");
+
+    QString get_core_config_file() const { return core_config_file_; }
 
     /**
      * @brief Load instruments configuration file
@@ -153,6 +156,8 @@ public:
      */
     bool reloadConfig();
 
+    bool get_simulation() const { return simulation_; }
+
 signals:
     /**
      * @brief Configuration loaded signal
@@ -193,26 +198,29 @@ private:
     bool validateInstrumentsConfig() const;
 
 private:
-    QString m_configPath;                    ///< Main configuration file path
-    QString m_instrumentsPath;               ///< Instruments configuration file path
-    QList<InstrumentConfig> m_instruments;  ///< List of instrument configurations
-    QStringList m_defaultInstruments;        ///< Default instruments list
-    int m_updateInterval;                    ///< Update interval
-    int m_maxInstruments;                    ///< Maximum number of instruments
-    bool m_configLoaded;                     ///< Whether configuration is loaded
-    
+    QString m_configPath;                  ///< Main configuration file path
+    QString m_instrumentsPath;             ///< Instruments configuration file path
+    QString core_config_file_;             /*Core engine configuration file path*/
+    QList<InstrumentConfig> m_instruments; ///< List of instrument configurations
+    QStringList m_defaultInstruments;      ///< Default instruments list
+    int m_updateInterval;                  ///< Update interval
+    int m_maxInstruments;                  ///< Maximum number of instruments
+    bool m_configLoaded;                   ///< Whether configuration is loaded
+
     // GUI configuration
-    QString m_theme;                         ///< Theme
-    QString m_language;                      ///< Language
-    bool m_autoRefresh;                      ///< Auto refresh setting
-    int m_refreshInterval;                   ///< Refresh interval
-    QString m_defaultTimeframe;              ///< Default timeframe
-    int m_maxCandlesticks;                   ///< Maximum number of candlesticks
-    double m_defaultZoomFactor;              ///< Default zoom factor
-    QStringList m_defaultSymbols;            ///< Default symbols list
-    QString m_dataSource;                    ///< Data source
+    QString m_theme;              ///< Theme
+    QString m_language;           ///< Language
+    bool m_autoRefresh;           ///< Auto refresh setting
+    int m_refreshInterval;        ///< Refresh interval
+    QString m_defaultTimeframe;   ///< Default timeframe
+    int m_maxCandlesticks;        ///< Maximum number of candlesticks
+    double m_defaultZoomFactor;   ///< Default zoom factor
+    QStringList m_defaultSymbols; ///< Default symbols list
+    QString m_dataSource;         ///< Data source
+
+    bool simulation_{false};
 };
 
 } // namespace btra::gui
 
-#endif // CONFIGMANAGER_H 
+#endif // CONFIGMANAGER_H

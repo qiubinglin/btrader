@@ -46,6 +46,8 @@ bool Application::initialize() {
     /* Create gui database */
     database_ = std::make_shared<Database>();
 
+    init_coreagent();
+
     // 初始化数据模型
     if (!initializeModels()) {
         qCritical() << "Failed to initialize data models";
@@ -73,9 +75,6 @@ bool Application::initialize() {
         qCritical() << "Failed to initialize UI manager";
         return false;
     }
-
-    /* Create CoreAgent */
-    coreagent_ = new CoreAgent(this);
 
     RegisterCoreMsgHandlers();
 
@@ -106,6 +105,8 @@ void Application::RegisterCoreMsgHandlers() {
 
 int Application::run() {
     qDebug() << "Starting application...";
+
+    coreagent_->StartListening();
 
     // 连接应用退出信号
     connect(m_app, &QGuiApplication::aboutToQuit, this, &Application::onAboutToQuit);

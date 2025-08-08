@@ -1,29 +1,40 @@
 #include "corecomm.h"
 
+#include <filesystem>
+
+#include "infra/log.h"
+
 namespace btra {
 
 void CoreComm::init(const std::string &conf_file) {
-    std::ifstream f(conf_file);
-    auto j = Json::json::parse(f);
-    comm_data_.init(j);
+    if (std::filesystem::exists(conf_file)) {
+        std::ifstream f(conf_file);
+        auto j = Json::json::parse(f);
+        comm_data_.init(j);
+        inited_ = true;
+    } else {
+        INFRA_LOG_ERROR("When initial CoreComm: {} is not existed!", conf_file);
+    }
 }
 
 void CoreComm::start() {
     /* tmp code */
-    auto &writers = comm_data_.writers;
+    if (inited_) {
+        auto &writers = comm_data_.writers;
 
-    auto req_md_dest = journal::JIDUtil::build(journal::JIDUtil::MD_REQ);
-    auto now_time = infra::time::now_time();
+        auto req_md_dest = journal::JIDUtil::build(journal::JIDUtil::MD_REQ);
+        auto now_time = infra::time::now_time();
 
-    TradingStart trading_start;
-    trading_start.sync_time = now_time;
-    writers[req_md_dest]->write(now_time, trading_start);
+        TradingStart trading_start;
+        trading_start.sync_time = now_time;
+        writers[req_md_dest]->write(now_time, trading_start);
 
-    for (auto &[key, writer] : writers) {
-        if (key == req_md_dest) {
-            continue;
+        for (auto &[key, writer] : writers) {
+            if (key == req_md_dest) {
+                continue;
+            }
+            writer->write(now_time, trading_start);
         }
-        writer->write(now_time, trading_start);
     }
 }
 

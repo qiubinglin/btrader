@@ -140,6 +140,12 @@ private:
      */
     void setupApplicationInfo();
 
+    void init_coreagent() {
+        /* Create CoreAgent */
+        coreagent_ = new CoreAgent(this);
+        coreagent_->init(m_configManager->get_core_config_file());
+    }
+
 private:
     QGuiApplication* m_app;             ///< Qt应用程序实例
     QQmlApplicationEngine* m_qmlEngine; ///< QML引擎

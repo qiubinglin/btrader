@@ -275,10 +275,19 @@ bool ConfigManager::parseGuiConfig(const QJsonDocument& jsonDoc)
     // Parse config section
     if (root.contains("config") && root["config"].isObject()) {
         QJsonObject configObj = root["config"].toObject();
+
+        /* Parse core engine config file path */
+        if (configObj.contains("core_engine_config") && configObj["core_engine_config"].isString()) {
+            core_config_file_ = configObj["core_engine_config"].toString();
+        }
         
         // Parse instruments_file path
         if (configObj.contains("instruments_file") && configObj["instruments_file"].isString()) {
             m_instrumentsPath = configObj["instruments_file"].toString();
+        }
+
+        if (configObj.contains("simulation") && configObj["simulation"].isBool()) {
+            simulation_ = configObj["simulation"].toBool();
         }
         
         // Parse theme

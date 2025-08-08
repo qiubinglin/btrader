@@ -18,6 +18,8 @@ public:
     explicit CoreAgent(QObject* parent = nullptr);
     ~CoreAgent();
 
+    void init(const QString &filepath);
+
     void StartListening();
     void StopListening();
 

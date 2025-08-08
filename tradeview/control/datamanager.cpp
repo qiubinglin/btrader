@@ -44,9 +44,6 @@ bool DataManager::initialize() {
     // 初始化模拟数据
     initializeSimulatedData();
 
-    // 自动连接并开始生成数据
-    connectDataSource("simulation");
-
     qDebug() << "DataManager initialized successfully";
     return true;
 }
@@ -129,12 +126,16 @@ void DataManager::onConnectionTimeout() {
 }
 
 void DataManager::initializeSimulatedData() {
-    // 初始化默认交易对
-    QStringList defaultSymbols = config_mgr_->getEnabledInstruments();
-    for (const QString& symbol : defaultSymbols) {
-        subscribeSymbol(symbol);
-        m_lastPrices[symbol] = 50000.0 + QRandomGenerator::global()->bounded(1000.0);
-        m_lastUpdateTime[symbol] = QDateTime::currentDateTime();
+    if (config_mgr_->get_simulation()) {
+        // 初始化默认交易对
+        QStringList defaultSymbols = config_mgr_->getEnabledInstruments();
+        for (const QString& symbol : defaultSymbols) {
+            subscribeSymbol(symbol);
+            m_lastPrices[symbol] = 50000.0 + QRandomGenerator::global()->bounded(1000.0);
+            m_lastUpdateTime[symbol] = QDateTime::currentDateTime();
+        }
+
+        connectDataSource("simulation");
     }
 }
 
@@ -199,7 +200,7 @@ void DataManager::generateSimulatedTickTradeData(const QString& symbol) {
     QString tradeId = QString("T%1").arg(QDateTime::currentMSecsSinceEpoch());
 
     TickTradeData tickData(timestamp, price, volume, direction, tradeId, symbol);
-    
+
     // 添加到数据库
     auto dataset = database_->reqTickTradeBook(symbol.toStdString());
     dataset->add(tickData);

@@ -36,6 +36,7 @@ public:
     }
 
 private:
+    bool inited_{false};
     JourCommData comm_data_;
     std::unordered_map<int, std::function<void(const EventSPtr &)>> handlers_;
 };
