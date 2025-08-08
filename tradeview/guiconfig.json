@@ -1,5 +1,6 @@
 {
     "config": {
+        "core_engine_config": "./core_engine.json",
         "instruments_file": "./instruments.json"
     }
 }

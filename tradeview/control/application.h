@@ -7,15 +7,12 @@
 #include <QQmlContext>
 #include <QQuickStyle>
 
-// 包含模型头文件
-#include "candlestickmodel.h"
-#include "configmanager.h"
-#include "coreagent.h"
-#include "footprintmodel.h"
-#include "microorderbookmodel.h"
+#include "control/configmanager.h"
+#include "control/coreagent.h"
+#include "control/datamanager.h"
+#include "control/uimanager.h"
+#include "guidb/database.h"
 #include "model/modelmgr.h"
-#include "orderbookmodel.h"
-#include "ticktrademodel.h"
 
 namespace btra::gui {
 
@@ -150,9 +147,9 @@ private:
     UIManager* m_uiManager;             ///< UI管理器
     CoreAgent* coreagent_{nullptr};     /* Communication with core engine. */
 
-    // 数据模型
     ModelMgr* model_mgr_{nullptr};
     ConfigManager* m_configManager; ///< 配置管理器
+    DatabaseSPtr database_;
 
     int m_argc;    ///< 命令行参数数量
     char** m_argv; ///< 命令行参数数组

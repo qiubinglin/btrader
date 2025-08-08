@@ -8,12 +8,6 @@
 #include <QQuickStyle>
 #include <memory>
 
-#include "control/coreagent.h"
-#include "datamanager.h"
-#include "guidb/database.h"
-#include "modelmgr.h"
-#include "uimanager.h"
-
 namespace btra::gui {
 
 Application::Application(int argc, char *argv[], QObject *parent)
@@ -50,7 +44,7 @@ bool Application::initialize() {
     }
 
     /* Create gui database */
-    DatabaseSPtr db = std::make_shared<Database>();
+    database_ = std::make_shared<Database>();
 
     // 初始化数据模型
     if (!initializeModels()) {
@@ -65,13 +59,13 @@ bool Application::initialize() {
     }
 
     // 创建数据管理器
-    m_dataManager = new DataManager(db, m_configManager, this);
+    m_dataManager = new DataManager(database_, m_configManager, this);
     if (!m_dataManager->initialize()) {
         qCritical() << "Failed to initialize data manager";
         return false;
     }
 
-    model_mgr_->setDatabase(db);
+    model_mgr_->setDatabase(database_);
 
     // 创建UI管理器
     m_uiManager = new UIManager(this);
@@ -98,13 +92,7 @@ bool Application::initialize() {
         return false;
     }
 
-    // 连接数据源并订阅交易对
-    m_dataManager->connectDataSource("simulation");
-    m_dataManager->subscribeSymbol("BTC/USDT");
-    m_dataManager->subscribeSymbol("ETH/USDT");
-    m_dataManager->subscribeSymbol("BNB/USDT");
-
-    qDebug() << "Application initialized successfully";
+    qCritical() << "Application initialized successfully";
     emit initialized();
 
     return true;
