@@ -12,3 +12,10 @@ struct epoll_event create_epoll_event(int event_fd, int flags) {
     ev.events = flags;
     return ev;
 }
+
+struct epoll_pair_t create_epoll_pair(int epfd_flags, unsigned int efd_initval, int flags) {
+    struct epoll_pair_t epoll_pair;
+    epoll_pair.epfd = create_epoll(epfd_flags);
+    epoll_pair.efd = create_eventfd(efd_initval, flags);
+    return epoll_pair;
+}

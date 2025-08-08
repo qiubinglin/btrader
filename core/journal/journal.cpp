@@ -1,6 +1,7 @@
 #include "journal.h"
 
 #include "enums.h"
+#include "infra/log.h"
 
 namespace btra::journal {
 
@@ -83,12 +84,16 @@ JourIndicator::~JourIndicator() {
 
 int JourIndicator::init() {
     efd_ = create_eventfd(0, EFD_NONBLOCK);
+    if (efd_ == -1) {
+        INFRA_LOG_ERROR("Initail efd failed");
+    }
     return efd_;
 }
 
 int JourIndicator::post() {
 #ifndef HP
     if (efd_ == -1) {
+        INFRA_LOG_ERROR("Invalid efd in JourIndicator");
         return -1;
     }
     uint64_t val = 1;

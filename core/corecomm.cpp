@@ -43,15 +43,20 @@ void CoreComm::register_handler(MsgTag::Tag tag, std::function<void(const EventS
 }
 
 void CoreComm::listening() {
-    INFRA_LOG_DEBUG("CoreComm::listening");
+    if (not inited_) {
+        return;
+    }
+    INFRA_LOG_INFO("CoreComm::listening");
 
     auto &ob_helper = comm_data_.observe_helper;
     auto &reader = comm_data_.reader;
 #ifndef HP
     while (ob_helper.data_available()) {
-        INFRA_LOG_DEBUG("ob_helper.data_available()");
 #endif
         while (reader->data_available()) {
+            if (status_ < 0) {
+                break;
+            }
             auto event = reader->current_frame();
             if (handlers_.contains(event->msg_type())) {
                 handlers_.at(event->msg_type())(event);
@@ -59,8 +64,16 @@ void CoreComm::listening() {
             reader->next();
         }
 #ifndef HP
+        if (status_ < 0) {
+            break;
+        }
     }
 #endif
+}
+
+void CoreComm::terminate() {
+    status_ = -1;
+    comm_data_.interrupt_sender.post();
 }
 
 } // namespace btra

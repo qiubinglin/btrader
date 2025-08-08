@@ -1,12 +1,22 @@
 #include "coreagent.h"
 
+#include <qlogging.h>
+
+#include <stdexcept>
+
 namespace btra::gui {
 
 CoreAgent::CoreAgent(QObject* parent) : QObject(parent) {}
 
 CoreAgent::~CoreAgent() { StopListening(); }
 
-void CoreAgent::init(const QString& filepath) { corecomm_.init(filepath.toStdString()); }
+void CoreAgent::init(const QString& filepath) {
+    try {
+        corecomm_.init(filepath.toStdString());
+    } catch (const std::runtime_error& e) {
+        qErrnoWarning(e.what());
+    }
+}
 
 void CoreAgent::StartListening() {
     corecomm_.start();
@@ -18,7 +28,8 @@ void CoreAgent::StartListening() {
 void CoreAgent::StopListening() {
     /* Stop existing thread */
     if (listening_th_) {
-        listening_th_->terminate();
+        corecomm_.terminate();
+        listening_th_->wait();
     }
 }
 

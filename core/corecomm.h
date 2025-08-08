@@ -22,6 +22,8 @@ public:
 
     void listening();
 
+    void terminate();
+
     template <typename T>
     void write(uint32_t id, const T &data) {
         if (comm_data_.writers.count(id) == 0) [[unlikely]] {
@@ -37,6 +39,7 @@ public:
 
 private:
     bool inited_{false};
+    volatile int status_{0};
     JourCommData comm_data_;
     std::unordered_map<int, std::function<void(const EventSPtr &)>> handlers_;
 };

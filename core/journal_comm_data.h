@@ -17,6 +17,8 @@ struct JourCommData {
     WriterMap writers;
     unsigned md_account_count;
 
+    journal::JourIndicator interrupt_sender;
+
     void init(const Json::json &json);
 };
 

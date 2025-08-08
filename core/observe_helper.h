@@ -12,6 +12,8 @@ public:
 
     bool data_available();
 
+    void add_target(int efd);
+
 private:
     journal::Reader *reader_{nullptr};
 #ifndef HP

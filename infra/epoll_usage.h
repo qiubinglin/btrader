@@ -14,6 +14,11 @@
 extern "C" {
 #endif
 
+typedef struct epoll_pair_t {
+    int epfd;
+    int efd;
+} epoll_pair_t;
+
 /**
  * @brief Create epoll instance.
  *
@@ -39,6 +44,8 @@ int create_eventfd(unsigned int initval, int flags);
  * @return struct epoll_event which exchange information between user space and kernel space.
  */
 struct epoll_event create_epoll_event(int event_fd, int flags);
+
+struct epoll_pair_t create_epoll_pair(int epfd_flags, unsigned int efd_initval, int flags);
 
 #ifdef __cplusplus
 }

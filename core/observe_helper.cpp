@@ -1,8 +1,9 @@
 #include "observe_helper.h"
 
+#include <fstream>
+
 #include "core/fds_map.h"
 #include "infra/json.h"
-#include <fstream>
 
 namespace btra {
 
@@ -41,6 +42,14 @@ bool ObserveHelper::data_available() {
     return retval;
 #else
     return reader_->data_available();
+#endif
+}
+
+void ObserveHelper::add_target(int efd) {
+#ifndef HP
+    jour_observer_.add_target(efd);
+#else
+    (void)efd;
 #endif
 }
 
