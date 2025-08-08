@@ -58,7 +58,7 @@ Page {
                 }
                 onCurrentTextChanged: {
                     // Switch model and reload data when symbol changes
-                    console.log("Symbol changed to:", currentText)
+                    // console.log("Symbol changed to:", currentText)
                     switchCandlestickModel(currentText)
                 }
             }
@@ -83,7 +83,7 @@ Page {
                 onCurrentTextChanged: {
                     if (candlestickModel) {
                         candlestickModel.set_timeframe(currentText)
-                        console.log("Timeframe changed to:", currentText)
+                        // console.log("Timeframe changed to:", currentText)
                         // Force repaint to show new timeframe data
                         candlestickCanvas.requestPaint()
                         volumeCanvas.requestPaint()
@@ -260,7 +260,7 @@ Page {
             antialiasing: true
 
             onPaint: {
-                console.log("Canvas paint triggered, model count:", candlestickModel ? candlestickModel.count : "undefined")
+                // console.log("Canvas paint triggered, model count:", candlestickModel ? candlestickModel.count : "undefined")
                 
                 if (!candlestickModel || candlestickModel.count === 0) {
                     console.log("No candlestick data available, candlestickModel name: ", candlestickModel ? candlestickModel.get_name() : "undefined")
@@ -301,7 +301,7 @@ Page {
                     return
                 }
 
-                console.log("Price range:", minPrice, "to", maxPrice)
+                // console.log("Price range:", minPrice, "to", maxPrice)
 
                 let priceRange = maxPrice - minPrice
                 if (priceRange === 0) priceRange = 1
@@ -366,7 +366,7 @@ Page {
                     }
 
                     // Debug: Log drawing coordinates
-                    console.log("Drawing candlestick at x:", x, "bodyY:", bodyY, "width:", effectiveBarWidth, "height:", bodyHeight)
+                    // console.log("Drawing candlestick at x:", x, "bodyY:", bodyY, "width:", effectiveBarWidth, "height:", bodyHeight)
 
                     ctx.fillRect(x, bodyY, effectiveBarWidth, bodyHeight)
                     
@@ -546,7 +546,7 @@ Page {
         function onDataChanged() {
             // Verify we're still connected to the current model
             if (candlestickModel && candlestickModel === target) {
-                console.log("Candlestick data changed, count:", candlestickModel.count, "model name:", candlestickModel.get_name())
+                // console.log("Candlestick data changed, count:", candlestickModel.count, "model name:", candlestickModel.get_name())
                 candlestickCanvas.requestPaint()
                 volumeCanvas.requestPaint()
             } else {
@@ -557,7 +557,7 @@ Page {
         function onCandlestickAdded() {
             // Verify we're still connected to the current model
             if (candlestickModel && candlestickModel === target) {
-                console.log("New candlestick added, total count:", candlestickModel.count, "model name:", candlestickModel.get_name())
+                // console.log("New candlestick added, total count:", candlestickModel.count, "model name:", candlestickModel.get_name())
                 candlestickCanvas.requestPaint()
                 volumeCanvas.requestPaint()
             } else {

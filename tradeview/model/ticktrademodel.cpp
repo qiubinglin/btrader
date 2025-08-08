@@ -1,7 +1,5 @@
 #include "ticktrademodel.h"
 
-#include <QDebug>
-
 namespace btra::gui {
 
 TickTradeModel::TickTradeModel(const QString &name, TickTradeBookSPtr book, QObject *parent)

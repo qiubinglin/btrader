@@ -1,11 +1,11 @@
 #include "datamanager.h"
 
 #include <QDateTime>
-#include <QDebug>
 #include <QRandomGenerator>
 #include <QTimer>
 #include <utility>
 
+#include "core/types.h"
 #include "guidb/kline.h"
 #include "guidb/orderbookset.h"
 
@@ -49,7 +49,7 @@ bool DataManager::initialize() {
 }
 
 bool DataManager::connectDataSource(const QString& dataSource) {
-    qDebug() << "Connecting to data source:" << dataSource;
+    // Connecting to data source: " << dataSource;
 
     m_dataSource = dataSource;
 
@@ -61,7 +61,7 @@ bool DataManager::connectDataSource(const QString& dataSource) {
 }
 
 void DataManager::disconnectDataSource() {
-    qDebug() << "Disconnecting from data source";
+    // Disconnecting from data source
 
     updateConnectionStatus(false);
     m_simulationTimer->stop();
@@ -69,7 +69,7 @@ void DataManager::disconnectDataSource() {
 }
 
 bool DataManager::subscribeSymbol(const QString& symbol) {
-    qDebug() << "Subscribing to symbol:" << symbol;
+    // Subscribing to symbol: " << symbol;
 
     if (!m_subscribedSymbols.contains(symbol)) {
         m_subscribedSymbols.append(symbol);
@@ -88,7 +88,7 @@ bool DataManager::subscribeSymbol(const QString& symbol) {
 }
 
 void DataManager::unsubscribeSymbol(const QString& symbol) {
-    qDebug() << "Unsubscribing from symbol:" << symbol;
+    // Unsubscribing from symbol: " << symbol;
 
     m_subscribedSymbols.removeOne(symbol);
     m_lastPrices.remove(symbol);
@@ -116,7 +116,7 @@ void DataManager::onSimulateDataUpdate() {
 }
 
 void DataManager::onConnectionTimeout() {
-    qDebug() << "Connection timeout, simulating successful connection";
+    // Connection timeout, simulating successful connection
     updateConnectionStatus(true);
 
     // 开始模拟数据更新
@@ -176,7 +176,7 @@ void DataManager::generateSimulatedCandlestickData(const QString& symbol) {
     }
     dataset->notify_all(NotifyType::Update);
 
-    qDebug() << "Generated candlestick for" << symbol << ":" << open << high << low << close << volume;
+    // Generated candlestick for " << symbol << ": " << open << " " << high << " " << low << " " << close << " " << volume;
 }
 
 void DataManager::generateSimulatedTickTradeData(const QString& symbol) {
@@ -206,7 +206,7 @@ void DataManager::generateSimulatedTickTradeData(const QString& symbol) {
     dataset->add(tickData);
     dataset->notify_all(NotifyType::Update);
 
-    qDebug() << "Generated tick trade for" << symbol << ":" << price << volume << (isBuy ? "BUY" : "SELL");
+    // Generated tick trade for " << symbol << ": " << price << " " << volume << " " << (isBuy ? "BUY" : "SELL");
 }
 
 void DataManager::generateSimulatedOrderBookData(const QString& symbol) {
@@ -236,9 +236,8 @@ void DataManager::generateSimulatedOrderBookData(const QString& symbol) {
         asks.append(level);
     }
 
-    qDebug() << "Generated order book for" << symbol << "with" << bids.size() << "bids and" << asks.size() << "asks";
-    qDebug() << "Base price:" << basePrice << "Best bid:" << (bids.isEmpty() ? 0 : bids.first().price)
-             << "Best ask:" << (asks.isEmpty() ? 0 : asks.first().price);
+    // Generated order book for " << symbol << " with " << bids.size() << " bids and " << asks.size() << " asks";
+        // Base price: " << basePrice << " Best bid: " << (bids.isEmpty() ? 0 : bids.first().price) << " Best ask: " << (asks.isEmpty() ? 0 : asks.first().price);
 
     auto dataset = database_->reqOrderBookSet(symbol.toStdString());
     OrderBook book;
@@ -263,6 +262,10 @@ void DataManager::updateConnectionStatus(bool connected) {
     }
 }
 
-void DataManager::handleBar(const EventSPtr& event) {}
+void DataManager::handleBar(const EventSPtr& event) {
+    const auto& bar = event->data<Bar>();
+    auto dataset = database_->reqKlineDB(bar.instrument_id);
+    /* Add bar */
+}
 
 } // namespace btra::gui

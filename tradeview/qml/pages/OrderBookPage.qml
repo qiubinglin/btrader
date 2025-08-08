@@ -102,7 +102,7 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                 }
                 onClicked: {
-                    console.log("Manual refresh requested")
+                    // console.log("Manual refresh requested")
                     loadOrderBookData()
                 }
             }

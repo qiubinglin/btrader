@@ -1,10 +1,5 @@
 #include "candlestickmodel.h"
 
-#include <qdebug.h>
-#include <qlogging.h>
-
-#include <QDebug>
-
 #include "guidb/kline.h"
 
 namespace btra::gui {

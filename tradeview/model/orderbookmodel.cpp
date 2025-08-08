@@ -1,6 +1,5 @@
 #include "orderbookmodel.h"
 
-#include <QDebug>
 #include <algorithm>
 #include <QtMath>
 

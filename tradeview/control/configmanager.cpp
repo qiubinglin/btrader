@@ -1,7 +1,6 @@
 #include "configmanager.h"
 #include <QFile>
 #include <QDir>
-#include <QDebug>
 #include <QCoreApplication>
 
 namespace btra::gui {
