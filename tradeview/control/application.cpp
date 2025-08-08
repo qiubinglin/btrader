@@ -61,7 +61,7 @@ bool Application::initialize() {
     }
 
     // 创建数据管理器
-    m_dataManager = new DataManager(database_, m_configManager, this);
+    m_dataManager = new DataManager(database_, m_configManager, coreagent_, this);
     if (!m_dataManager->initialize()) {
         qCritical() << "Failed to initialize data manager";
         return false;
@@ -98,9 +98,7 @@ bool Application::initialize() {
 }
 
 void Application::RegisterCoreMsgHandlers() {
-    auto &corecomm = coreagent_->GetCoreComm();
-    auto data_mgr = this->m_dataManager;
-    corecomm.register_handler(MsgTag::Bar, [data_mgr](const EventSPtr &event) { data_mgr->handleBar(event); });
+    connect(coreagent_, &CoreAgent::incomming_message, m_dataManager, &DataManager::on_incomming_message);
 }
 
 int Application::run() {

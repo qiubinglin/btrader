@@ -1,6 +1,7 @@
 #include "coreagent.h"
 
 #include <qlogging.h>
+#include <qtmetamacros.h>
 
 #include <stdexcept>
 
@@ -21,7 +22,12 @@ void CoreAgent::init(const QString& filepath) {
 void CoreAgent::StartListening() {
     corecomm_.start();
     listening_th_ = std::make_unique<WorkThread>();
-    listening_th_->setup([this] { this->corecomm_.listening(); });
+    listening_th_->setup([this] {
+        while (this->corecomm_.get_status() >= 0) {
+            this->corecomm_.wait_msg();
+            emit this->incomming_message();
+        }
+    });
     listening_th_->start();
 }
 

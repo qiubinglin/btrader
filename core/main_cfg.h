@@ -10,6 +10,7 @@ namespace btra {
 class MainCfg {
 public:
     MainCfg() {}
+    MainCfg(const std::string &filepath);
     MainCfg(const Json::json &cfg);
     journal::JLocationSPtr md_location() const;
     const std::vector<uint32_t> &md_dests() const;
@@ -36,6 +37,8 @@ public:
 
     uint32_t get_page_rollback_size() const { return page_rollback_size_; }
 
+    infra::TimeUnit get_time_unit() const { return time_unit_; }
+
 private:
     Json::json cfg_;
 
@@ -53,6 +56,8 @@ private:
     std::string fds_file_;
 
     uint32_t page_rollback_size_{0};
+
+    infra::TimeUnit time_unit_{infra::TimeUnit::MILLI};
 };
 
 } // namespace btra

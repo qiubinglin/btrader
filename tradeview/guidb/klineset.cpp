@@ -2,9 +2,9 @@
 
 namespace btra::gui {
 
-int KLineSet::count() const { return static_cast<int>(size()); }
+int KLineSet::count() const { return static_cast<int>(klines.size()); }
 void KLineSet::clear() {
-    std::deque<KLine>::clear();
+    klines.clear();
     m_max_price = 0;
     m_min_price = 0;
     m_max_volume = 0;

@@ -22,6 +22,21 @@ public:
 
     void listening();
 
+    void wait_msg();
+
+    template <typename HANDLER>
+    void read_msg(HANDLER &&common_handler_) {
+        auto &reader = comm_data_.reader;
+        while (reader->data_available()) {
+            if (status_ < 0) {
+                break;
+            }
+            auto event = reader->current_frame();
+            common_handler_(event);
+            reader->next();
+        }
+    }
+
     void terminate();
 
     template <typename T>
@@ -36,6 +51,8 @@ public:
     void write(const MSGTARGET &target, const T &data) {
         write(target(), data);
     }
+
+    int get_status() const { return status_; }
 
 private:
     bool inited_{false};

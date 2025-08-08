@@ -1,28 +1,28 @@
 {
     "instruments": [
         {
-            "symbol": "BTC/USDT",
+            "symbol": "BTCUSDT",
             "name": "Bitcoin",
             "type": "crypto",
             "exchange": "binance",
             "enabled": true
         },
         {
-            "symbol": "ETH/USDT",
+            "symbol": "ETHUSDT",
             "name": "Ethereum",
             "type": "crypto",
             "exchange": "binance",
             "enabled": true
         },
         {
-            "symbol": "BNB/USDT",
+            "symbol": "BNBUSDT",
             "name": "Binance Coin",
             "type": "crypto",
             "exchange": "binance",
             "enabled": true
         },
         {
-            "symbol": "ADA/USDT",
+            "symbol": "ADAUSDT",
             "name": "Cardano",
             "type": "crypto",
             "exchange": "binance",

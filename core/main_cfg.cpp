@@ -4,6 +4,12 @@ namespace btra {
 
 using namespace btra::journal;
 
+MainCfg::MainCfg(const std::string &filepath) {
+    std::ifstream ifs(filepath);
+    Json::json cfg = Json::json::parse(ifs);
+    *this = MainCfg(cfg);
+}
+
 MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
     run_mode_ = enums::get_mode_by_name(cfg_["system"]["mode"].get<std::string>());
     root_ = cfg_["system"]["output_root_path"].get<std::string>();
@@ -38,6 +44,17 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
     }
 
     page_rollback_size_ = cfg_["system"]["page_rollback_size"].get<uint32_t>();
+
+    if (cfg_["system"].contains("time_unit")) {
+        std::string unitstr = cfg_["system"]["time_unit"].get<std::string>();
+        if (unitstr == "sec") {
+            time_unit_ = infra::TimeUnit::SEC;
+        } else if (unitstr == "nano") {
+            time_unit_ = infra::TimeUnit::NANO;
+        } else {
+            time_unit_ = infra::TimeUnit::MILLI;
+        }
+    }
 }
 
 JLocationSPtr MainCfg::md_location() const {
@@ -104,8 +121,6 @@ std::vector<std::string> MainCfg::get_journal_names() const {
     return res;
 }
 
-const Book &MainCfg::get_initail_book() const {
-    return initial_book_;
-}
+const Book &MainCfg::get_initail_book() const { return initial_book_; }
 
 } // namespace btra

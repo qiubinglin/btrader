@@ -71,6 +71,10 @@ void CoreComm::listening() {
 #endif
 }
 
+void CoreComm::wait_msg() {
+    comm_data_.observe_helper.data_available();
+}
+
 void CoreComm::terminate() {
     status_ = -1;
     comm_data_.interrupt_sender.post();

@@ -25,6 +25,9 @@ public:
 
     CoreComm& GetCoreComm() { return corecomm_; }
 
+signals:
+    void incomming_message();
+
 private:
     CoreComm corecomm_;
     std::unique_ptr<WorkThread> listening_th_;

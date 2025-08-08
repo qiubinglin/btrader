@@ -9,9 +9,10 @@
 
 namespace btra::gui {
 
-class KLineSet : public Resource, public std::deque<KLine> {
+class KLineSet : public Resource {
 public:
     int count() const;
+    size_t size() const { return klines.size(); }
     void clear();
 
     /**
@@ -30,7 +31,13 @@ public:
     double get_min_price() const;
     qint64 get_max_volume() const;
 
+    const KLine& at(size_t i) { return klines.at(i); }
+    void push_back(const KLine& elm) { klines.push_back(elm); }
+    void pop_front() { klines.pop_front(); }
+    KLine& back() { return klines.back(); }
+
 private:
+    std::deque<KLine> klines;
     QString m_timeframe{"1m"}; ///< 时间周期
     double m_max_price{0};     ///< 最高价格
     double m_min_price{0};     ///< 最低价格

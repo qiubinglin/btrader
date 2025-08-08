@@ -76,6 +76,10 @@ bool ConfigManager::loadConfig(const QString& configPath)
         emit configLoadError(error);
         return false;
     }
+
+    if (!core_config_file_.isEmpty()) {
+        core_engine_cfg_ = MainCfg(core_config_file_.toStdString());
+    }
     
     // Load instruments configuration file
     if (!m_instrumentsPath.isEmpty()) {

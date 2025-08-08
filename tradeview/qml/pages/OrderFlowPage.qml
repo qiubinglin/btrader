@@ -385,7 +385,7 @@ Page {
                     ctx.stroke()
                 }
 
-                console.log("Canvas painting completed")
+                // console.log("Canvas painting completed")
             }
 
             // Mouse hover effect

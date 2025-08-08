@@ -7,9 +7,11 @@
 #include <QString>
 #include <QTimer>
 
+#include "control/coreagent.h"
 #include "core/event.h"
 #include "guidb/database.h"
 #include "control/configmanager.h"
+#include "infra/time.h"
 
 namespace btra::gui {
 
@@ -26,7 +28,7 @@ class DataManager : public QObject {
     Q_OBJECT
 
 public:
-    explicit DataManager(DatabaseSPtr database, ConfigManager *config_mgr, QObject* parent = nullptr);
+    explicit DataManager(DatabaseSPtr database, ConfigManager *config_mgr, CoreAgent *coreagent, QObject* parent = nullptr);
     ~DataManager();
 
     /**
@@ -135,12 +137,13 @@ private:
 
 public:
     void setDatabase(DatabaseSPtr ptr) { database_ = ptr; }
-
-    /* Functions to handle incoming message begin */
-    void handleBar(const EventSPtr&);
-    /* Functions to handle incoming message end */
+    void on_incomming_message();
 
 private:
+    /* Functions to handle incoming message begin */
+    void handle_bar(const EventSPtr&);
+    /* Functions to handle incoming message end */
+
     // 连接状态
     bool m_isConnected;              ///< 是否已连接
     QString m_dataSource;            ///< 数据源地址
@@ -156,6 +159,9 @@ private:
 
     DatabaseSPtr database_{nullptr};
     ConfigManager *config_mgr_{nullptr};
+    CoreAgent *coreagent_{nullptr};
+    infra::TimeUnit time_unit_{infra::TimeUnit::MILLI};
+    std::unordered_map<int, std::function<void(const EventSPtr &)>> event_handlers_;
 };
 
 } // namespace btra::gui

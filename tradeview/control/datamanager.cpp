@@ -1,23 +1,31 @@
 #include "datamanager.h"
 
+#include <qdatetime.h>
+#include <qlogging.h>
+
 #include <QDateTime>
 #include <QRandomGenerator>
 #include <QTimer>
 #include <utility>
 
 #include "core/types.h"
+#include "guidb/guitime.h"
 #include "guidb/kline.h"
 #include "guidb/orderbookset.h"
+#include "guidb/resource.h"
+
+#define ON_MEM_FUNC(func) [this](const EventSPtr& event) { this->func(event); }
 
 namespace btra::gui {
 
-DataManager::DataManager(DatabaseSPtr database, ConfigManager* config_mgr, QObject* parent)
+DataManager::DataManager(DatabaseSPtr database, ConfigManager* config_mgr, CoreAgent* coreagent, QObject* parent)
     : QObject(parent),
       m_isConnected(false),
       m_simulationTimer(nullptr),
       m_connectionTimer(nullptr),
       database_(database),
-      config_mgr_(config_mgr) {}
+      config_mgr_(config_mgr),
+      coreagent_(coreagent) {}
 
 DataManager::~DataManager() {
     if (m_simulationTimer) {
@@ -33,6 +41,8 @@ DataManager::~DataManager() {
 bool DataManager::initialize() {
     qDebug() << "Initializing DataManager...";
 
+    time_unit_ = config_mgr_->get_core_engine_cfg().get_time_unit();
+
     // 创建定时器
     m_simulationTimer = new QTimer(this);
     m_connectionTimer = new QTimer(this);
@@ -43,6 +53,8 @@ bool DataManager::initialize() {
 
     // 初始化模拟数据
     initializeSimulatedData();
+
+    event_handlers_ = {{MsgTag::Bar, ON_MEM_FUNC(handle_bar)}};
 
     qDebug() << "DataManager initialized successfully";
     return true;
@@ -176,7 +188,8 @@ void DataManager::generateSimulatedCandlestickData(const QString& symbol) {
     }
     dataset->notify_all(NotifyType::Update);
 
-    // Generated candlestick for " << symbol << ": " << open << " " << high << " " << low << " " << close << " " << volume;
+    // Generated candlestick for " << symbol << ": " << open << " " << high << " " << low << " " << close << " " <<
+    // volume;
 }
 
 void DataManager::generateSimulatedTickTradeData(const QString& symbol) {
@@ -237,7 +250,8 @@ void DataManager::generateSimulatedOrderBookData(const QString& symbol) {
     }
 
     // Generated order book for " << symbol << " with " << bids.size() << " bids and " << asks.size() << " asks";
-        // Base price: " << basePrice << " Best bid: " << (bids.isEmpty() ? 0 : bids.first().price) << " Best ask: " << (asks.isEmpty() ? 0 : asks.first().price);
+    // Base price: " << basePrice << " Best bid: " << (bids.isEmpty() ? 0 : bids.first().price) << " Best ask: " <<
+    // (asks.isEmpty() ? 0 : asks.first().price);
 
     auto dataset = database_->reqOrderBookSet(symbol.toStdString());
     OrderBook book;
@@ -262,10 +276,46 @@ void DataManager::updateConnectionStatus(bool connected) {
     }
 }
 
-void DataManager::handleBar(const EventSPtr& event) {
+void DataManager::on_incomming_message() {
+    coreagent_->GetCoreComm().read_msg([this](const EventSPtr& event) {
+        if (this->event_handlers_.contains(event->msg_type())) {
+            this->event_handlers_[event->msg_type()](event);
+        }
+    });
+}
+
+void DataManager::handle_bar(const EventSPtr& event) {
     const auto& bar = event->data<Bar>();
     auto dataset = database_->reqKlineDB(bar.instrument_id);
+
+    QDateTime start, end;
+    switch (time_unit_) {
+        case infra::TimeUnit::SEC:
+            break;
+        case infra::TimeUnit::NANO:
+            break;
+        case infra::TimeUnit::MILLI:
+        default:
+            start = GuiTime::fromTimestampMs(bar.start_time);
+            end = GuiTime::fromTimestampMs(bar.end_time);
+            break;
+    }
+
     /* Add bar */
+    if (dataset->size() and dataset->back().contains(end)) {
+        dataset->back().close = bar.close;
+        dataset->back().high = std::max(dataset->back().high, bar.high);
+        dataset->back().low = std::max(dataset->back().low, bar.low);
+        dataset->back().volume += bar.volume;
+    } else {
+        KLine kline(end, bar.open, bar.high, bar.low, bar.close, bar.volume, 0);
+        dataset->push_back(kline);
+    }
+
+    if (dataset->size() > 1000) {
+        dataset->pop_front();
+    }
+    dataset->notify_all(NotifyType::Update);
 }
 
 } // namespace btra::gui

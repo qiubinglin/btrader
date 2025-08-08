@@ -11,6 +11,8 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+#include "core/main_cfg.h"
+
 namespace btra::gui {
 
 /**
@@ -158,6 +160,8 @@ public:
 
     bool get_simulation() const { return simulation_; }
 
+    const MainCfg &get_core_engine_cfg() const { return core_engine_cfg_; }
+
 signals:
     /**
      * @brief Configuration loaded signal
@@ -219,6 +223,7 @@ private:
     QString m_dataSource;         ///< Data source
 
     bool simulation_{false};
+    MainCfg core_engine_cfg_;
 };
 
 } // namespace btra::gui

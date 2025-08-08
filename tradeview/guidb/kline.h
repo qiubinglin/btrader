@@ -1,6 +1,11 @@
 #pragma once
 
+#include <qdatetime.h>
+
 #include <QDateTime>
+#include <QTime>
+
+#include "guitime.h"
 
 namespace btra::gui {
 
@@ -40,8 +45,8 @@ struct KLine {
         : start_time(start), end_time(end), open(o), high(h), low(l), close(c), volume(vol), amount(amt) {}
 
     /**
-     * @brief 带参数构造函数（向后兼容，使用单个时间戳作为结束时间）
-     * @param ts 时间戳（作为结束时间）
+     * @brief 带参数构造函数（根据传入的时间戳计算包含该时间戳的那一分钟的起始和结束时间）
+     * @param ts 时间戳（用于计算包含该时间戳的那一分钟）
      * @param o 开盘价
      * @param h 最高价
      * @param l 最低价
@@ -50,10 +55,16 @@ struct KLine {
      * @param amt 成交额
      */
     KLine(const QDateTime& ts, double o, double h, double l, double c, qint64 vol, double amt)
-        : end_time(ts), open(o), high(h), low(l), close(c), volume(vol), amount(amt) {
-        // 默认开始时间为结束时间减去1分钟
-        start_time = end_time.addSecs(-60);
+        : open(o), high(h), low(l), close(c), volume(vol), amount(amt) {
+        // 计算包含该时间戳的那一分钟的起始时间
+        // 将秒和毫秒清零，只保留到分钟级别
+        start_time = QDateTime(ts.date(), QTime(ts.time().hour(), ts.time().minute(), 0, 0));
+
+        // 计算结束时间（起始时间加1分钟）
+        end_time = start_time.addSecs(60);
     }
+
+    bool contains(const QDateTime& ts) const { return start_time < ts and end_time >= ts; }
 };
 
 } // namespace btra::gui
