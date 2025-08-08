@@ -12,6 +12,8 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include "infra/log.h"
+
 static int server_sock = -1;
 
 // 通过Unix域套接字发送文件描述符
@@ -66,32 +68,49 @@ void Mentor::send_eventfds(const std::vector<int> &eventfd_list, const std::stri
         exit(1);
     }
 
-    if (listen(server_sock, 1) == -1) {
+    if (listen(server_sock, 16) == -1) {
         perror("listen");
         exit(1);
     }
 
-    printf("[server] Waiting for client...\n");
+    printf("[server] Waiting for clients... (listening on %s)\n", SOCKET_PATH);
+    INFRA_LOG_CRITICAL("[server] Waiting for clients... (listening on {})", SOCKET_PATH);
 
-    // Waiting for connection
-    client_sock = accept(server_sock, NULL, NULL);
-    if (client_sock == -1) {
-        perror("accept");
-        exit(1);
-    }
-
-    printf("[server] client is connected\n");
-
-    // Send eventfd to client
-    for (auto eventfd_fd : eventfd_list) {
-        if (send_fd(client_sock, eventfd_fd) == -1) {
-            perror("send_fd");
-            exit(1);
+    // Continuously accept and serve clients
+    for (;;) {
+        client_sock = accept(server_sock, NULL, NULL);
+        if (client_sock == -1) {
+            if (errno == EINTR) {
+                // Interrupted by a signal, retry
+                continue;
+            }
+            perror("accept");
+            // On fatal error, break the loop and stop the server
+            break;
         }
-    }
 
-    sleep(2);
-    close(client_sock);
+        printf("[server] client connected\n");
+        INFRA_LOG_CRITICAL("[server] client connected");
+
+        // Send eventfd to connected client
+        for (auto eventfd_fd : eventfd_list) {
+            if (send_fd(client_sock, eventfd_fd) == -1) {
+                perror("send_fd");
+                // close client and continue to next one
+                close(client_sock);
+                client_sock = -1;
+                goto wait_next_client;
+            }
+        }
+
+        close(client_sock);
+        client_sock = -1;
+
+wait_next_client:
+        // Ready for the next client
+        printf("[server] Waiting for next client...\n");
+        INFRA_LOG_CRITICAL("[server] Waiting for next client...");
+    }
 #endif
 }
 
