@@ -9,5 +9,10 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3")
+endif()
+
 # Use this to help clangd server to parse the project
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
