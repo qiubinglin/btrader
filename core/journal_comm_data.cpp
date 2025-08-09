@@ -7,6 +7,9 @@
 namespace btra {
 
 void JourCommData::init(const Json::json &json) {
+    interrupt_sender.init();
+    observe_helper.add_target(interrupt_sender.get_fd());
+
     MainCfg main_cfg(json);
     FdsMap::set_fds_file(main_cfg.get_fds_file()); /* Set fds file path first */
 
@@ -29,9 +32,6 @@ void JourCommData::init(const Json::json &json) {
 
     auto md_req_dest = journal::JIDUtil::build(journal::JIDUtil::MD_REQ);
     writers[md_req_dest] = std::make_unique<journal::Writer>(main_cfg.md_req_location(), md_req_dest, false);
-
-    interrupt_sender.init();
-    observe_helper.add_target(interrupt_sender.get_fd());
 
     /* Intialize ObserveHelper */
     observe_helper.add_customer(reader);

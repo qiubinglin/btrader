@@ -126,14 +126,12 @@ QVariantList CandlestickModel::get_candlesticks(int start, int count) const {
     for (int i = start; i < end; ++i) {
         QVariantMap candlestick;
         const KLine& data = klineset_->at(i);
-        candlestick["start_time"] = data.start_time;
-        candlestick["end_time"] = data.end_time;
+        candlestick["timestamp"] = data.start_time;
         candlestick["open"] = data.open;
         candlestick["high"] = data.high;
         candlestick["low"] = data.low;
         candlestick["close"] = data.close;
         candlestick["volume"] = data.volume;
-        candlestick["amount"] = data.amount;
         result.append(candlestick);
     }
 
@@ -150,14 +148,12 @@ QVariantMap CandlestickModel::get(int index) const {
     if (not klineset_) return result;
     if (index >= 0 && index < klineset_->count()) {
         const KLine& data = klineset_->at(index);
-        result["start_time"] = data.start_time;
-        result["end_time"] = data.end_time;
+        result["timestamp"] = data.start_time;
         result["open"] = data.open;
         result["high"] = data.high;
         result["low"] = data.low;
         result["close"] = data.close;
         result["volume"] = data.volume;
-        result["amount"] = data.amount;
     }
     return result;
 }

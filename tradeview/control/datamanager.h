@@ -156,6 +156,7 @@ private:
     // 模拟数据
     QMap<QString, double> m_lastPrices;        ///< 最新价格缓存
     QMap<QString, QDateTime> m_lastUpdateTime; ///< 最后更新时间
+    QMap<QString, QDateTime> m_lastKlineStartTime; ///< 上一根K线的开始时间（按分钟对齐）
 
     DatabaseSPtr database_{nullptr};
     ConfigManager *config_mgr_{nullptr};

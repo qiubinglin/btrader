@@ -170,10 +170,33 @@ void DataManager::generateSimulatedCandlestickData(const QString& symbol) {
     // 更新最新价格
     m_lastPrices[symbol] = newPrice;
 
-    // 创建K线数据
-    QDateTime endTime = QDateTime::currentDateTime();
-    QDateTime startTime = endTime.addSecs(-60); // 1分钟K线
+    // 创建按分钟对齐的1m K线：第一根基于当前时刻所在分钟，其后每次严格为上一根的下一分钟
+    const QDateTime now = QDateTime::currentDateTime();
+    const qint64 nowMs = now.toMSecsSinceEpoch();
+    const qint64 alignedMs = (nowMs / 60000) * 60000; // 向下取整到分钟起点
+    QDateTime alignedStartOfNow = QDateTime::fromMSecsSinceEpoch(alignedMs, now.timeZone());
+
+    auto dataset = database_->reqKlineDB(symbol.toStdString());
+
+    QDateTime startTime;
+    if (m_lastKlineStartTime.contains(symbol)) {
+        // 已经有上一根，下一根固定为上一根+60s
+        startTime = m_lastKlineStartTime[symbol].addSecs(60);
+    } else if (dataset->size() > 0) {
+        // 若数据库已有最后一根，则在其基础上生成下一分钟
+        startTime = dataset->back().start_time.addSecs(60);
+    } else {
+        // 第一根：以当前时刻所在分钟为起点
+        startTime = alignedStartOfNow;
+    }
+
+    QDateTime endTime = startTime.addSecs(60);
+
+    // 连续性：若有上一根，开盘取上一根收盘；否则用basePrice
     double open = basePrice;
+    if (dataset->size() > 0) {
+        open = dataset->back().close;
+    }
     double close = newPrice;
     double high = qMax(open, close) + QRandomGenerator::global()->bounded(50.0);
     double low = qMin(open, close) - QRandomGenerator::global()->bounded(50.0);
@@ -181,12 +204,13 @@ void DataManager::generateSimulatedCandlestickData(const QString& symbol) {
     double amount = volume * close;
 
     KLine candlestick(startTime, endTime, open, high, low, close, volume, amount);
-    auto dataset = database_->reqKlineDB(symbol.toStdString());
     dataset->push_back(candlestick);
     if (dataset->size() > 1000) {
         dataset->pop_front();
     }
     dataset->notify_all(NotifyType::Update);
+
+    m_lastKlineStartTime[symbol] = startTime;
 
     // Generated candlestick for " << symbol << ": " << open << " " << high << " " << low << " " << close << " " <<
     // volume;
@@ -302,7 +326,7 @@ void DataManager::handle_bar(const EventSPtr& event) {
     }
 
     /* Add bar */
-    if (dataset->size() and dataset->back().contains(end)) {
+    if (dataset->size() and dataset->back().contains(start)) {
         dataset->back().close = bar.close;
         dataset->back().high = std::max(dataset->back().high, bar.high);
         dataset->back().low = std::max(dataset->back().low, bar.low);

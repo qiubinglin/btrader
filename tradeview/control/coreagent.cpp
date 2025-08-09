@@ -1,6 +1,6 @@
 #include "coreagent.h"
 
-#include <qlogging.h>
+#include <QDebug>
 #include <qtmetamacros.h>
 
 #include <stdexcept>
@@ -15,7 +15,7 @@ void CoreAgent::init(const QString& filepath) {
     try {
         corecomm_.init(filepath.toStdString());
     } catch (const std::runtime_error& e) {
-        qErrnoWarning(e.what());
+        qDebug() << "CoreAgent::init error: " << e.what();
     }
 }
 

@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <stdexcept>
 
 // 通过Unix域套接字接收文件描述符
 int recv_fd(int socket) {
@@ -49,8 +50,7 @@ void FdsMap::fix_fds(std::vector<std::string> &fds_vec, const std::string &socke
     // 连接到服务器
     client_sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (client_sock == -1) {
-        perror("socket");
-        exit(1);
+        throw std::runtime_error("Create socket failed");
     }
 
     memset(&addr, 0, sizeof(addr));
@@ -58,17 +58,15 @@ void FdsMap::fix_fds(std::vector<std::string> &fds_vec, const std::string &socke
     strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
     if (connect(client_sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-        perror("connect - 请先启动服务器进程");
-        exit(1);
+        throw std::runtime_error("connect - please launch server first!!!");
     }
 
-    printf("[客户端] 已连接到服务器\n");
+    printf("Connect to server\n");
 
     for (size_t i = 0; i < fds_vec.size() / 2; ++i) {
         int received_eventfd = recv_fd(client_sock);
         if (received_eventfd == -1) {
-            printf("[客户端] 接收eventfd失败\n");
-            exit(1);
+            throw std::runtime_error("[client] - receive eventfd failed");
         }
         printf("recv %lu eventfd: %d\n", i, received_eventfd);
         fds_vec[i * 2 + 1] = std::to_string(received_eventfd);
