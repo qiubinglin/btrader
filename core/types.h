@@ -69,6 +69,14 @@ struct MsgTag {
     };
 };
 
+template <size_t N>
+struct Depth {
+    infra::Array<double, N> bid_prices;
+    infra::Array<double, N> ask_prices;
+    infra::Array<double, N> bid_volumes;
+    infra::Array<double, N> ask_volumes;
+};
+
 struct TimeValue { //
     PACK_DATA_BODY
     int64_t update_time; //
@@ -931,8 +939,8 @@ struct TDID {
     std::string account;
 };
 
-inline void order_from_input(const OrderInput &input, Order &order);
+void order_from_input(const OrderInput &input, Order &order);
 
-[[maybe_unused]] inline void trade_from_order(const Order &order, Trade &trade);
+void trade_from_order(const Order &order, Trade &trade);
 
 } // namespace btra

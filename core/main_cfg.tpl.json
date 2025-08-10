@@ -45,7 +45,14 @@
             "institution": "binance",
             "account": "euHZeWJLF1IO5MNsuKIQYqJH4ZqLfFbtwxp0ychQi41f7CDBRRCrSt2d7nRzXq1T",
             "password": "/home/qiubinglin/btrader/usrconf/Private_key.txt",
-            "authentication": "private-key"
+            "authentication": "private-key",
+            "simulation": {
+                "commission_rate": 0.0003,
+                "slippage_rate": 0.0001,
+                "enable_slippage": true,
+                "enable_commission": true,
+                "initial_capital": 1000000.0
+            }
         }
     ],
     "user-app": {
