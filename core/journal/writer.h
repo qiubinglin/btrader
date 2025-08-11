@@ -134,6 +134,6 @@ DECLARE_UPTR(Writer)
 
 namespace btra {
 
-using WriterMap = std::unordered_map<uint32_t, journal::WriterUPtr>;
+class WriterMap : public std::unordered_map<uint32_t, journal::WriterUPtr> {};
 
-}
+} // namespace btra
