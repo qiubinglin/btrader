@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "core/book.h"
 #include "core/enums.h"
 #include "eventengine.h"
@@ -118,8 +120,11 @@ public:
     virtual uint64_t req_account_info(const std::string &institution, const std::string &account,
                                       const AccountReq &req) = 0;
 
+    std::set<TDID> &get_td_ids() { return td_ids_; }
+
 protected:
     Book book_;
+    std::set<TDID> td_ids_;
 
     EventEngine *engine_ = nullptr;
 };

@@ -926,6 +926,11 @@ struct Termination {
     PACK_DATA_BODY2(Termination)
 };
 
+struct TDID {
+    std::string institution;
+    std::string account;
+};
+
 inline void order_from_input(const OrderInput &input, Order &order);
 
 [[maybe_unused]] inline void trade_from_order(const Order &order, Trade &trade);
