@@ -21,3 +21,5 @@ private:
         ptr = nullptr;
     }
 };
+
+#define INSTANCE(classname) Singleton<classname>::instance()

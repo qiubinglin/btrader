@@ -192,91 +192,249 @@ enum class PriceLevel : int8_t {
     Unknown
 };
 
-enum class VolumeCondition : int8_t { Any, Min, All };
+/**
+ * @brief Volume condition for order execution
+ *
+ * Defines how the order volume should be handled during execution.
+ */
+enum class VolumeCondition : int8_t {
+    Any, ///< Execute any available volume (partial fills allowed)
+    Min, ///< Execute minimum required volume or cancel
+    All  ///< Execute all volume or cancel (FOK - Fill or Kill)
+};
 
+/**
+ * @brief Time condition for order validity
+ *
+ * Defines when and how long an order remains valid in the market.
+ */
 enum class TimeCondition : int8_t {
-    IOC, /* 立即成交可用部分，剩余取消 */
-    GFD, /* 当日有效 */
-    GTC, /* 订单持续有效，直到手动取消 */
-    FOK  /* 必须全部成交，否则取消 */
+    IOC, ///< Immediate or Cancel: Execute available volume immediately, cancel remaining
+    GFD, ///< Good for Day: Order valid until end of trading day
+    GTC, ///< Good Till Cancelled: Order remains valid until manually cancelled
+    FOK  ///< Fill or Kill: Must execute all volume or cancel entirely
 };
 
+/**
+ * @brief Order status enumeration representing the current state of a trading order
+ *
+ * This enum defines all possible states that an order can be in during its lifecycle,
+ * from initial submission to final completion or termination.
+ */
 enum class OrderStatus : int8_t {
-    Unknown,
-    Submitted,
-    Pending,
-    Cancelled,
-    Error,
-    Filled,
-    PartialFilledNotActive,
-    PartialFilledActive,
-    Lost
+    Unknown,                ///< Order status is unknown or not yet determined
+    Submitted,              ///< Order has been submitted to the trading system but not yet processed
+    Pending,                ///< Order is pending execution, waiting for market conditions to be met
+    Cancelled,              ///< Order has been cancelled by the user or system
+    Error,                  ///< Order encountered an error during processing or execution
+    Filled,                 ///< Order has been completely filled (all volume executed)
+    PartialFilledNotActive, ///< Order was partially filled but is no longer active (remaining volume cancelled)
+    PartialFilledActive,    ///< Order was partially filled and remains active for remaining volume
+    Lost                    ///< Order was lost due to system failure or network issues
 };
 
-// 币种枚举
-enum class CurrencyType : int8_t { Unknown = 0, CNY, HKD, USD, JPY, GBP, EUR, CNH, SGD, MYR };
+/**
+ * @brief Currency type enumeration
+ *
+ * Defines supported currency types for trading and settlement.
+ */
+enum class CurrencyType : int8_t {
+    Unknown = 0, ///< Unknown or unspecified currency
+    CNY,         ///< Chinese Yuan (Renminbi)
+    HKD,         ///< Hong Kong Dollar
+    USD,         ///< US Dollar
+    JPY,         ///< Japanese Yen
+    GBP,         ///< British Pound Sterling
+    EUR,         ///< Euro
+    CNH,         ///< Chinese Yuan (Offshore)
+    SGD,         ///< Singapore Dollar
+    MYR          ///< Malaysian Ringgit
+};
 
-enum class BasketOrderStatus : int8_t { Unknown, Pending, PartialFilledNotActive, PartialFilledActive, Filled };
+/**
+ * @brief Basket order status enumeration
+ *
+ * Represents the current status of a basket order (multiple instruments).
+ */
+enum class BasketOrderStatus : int8_t {
+    Unknown,                ///< Basket order status is unknown
+    Pending,                ///< Basket order is pending execution
+    PartialFilledNotActive, ///< Partially filled but no longer active
+    PartialFilledActive,    ///< Partially filled and still active
+    Filled                  ///< All instruments in basket are filled
+};
 
-enum class BasketOrderCalculationMode : int8_t { Static, Dynamic };
+/**
+ * @brief Basket order calculation mode
+ *
+ * Defines how basket order quantities are calculated.
+ */
+enum class BasketOrderCalculationMode : int8_t {
+    Static, ///< Fixed quantities for each instrument
+    Dynamic ///< Dynamic quantities based on market conditions
+};
 
-enum class BasketVolumeType : int8_t { Unknown, Quantity, Proportion };
+/**
+ * @brief Basket volume type
+ *
+ * Defines how volume is specified in basket orders.
+ */
+enum class BasketVolumeType : int8_t {
+    Unknown,   ///< Volume type is unknown or unspecified
+    Quantity,  ///< Absolute quantity for each instrument
+    Proportion ///< Proportional quantity based on weights
+};
 
-enum class BasketType : int8_t { Custom, ETF };
+/**
+ * @brief Basket order type
+ *
+ * Defines the type of basket order.
+ */
+enum class BasketType : int8_t {
+    Custom, ///< Custom basket with user-defined instruments
+    ETF     ///< ETF basket following predefined composition
+};
 
-enum class Direction : int8_t { Long, Short, Unknown };
+/**
+ * @brief Position direction
+ *
+ * Indicates the direction of a trading position.
+ */
+enum class Direction : int8_t {
+    Long,   ///< Long position (buy and hold)
+    Short,  ///< Short position (sell and cover later)
+    Unknown ///< Position direction is unknown
+};
 
-enum class AccountType : int8_t { Stock, Credit, Future, BackTest };
+/**
+ * @brief Account type
+ *
+ * Defines the type of trading account.
+ */
+enum class AccountType : int8_t {
+    Stock,   ///< Stock trading account
+    Credit,  ///< Credit/margin trading account
+    Future,  ///< Futures trading account
+    BackTest ///< Backtesting simulation account
+};
 
-enum class CommissionRateMode : int8_t { ByAmount, ByVolume };
+/**
+ * @brief Commission rate calculation mode
+ *
+ * Defines how commission is calculated for trades.
+ */
+enum class CommissionRateMode : int8_t {
+    ByAmount, ///< Commission calculated based on trade amount
+    ByVolume  ///< Commission calculated based on trade volume
+};
 
+/**
+ * @brief Ledger category
+ *
+ * Defines the category of ledger entries.
+ */
 enum class LedgerCategory : int8_t {
-    Account,
-    Strategy,
+    Account,  ///< Account-level ledger entries
+    Strategy, ///< Strategy-level ledger entries
 };
 
+/**
+ * @brief Broker connection state
+ *
+ * Represents the current connection and authentication state of a broker.
+ */
 enum class BrokerState : int8_t {
-    Pending = 0,
-    Idle = 1,
-    DisConnected = 2,
-    Connected = 3,
-    LoggedIn = 4,
-    LoginFailed = 5,
-    Ready = 100
+    Pending = 0,      ///< Initial state, waiting to start
+    Idle = 1,         ///< Broker is idle, ready to connect
+    DisConnected = 2, ///< Broker is disconnected from exchange
+    Connected = 3,    ///< Broker is connected to exchange
+    LoggedIn = 4,     ///< Broker is authenticated and logged in
+    LoginFailed = 5,  ///< Authentication failed
+    Ready = 100       ///< Broker is ready for trading operations
 };
 
-enum class HistoryDataType : int8_t { Normal = 0, PageEnd = 1, TotalEnd = 2 };
+/**
+ * @brief Historical data type
+ *
+ * Defines the type of historical data response.
+ */
+enum class HistoryDataType : int8_t {
+    Normal = 0,  ///< Normal historical data record
+    PageEnd = 1, ///< End of current data page
+    TotalEnd = 2 ///< End of all requested data
+};
 
-enum class StrategyState : int8_t { Normal, Warn, Error };
+/**
+ * @brief Strategy execution state
+ *
+ * Represents the current execution state of a trading strategy.
+ */
+enum class StrategyState : int8_t {
+    Normal, ///< Strategy is running normally
+    Warn,   ///< Strategy has warnings but continues running
+    Error   ///< Strategy has encountered an error and may be stopped
+};
 
+/**
+ * @brief Journal assembly mode configuration
+ *
+ * Defines how journal entries are assembled and accessed.
+ * Uses bit flags for flexible configuration.
+ */
 class AssembleMode {
 public:
-    inline static const uint32_t Channel = 0b00000001; // read only journal of location to dest_id
-    inline static const uint32_t Write = 0b00000010;   // read all journal from this location
-    inline static const uint32_t Read = 0b00000100;    // read all journal to this dest_id
-    inline static const uint32_t Public = 0b00001000;  // read all journal to location::PUBLIC
-    inline static const uint32_t Sync = 0b00010000;    // read all journal to location::PUBLIC
-    inline static const uint32_t All = 0b00100000;     // read all journal
+    inline static const uint32_t Channel = 0b00000001; ///< Read only journal of location to dest_id
+    inline static const uint32_t Write = 0b00000010;   ///< Read all journal from this location
+    inline static const uint32_t Read = 0b00000100;    ///< Read all journal to this dest_id
+    inline static const uint32_t Public = 0b00001000;  ///< Read all journal to location::PUBLIC
+    inline static const uint32_t Sync = 0b00010000;    ///< Read all journal to location::PUBLIC
+    inline static const uint32_t All = 0b00100000;     ///< Read all journal
 };
 
 /**
  * @brief Market data type
  *
+ * Defines the type of market data being processed.
  */
 enum class MDType : int8_t {
-    Unknown,
-    Kline,
-    Depth,
-    Trade,
+    Unknown, ///< Unknown or unspecified market data type
+    Kline,   ///< Candlestick/K-line data
+    Depth,   ///< Market depth/order book data
+    Trade,   ///< Trade execution data
 };
 
-enum class BrokerReqType : uint8_t { Unknown = 0, OrderPlace, OrderCancel, OrderBook, OrderState, PositionBook };
+/**
+ * @brief Broker request type
+ *
+ * Defines the type of request sent to a broker.
+ */
+enum class BrokerReqType : uint8_t {
+    Unknown = 0, ///< Unknown or unspecified request type
+    OrderPlace,  ///< Place a new order
+    OrderCancel, ///< Cancel an existing order
+    OrderBook,   ///< Request order book information
+    OrderState,  ///< Request order state information
+    PositionBook ///< Request position book information
+};
 
+/**
+ * @brief Backtest data format type
+ *
+ * Defines the format of backtest data files.
+ */
 enum class BacktestDataType : uint8_t {
-    None,
-    CSV,
+    None, ///< No backtest data format specified
+    CSV,  ///< Comma-separated values format
 };
 
+/**
+ * @brief Convert order side to position direction
+ *
+ * Maps a trading order side (Buy/Sell) to the corresponding position direction (Long/Short).
+ *
+ * @param side The order side (Buy or Sell)
+ * @return The corresponding position direction (Long for Buy, Short for Sell)
+ */
 inline Direction side2direction(Side side) {
     Direction ret = Direction::Unknown;
     switch (side) {

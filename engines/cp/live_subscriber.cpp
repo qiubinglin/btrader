@@ -50,6 +50,18 @@ void LiveSubscriber::on_bar(const EventSPtr &event) {
 }
 
 void LiveSubscriber::on_quote(const EventSPtr &event) {
+    if (engine_->is_backtest()) {
+        const auto &data = event->data<Quote>();
+        InstrumentDepth<20> input;
+        input.real_depth_size = 20;
+        input.instrument_id = data.instrument_id;
+        input.exchange_id = data.exchange_id;
+        input.ask_price = data.ask_price;
+        input.bid_price = data.bid_price;
+        input.ask_volume = data.ask_volume;
+        input.bid_volume = data.bid_volume;
+        engine_->simulation_depth_callboard_->set(input.instrument_id, input.exchange_id, input);
+    }
     Invoker::invoke(*this, &strategy::Strategy::on_quote, event->data<Quote>(), event->source());
 }
 

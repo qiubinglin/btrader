@@ -1,10 +1,15 @@
 #include "brokersim.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>
+#include <vector>
 
+#include "constants.h"
+#include "core/globalparams.h"
 #include "core/types.h"
+#include "infra/singleton.h"
 #include "infra/time.h"
 
 namespace btra::broker {
@@ -40,6 +45,8 @@ void BrokerSim::setup(const Json::json& cfg) {
 
     std::cout << "BrokerSim setup completed. Commission rate: " << commission_rate_
               << ", Slippage rate: " << slippage_rate_ << std::endl;
+
+    depth_callboard_.init(INSTANCE(GlobalParams).root_dir, PAGE_SIZE, sizeof(InstrumentDepth<10>), false);
 }
 
 void BrokerSim::start() {
@@ -92,8 +99,8 @@ bool BrokerSim::insert_order(const OrderInput& input) {
 
         // 设置订单状态
         order.status = enums::OrderStatus::Submitted;
-        order.insert_time = infra::time::now_time();
-        order.update_time = infra::time::now_time();
+        order.insert_time = input.insert_time;
+        order.update_time = input.insert_time;
 
         // 检查资金是否足够
         if (input.side == enums::Side::Buy) {
@@ -129,9 +136,24 @@ bool BrokerSim::cancel_order(const OrderAction& input) {
         }
 
         Order& order = it->second;
-        if (order.status != enums::OrderStatus::Pending && order.status != enums::OrderStatus::PartialFilledActive) {
+        // Check if order can be cancelled
+        // Orders can only be cancelled in certain states:
+        // - Submitted: Order submitted but not yet processed
+        // - Pending: Order waiting for market conditions
+        // - PartialFilledActive: Partially filled order still active
+        // 
+        // Orders cannot be cancelled in these states:
+        // - Filled: Already completely executed
+        // - Cancelled: Already cancelled
+        // - Error: Order in error state
+        // - Lost: Order lost due to system issues
+        // - PartialFilledNotActive: Partially filled but no longer active
+        if (order.status != enums::OrderStatus::Submitted && 
+            order.status != enums::OrderStatus::Pending && 
+            order.status != enums::OrderStatus::PartialFilledActive) {
             std::cerr << "Order " << input.target_order_id << " cannot be cancelled in status "
-                      << static_cast<int>(order.status) << std::endl;
+                      << static_cast<int>(order.status) << " (" 
+                      << get_order_status_string(order.status) << ")" << std::endl;
             return false;
         }
 
@@ -213,15 +235,92 @@ void BrokerSim::process_order_matching() {
 }
 
 void BrokerSim::match_order_with_market_data(Order& order) {
-    double market_price = generate_market_price(order);
+    // 获取实时深度数据
+    InstrumentDepth<20> depth;
+    depth_callboard_.get(order.instrument_id, order.exchange_id, depth);
 
-    // 检查是否可以成交
-    if (can_execute_order(order, market_price)) {
-        // 计算成交数量（这里简化处理，假设全部成交）
-        int64_t volume = order.volume_left;
+    // 如果没有深度数据，使用模拟价格
+    if (depth.real_depth_size == 0) {
+        double simulated_price = generate_market_price(order);
+        if (can_execute_order(order, simulated_price)) {
+            execute_trade(order, simulated_price, order.volume_left);
+        }
+        return;
+    }
 
-        // 执行成交
-        execute_trade(order, market_price, volume);
+    // 根据订单方向选择撮合价格和数量
+    std::vector<std::pair<double, int64_t>> price_levels;
+
+    if (order.side == enums::Side::Buy) {
+        // 买单：寻找卖盘价格进行撮合
+        for (size_t i = 0; i < depth.real_depth_size && i < 20; ++i) {
+            if (depth.ask_price[i] > 0 && depth.ask_volume[i] > 0) {
+                price_levels.push_back({depth.ask_price[i], static_cast<int64_t>(depth.ask_volume[i])});
+            }
+        }
+    } else {
+        // 卖单：寻找买盘价格进行撮合
+        for (size_t i = 0; i < depth.real_depth_size && i < 20; ++i) {
+            if (depth.bid_price[i] > 0 && depth.bid_volume[i] > 0) {
+                price_levels.push_back({depth.bid_price[i], static_cast<int64_t>(depth.bid_volume[i])});
+            }
+        }
+    }
+
+    // 如果没有可撮合的价格
+    if (price_levels.empty()) {
+        if (order.status == enums::OrderStatus::Submitted) {
+            order.status = enums::OrderStatus::Pending;
+            order.update_time = infra::time::now_time();
+        }
+        return;
+    }
+
+    // 按价格排序（买单按价格升序，卖单按价格降序）
+    // if (order.side == enums::Side::Buy) {
+    //     std::sort(price_levels.begin(), price_levels.end());
+    // } else {
+    //     std::sort(price_levels.begin(), price_levels.end(), std::greater<>());
+    // }
+
+    // 尝试逐级撮合
+    int64_t remaining_volume = order.volume_left;
+    double weighted_avg_price = 0.0;
+    int64_t total_traded_volume = 0;
+
+    for (const auto& [price, volume] : price_levels) {
+        if (remaining_volume <= 0) break;
+
+        // 检查是否可以成交
+        if (can_execute_order(order, price)) {
+            // 计算当前价格级别的成交数量
+            int64_t trade_volume = std::min(remaining_volume, volume);
+
+            // 应用滑点
+            double final_price = apply_slippage(price, order.side);
+
+            // 执行成交
+            execute_trade(order, final_price, trade_volume);
+
+            // 更新加权平均价格
+            weighted_avg_price += final_price * trade_volume;
+            total_traded_volume += trade_volume;
+            remaining_volume -= trade_volume;
+
+            std::cout << "Partial fill: Order " << order.order_id << " "
+                      << (order.side == enums::Side::Buy ? "BUY" : "SELL") << " " << trade_volume << " @ "
+                      << final_price << " (Depth price: " << price << ")" << std::endl;
+        } else {
+            // 价格不满足条件，停止撮合
+            break;
+        }
+    }
+
+    // 输出撮合统计
+    if (total_traded_volume > 0) {
+        double avg_price = weighted_avg_price / total_traded_volume;
+        std::cout << "Order " << order.order_id << " matched: " << total_traded_volume << " @ avg price " << avg_price
+                  << std::endl;
     }
 }
 
@@ -261,9 +360,6 @@ void BrokerSim::execute_trade(Order& order, double price, int64_t volume) {
     }
 
     trade.tax = 0.0; // 模拟盘暂不考虑税费
-
-    // 添加到成交记录
-    trades_[trade.trade_id] = trade;
 
     // 更新订单状态
     order.volume_left -= volume;
@@ -352,6 +448,45 @@ double BrokerSim::calculate_commission(const Trade& trade) {
     return trade_value * commission_rate_;
 }
 
+double BrokerSim::apply_slippage(double base_price, enums::Side side) {
+    if (!enable_slippage_) {
+        return base_price;
+    }
+
+    if (side == enums::Side::Buy) {
+        // 买入时价格略高（滑点）
+        return base_price * (1.0 + slippage_rate_);
+    } else {
+        // 卖出时价格略低（滑点）
+        return base_price * (1.0 - slippage_rate_);
+    }
+}
+
+std::string BrokerSim::get_order_status_string(enums::OrderStatus status) {
+    switch (status) {
+        case enums::OrderStatus::Unknown:
+            return "Unknown";
+        case enums::OrderStatus::Submitted:
+            return "Submitted";
+        case enums::OrderStatus::Pending:
+            return "Pending";
+        case enums::OrderStatus::Cancelled:
+            return "Cancelled";
+        case enums::OrderStatus::Error:
+            return "Error";
+        case enums::OrderStatus::Filled:
+            return "Filled";
+        case enums::OrderStatus::PartialFilledNotActive:
+            return "PartialFilledNotActive";
+        case enums::OrderStatus::PartialFilledActive:
+            return "PartialFilledActive";
+        case enums::OrderStatus::Lost:
+            return "Lost";
+        default:
+            return "Invalid";
+    }
+}
+
 double BrokerSim::generate_market_price(const Order& order) {
     // 简单的模拟市场价格生成
     // 在实际应用中，这里应该基于真实的市场数据或更复杂的模拟逻辑
@@ -369,13 +504,7 @@ double BrokerSim::generate_market_price(const Order& order) {
     double market_price = base_price * (1.0 + price_change);
 
     // 应用滑点
-    if (enable_slippage_) {
-        if (order.side == enums::Side::Buy) {
-            market_price *= (1.0 + slippage_rate_); // 买入时价格略高
-        } else {
-            market_price *= (1.0 - slippage_rate_); // 卖出时价格略低
-        }
-    }
+    market_price = apply_slippage(market_price, order.side);
 
     return market_price;
 }

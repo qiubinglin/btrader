@@ -1,8 +1,11 @@
 #pragma once
 
+#include <memory>
 #include "core/eventengine.h"
 #include "engines/cp/backtest_dump.h"
 #include "strategy/strategy.h"
+
+#include "extension/depthcallboard.h"
 
 namespace btra {
 
@@ -42,6 +45,7 @@ private:
     BacktestSubscriber *backtest_subscriber_{nullptr}; /* Not use now */
 
     BacktestDump backtest_dump_;
+    std::unique_ptr<extension::DepthCallBoard> simulation_depth_callboard_;
 
     friend class LiveSubscriber;
     friend class BacktestSubscriber;

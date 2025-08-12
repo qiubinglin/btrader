@@ -1,8 +1,10 @@
 #include "cp/cp_engine.h"
 
+#include "constants.h"
 #include "cp/backtest_subscriber.h"
 #include "cp/live_subscriber.h"
 #include "strategy/dummy_strategy.h"
+#include "types.h"
 
 namespace btra {
 
@@ -97,6 +99,11 @@ void CPEngine::on_setup() {
                 strategy::StrategySPtr(dlhelper_.find_symbol<create_strat_func>(static_cast<int>(i), symbol_name)());
             add_strategy(strat_sptr);
         }
+    }
+
+    if (is_backtest()) {
+        simulation_depth_callboard_ = std::make_unique<extension::DepthCallBoard>();
+        simulation_depth_callboard_->init(main_cfg_.root_path(), PAGE_SIZE, sizeof(InstrumentDepth<20>), true);
     }
 }
 

@@ -7,6 +7,8 @@
 
 #include "broker/trade_service.h"
 
+#include "extension/depthcallboard.h"
+
 namespace btra::broker {
 
 class BrokerSim : public TradeService {
@@ -44,10 +46,13 @@ private:
 
     // 生成模拟市场数据
     double generate_market_price(const Order& order);
+    double apply_slippage(double base_price, enums::Side side);
+    
+    // 辅助函数
+    std::string get_order_status_string(enums::OrderStatus status);
 
     // 内部状态
     std::map<uint64_t, Order> active_orders_;
-    std::map<uint64_t, Trade> trades_;
     Asset asset_;
     PositionBook positions_;
 
@@ -63,6 +68,8 @@ private:
     // 运行状态
     bool running_{false};
     std::thread matching_thread_;
+
+    extension::DepthCallBoard depth_callboard_;
 };
 
 } // namespace btra::broker

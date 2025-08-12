@@ -1,5 +1,8 @@
 #include "main_cfg.h"
 
+#include "core/globalparams.h"
+#include "infra/singleton.h"
+
 namespace btra {
 
 using namespace btra::journal;
@@ -55,6 +58,8 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
             time_unit_ = infra::TimeUnit::MILLI;
         }
     }
+
+    Singleton<GlobalParams>::instance().root_dir = root_;
 }
 
 JLocationSPtr MainCfg::md_location() const {

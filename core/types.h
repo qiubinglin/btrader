@@ -64,17 +64,21 @@ struct MsgTag {
         HistoryTrade,
         RequestHistoryOrderError,
         RequestHistoryTradeError,
-        Termination, /* Terminate event engine. */
+        Termination,  /* Terminate event engine. */
         TAG_MAX_SIZE, /* This must be the last tag which indicates the maximum size of the tag. */
     };
 };
 
 template <size_t N>
-struct Depth {
-    infra::Array<double, N> bid_prices;
-    infra::Array<double, N> ask_prices;
-    infra::Array<double, N> bid_volumes;
-    infra::Array<double, N> ask_volumes;
+struct InstrumentDepth {
+    static const size_t MAX_SIZE = N;
+    uint32_t real_depth_size = N;
+    infra::Array<char, INSTRUMENT_ID_LEN> instrument_id; // 合约ID
+    infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所ID
+    infra::Array<double, N> bid_price;                   // 申买价
+    infra::Array<double, N> ask_price;                   // 申卖价
+    infra::Array<double, N> bid_volume;                  // 申买量
+    infra::Array<double, N> ask_volume;                  // 申卖量
 };
 
 struct TimeValue { //
