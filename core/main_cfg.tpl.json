@@ -36,6 +36,7 @@
     "strategy": [
         {
             "path": "/home/qiubinglin/btrader/build/lib",
+            "lib_name": "libstrategies.so",
             "id": "MyStrategy"
         }
     ],

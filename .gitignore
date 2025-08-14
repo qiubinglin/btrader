@@ -45,3 +45,6 @@ usrconf
 # clangd
 .cache
 compile_commands.json
+
+# Strategies
+strategies/strategylib

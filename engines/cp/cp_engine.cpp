@@ -81,7 +81,7 @@ void CPEngine::on_setup() {
         auto cfg_strats = cfg_["strategy"];
         for (size_t i = 0; i < cfg_strats.size(); ++i) {
             std::string strat_name = cfg_strats[i]["id"].get<std::string>();
-            std::string libfile = fmt::format("lib{}.so", strat_name);
+            std::string libfile = cfg_strats[i]["lib_name"].get<std::string>();
             std::filesystem::path path = cfg_strats[i]["path"].get<std::string>();
             path /= libfile;
 
