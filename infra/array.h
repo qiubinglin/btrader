@@ -20,6 +20,7 @@ template <typename T, size_t N> struct Array {
             memset(value, 0, sizeof(value));
         }
     }
+    Array(const Array<T, N> &other) = default;
 
     explicit Array(const T *t) { memcpy(value, t, sizeof(value)); }
 
