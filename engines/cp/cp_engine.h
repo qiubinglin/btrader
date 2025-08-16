@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "core/eventengine.h"
-#include "engines/cp/backtest_dump.h"
+#include "engines/cp/statistics_dump.h"
 #include "strategy/strategy.h"
 
 #include "extension/depthcallboard.h"
@@ -26,11 +26,6 @@ private:
 
     void add_strategy(strategy::StrategySPtr strat);
 
-    void pre_start();
-    void post_stop();
-
-    bool is_backtest() const { return main_cfg_.get_backtest_data_type() != enums::BacktestDataType::None; }
-
 private:
     strategy::ExecutorSPtr executor_;
     std::vector<strategy::StrategySPtr> strategies_;
@@ -42,13 +37,11 @@ private:
     unsigned md_account_count_ = 0;
 
     LiveSubscriber *live_subscriber_{nullptr};
-    BacktestSubscriber *backtest_subscriber_{nullptr}; /* Not use now */
 
-    BacktestDump backtest_dump_;
+    StatisticsDump statistics_dump_;
     std::unique_ptr<extension::DepthCallBoard> simulation_depth_callboard_;
 
     friend class LiveSubscriber;
-    friend class BacktestSubscriber;
     friend class Invoker;
 };
 

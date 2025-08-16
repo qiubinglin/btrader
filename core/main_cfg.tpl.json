@@ -5,22 +5,21 @@
             "path": "./log",
             "logger": "rotating",
             "max_size": 16,
-            "max_files": 3,
+            "max_files": 10,
             "mode": "log"
         },
         "mode": "live",
         "output_root_path": "./output",
         "time_unit": "milli",
         "currency": "USD",
-        "page_rollback_size": 0,
+        "page_rollback_size": 10,
         "book": {
             "asset": 3000
-        }
-    },
-    "backtest" : {
-        "enabled": false,
-        "type": "csv",
-        "file": "/home/qiubinglin/btrader/Nvidia_stock_data.csv"
+        },
+        "statistics": {
+            "mode": "none"
+        },
+        "simulation": false
     },
     "md": [
         {

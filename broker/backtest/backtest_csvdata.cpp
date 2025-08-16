@@ -3,11 +3,9 @@
 namespace btra::broker {
 
 void BackTestCSVData::setup(const Json::json &cfg) {
-    if (cfg.contains("backtest")) {
-        filename_ = cfg["backtest"]["file"].get<std::string>();
-        if (not reader_.set_file(filename_)) {
-            throw std::runtime_error("read csv file failed");
-        }
+    filename_ = cfg["account"].get<std::string>();
+    if (not reader_.set_file(filename_)) {
+        throw std::runtime_error("read csv file failed");
     }
 }
 

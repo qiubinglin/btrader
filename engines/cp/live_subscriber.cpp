@@ -1,5 +1,6 @@
 #include "live_subscriber.h"
 
+#include "extension/globalparams.h"
 #include "strategy_invoke.h"
 
 namespace btra {
@@ -40,17 +41,17 @@ void LiveSubscriber::on_bar(const EventSPtr &event) {
     engine_->executor_->book().update(bar);
 
     Invoker::invoke(*this, &strategy::Strategy::on_bar, bar, event->source());
-    if (engine_->is_backtest()) {
+    if (INSTANCE(GlobalParams).stat_params.stat_all()) {
         /* Compute floating profit indicators according to bar and current positions? */
-        auto &backtest_dump = engine_->backtest_dump_;
-        backtest_dump.asset_values.emplace_back();
-        backtest_dump.asset_values.back().time = bar.end_time;
-        backtest_dump.asset_values.back().value = engine_->executor_->book().asset_price();
+        auto &statistics_dump = engine_->statistics_dump_;
+        statistics_dump.log_asset(bar.end_time, engine_->executor_->book().asset_price());
+
+        statistics_dump.log_kline(bar);
     }
 }
 
 void LiveSubscriber::on_quote(const EventSPtr &event) {
-    if (engine_->is_backtest()) {
+    if (INSTANCE(GlobalParams).is_simulation) {
         const auto &data = event->data<Quote>();
         InstrumentDepth<20> input;
         input.real_depth_size = 20;
@@ -74,11 +75,15 @@ void LiveSubscriber::on_entrust(const EventSPtr &event) {
 }
 
 void LiveSubscriber::on_transaction(const EventSPtr &event) {
-    const auto &tranction = event->data<Transaction>();
+    const auto &transaction = event->data<Transaction>();
 
-    engine_->executor_->book().update(tranction);
+    if (INSTANCE(GlobalParams).stat_params.stat_all()) {
+        engine_->statistics_dump_.log_transaction(transaction);
+    }
 
-    Invoker::invoke(*this, &strategy::Strategy::on_transaction, tranction, event->source());
+    engine_->executor_->book().update(transaction);
+
+    Invoker::invoke(*this, &strategy::Strategy::on_transaction, transaction, event->source());
 }
 
 void LiveSubscriber::on_order_action_error(const EventSPtr &event) {

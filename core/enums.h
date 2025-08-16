@@ -418,16 +418,6 @@ enum class BrokerReqType : uint8_t {
 };
 
 /**
- * @brief Backtest data format type
- *
- * Defines the format of backtest data files.
- */
-enum class BacktestDataType : uint8_t {
-    None, ///< No backtest data format specified
-    CSV,  ///< Comma-separated values format
-};
-
-/**
  * @brief Convert order side to position direction
  *
  * Maps a trading order side (Buy/Sell) to the corresponding position direction (Long/Short).

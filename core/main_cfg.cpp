@@ -1,6 +1,6 @@
 #include "main_cfg.h"
 
-#include "core/globalparams.h"
+#include "extension/globalparams.h"
 #include "infra/singleton.h"
 
 namespace btra {
@@ -35,13 +35,6 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
         initial_book_.asset.avail = cfg_["system"]["book"]["asset"].get<double>();
     }
 
-    if (cfg_["backtest"]["enabled"].get<bool>() == true) {
-        auto type = cfg_["backtest"]["type"].get<std::string>();
-        if (type == "csv") {
-            backtest_data_type_ = enums::BacktestDataType::CSV;
-        }
-    }
-
     if (run_mode_ == enums::RunMode::USER_APP) {
         fds_file_ = cfg_["user-app"]["fds_file"].get<std::string>();
     }
@@ -59,7 +52,16 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
         }
     }
 
+    /* Setup global parameters */
     Singleton<GlobalParams>::instance().root_dir = root_;
+    if (cfg_["system"].contains("statistics")) {
+        auto stat_mode = cfg_["system"]["statistics"]["mode"].get<std::string>();
+        INSTANCE(GlobalParams).stat_params.stat_mode = StatisticsParams::str2mode(stat_mode);
+    }
+
+    if (cfg_["system"].contains("simulation")) {
+        INSTANCE(GlobalParams).is_simulation = cfg_["system"]["simulation"].get<bool>();
+    }
 }
 
 JLocationSPtr MainCfg::md_location() const {

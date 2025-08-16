@@ -19,6 +19,7 @@ target_link_libraries(broker PUBLIC
     core
     binance
     backtest_service
+    brokersim
     # ${XTP_LIBS}
 )
 target_include_directories(broker PUBLIC

@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "constants.h"
-#include "core/globalparams.h"
+#include "extension/globalparams.h"
 #include "core/types.h"
 #include "infra/singleton.h"
 #include "infra/time.h"

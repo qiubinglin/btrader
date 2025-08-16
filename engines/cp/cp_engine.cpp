@@ -1,8 +1,9 @@
 #include "cp/cp_engine.h"
 
 #include "constants.h"
-#include "cp/backtest_subscriber.h"
 #include "cp/live_subscriber.h"
+#include "extension/globalparams.h"
+#include "infra/singleton.h"
 #include "strategy/dummy_strategy.h"
 #include "types.h"
 
@@ -11,13 +12,6 @@ namespace btra {
 CPEngine::~CPEngine() {
     if (live_subscriber_) {
         delete live_subscriber_;
-    }
-    if (backtest_subscriber_) {
-        delete backtest_subscriber_;
-    }
-
-    if (is_backtest()) {
-        backtest_dump_.dump_files(main_cfg_.root_path());
     }
 }
 
@@ -101,7 +95,7 @@ void CPEngine::on_setup() {
         }
     }
 
-    if (is_backtest()) {
+    if (INSTANCE(GlobalParams).is_simulation) {
         simulation_depth_callboard_ = std::make_unique<extension::DepthCallBoard>();
         simulation_depth_callboard_->init(main_cfg_.root_path(), PAGE_SIZE, sizeof(InstrumentDepth<20>), true);
     }
@@ -109,11 +103,7 @@ void CPEngine::on_setup() {
 
 void CPEngine::on_active() {
     if (not pre_start_) [[unlikely]] {
-        if (main_cfg_.run_mode() == enums::RunMode::LIVE) {
-            live_subscriber_->pre_start();
-        } else if (main_cfg_.run_mode() == enums::RunMode::BACKTEST) {
-            backtest_subscriber_->pre_start();
-        }
+        live_subscriber_->pre_start();
         INFRA_LOG_CRITICAL("cp pre_start done");
         pre_start_ = true;
     }

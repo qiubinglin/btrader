@@ -7,6 +7,7 @@ add_library(core
 )
 target_link_libraries(core PUBLIC
     infra
+    extension
     fmt::fmt    
 )
 target_include_directories(core PUBLIC

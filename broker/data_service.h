@@ -24,7 +24,7 @@ public:
      * @param backtest_data_type
      * @return DataServiceUPtr
      */
-    static DataServiceUPtr create(const std::string &institution, enums::BacktestDataType backtest_data_type);
+    static DataServiceUPtr create(const std::string &institution);
 
     virtual ~DataService() = default;
 

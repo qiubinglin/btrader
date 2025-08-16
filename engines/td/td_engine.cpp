@@ -23,7 +23,7 @@ void TDEngine::on_setup() {
         const auto &institution = td_institutions[i];
         reader_->join(main_cfg_.td_location(), dest, begin_time_);
 
-        trade_services_[dest] = broker::TradeService::create(institution, main_cfg_.get_backtest_data_type());
+        trade_services_[dest] = broker::TradeService::create(institution);
         trade_services_[dest]->setup(cfg_["td"][i]);
     }
 
