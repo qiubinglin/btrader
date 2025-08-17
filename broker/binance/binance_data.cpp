@@ -376,7 +376,10 @@ bool BinanceData::process_depth_data(const Json::json& data) {
         }
 
         Quote depth;
-        depth.instrument_id = data["data"]["s"].get<std::string>().c_str();
+        std::string stream = data["stream"].get<std::string>();
+        stream = stream.substr(0, stream.find('@'));
+        depth.instrument_id = stream.c_str();
+        depth.exchange_id = "binance";
 
         // Process bids
         size_t bid_idx = 0;
@@ -389,6 +392,7 @@ bool BinanceData::process_depth_data(const Json::json& data) {
                 bid_idx++;
             }
         }
+        depth.real_depth_size = bid_idx; /* Setup real depth size */
 
         // Process asks
         size_t ask_idx = 0;
