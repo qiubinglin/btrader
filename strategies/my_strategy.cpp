@@ -17,12 +17,12 @@ public:
             quote_sequence_.pop();
         }
 
-        for (size_t i = 0; i < quote.bid_price.size(); ++i) {
-            INFRA_LOG_INFO("Bid Price[{}]: {}, Volume: {}", i, quote.bid_price[i], quote.bid_volume[i]);
-        }
-        for (size_t i = 0; i < quote.ask_price.size(); ++i) {
-            INFRA_LOG_INFO("Ask Price[{}]: {}, Volume: {}", i, quote.ask_price[i], quote.ask_volume[i]);
-        }
+        // for (size_t i = 0; i < quote.bid_price.size(); ++i) {
+        //     INFRA_LOG_INFO("Bid Price[{}]: {}, Volume: {}", i, quote.bid_price[i], quote.bid_volume[i]);
+        // }
+        // for (size_t i = 0; i < quote.ask_price.size(); ++i) {
+        //     INFRA_LOG_INFO("Ask Price[{}]: {}, Volume: {}", i, quote.ask_price[i], quote.ask_volume[i]);
+        // }
         // You can add your trading logic here based on the quote data
     }
 
@@ -31,7 +31,7 @@ public:
         if (price_sequence_.size() > 100) {
             price_sequence_.pop();
         }
-        INFRA_LOG_INFO("Bar Data: {} {} {} {} {}", bar.open, bar.high, bar.low, bar.close, bar.volume);
+        // INFRA_LOG_INFO("Bar Data: {} {} {} {} {}", bar.open, bar.high, bar.low, bar.close, bar.volume);
         // You can add your trading logic here based on the bar data
         if (bar_cnt_++ % 10 == 0) {
             {

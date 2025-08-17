@@ -3,6 +3,7 @@
 #include "core/book.h"
 #include "core/journal/jlocation.h"
 #include "core/types.h"
+#include "nlohmann/json.hpp"
 #include "strategy/executor.h"
 
 namespace btra::strategy {
@@ -10,6 +11,8 @@ namespace btra::strategy {
 class Strategy {
 public:
     virtual ~Strategy() = default;
+
+    virtual void setup(const Json::json &cfg) {}
 
     virtual void pre_start(ExecutorSPtr &executor) {}
     virtual void post_start(ExecutorSPtr &executor) {}
@@ -192,3 +195,6 @@ DECLARE_SPTR(Strategy)
 
 #define REGISTER_STRATEGY(strat) \
     extern "C" btra::strategy::Strategy *create_strategy_##strat() { return new strat(); }
+
+#define REGISTER_STRATEGY_2(strat, strat_class) \
+    extern "C" btra::strategy::Strategy *create_strategy_##strat() { return new strat_class(); }

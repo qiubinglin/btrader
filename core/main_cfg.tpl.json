@@ -13,8 +13,8 @@
         "time_unit": "milli",
         "currency": "USD",
         "page_rollback_size": 10,
-        "book": {
-            "asset": 3000
+        "initial_book": {
+            "asset": 10000000.0
         },
         "statistics": {
             "mode": "all"
@@ -36,7 +36,10 @@
         {
             "path": "/home/qiubinglin/btrader/build/lib",
             "lib_name": "libstrategies.so",
-            "id": "MyStrategy"
+            "id": "MyStrategy",
+            "params": {
+                "description": "your self-defined parameters passed to strategy"
+            }
         }
     ],
     "td": [
@@ -44,13 +47,19 @@
             "institution": "binance",
             "account": "euHZeWJLF1IO5MNsuKIQYqJH4ZqLfFbtwxp0ychQi41f7CDBRRCrSt2d7nRzXq1T",
             "password": "/home/qiubinglin/btrader/usrconf/Private_key.txt",
-            "authentication": "private-key",
+            "authentication": "private-key"
+        },
+        {
+            "institution": "simulation",
+            "account": "simulation1",
+            "password": "none",
+            "authentication": "none",
             "extra": {
                 "commission_rate": 0.0003,
                 "slippage_rate": 0.0001,
                 "enable_slippage": true,
                 "enable_commission": true,
-                "initial_capital": 1000000.0
+                "initial_capital": 10000000.0
             }
         }
     ],

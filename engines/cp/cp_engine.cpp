@@ -90,6 +90,7 @@ void CPEngine::on_setup() {
 
             strategy::StrategySPtr strat_sptr =
                 strategy::StrategySPtr(dlhelper_.find_symbol<create_strat_func>(static_cast<int>(i), symbol_name)());
+            strat_sptr->setup(cfg_strats[i]["params"]);
             add_strategy(strat_sptr);
         }
     }

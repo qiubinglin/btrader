@@ -45,7 +45,7 @@ public:
     virtual void add_time_interval(int64_t duration, const CBFunc &callback) = 0;
 
     /**
-     * @brief Add td account for strategy.
+     * @brief Add td account for strategy. Not use now
      * @param institution The institution which the account belongs to
      * @param account TD account ID
      */

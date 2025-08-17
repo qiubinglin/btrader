@@ -12,12 +12,15 @@ namespace btra {
 
 StatisticsDump::~StatisticsDump() {
     if (kline_dump_stream_.is_open()) {
+        kline_dump_stream_.flush();
         kline_dump_stream_.close();
     }
     if (asset_dump_stream_.is_open()) {
+        asset_dump_stream_.flush();
         asset_dump_stream_.close();
     }
     if (trade_dump_stream_.is_open()) {
+        trade_dump_stream_.flush();
         trade_dump_stream_.close();
     }
 }
@@ -92,11 +95,7 @@ void StatisticsDump::log_asset(int64_t time, double asset) {
         // Write asset data in CSV format: timestamp,asset_value
         asset_dump_stream_ << time_str << "," << std::fixed << std::setprecision(6) << asset << "\n";
 
-        // Auto-flush every 1000 records to ensure data is written
-        static int record_count = 0;
-        if (++record_count % 1000 == 0) {
-            asset_dump_stream_.flush();
-        }
+        asset_dump_stream_.flush();
 
     } catch (const std::exception& e) {
         printf("Error logging asset data: %s\n", e.what());
@@ -121,11 +120,7 @@ void StatisticsDump::log_kline(const Bar& kline) {
                            << kline.close << "," << kline.volume << "," << kline.start_volume << "," << kline.tick_count
                            << "\n";
 
-        // Auto-flush every 1000 records
-        static int record_count = 0;
-        if (++record_count % 1000 == 0) {
-            kline_dump_stream_.flush();
-        }
+        kline_dump_stream_.flush();
 
     } catch (const std::exception& e) {
         printf("Error logging kline data: %s\n", e.what());
@@ -171,11 +166,7 @@ void StatisticsDump::log_trade(const Trade& trade) {
                            << trade.price << "," << trade.volume << "," << std::fixed << std::setprecision(6)
                            << trade.commission << "," << std::fixed << std::setprecision(6) << trade.tax << "\n";
 
-        // Auto-flush every 1000 records
-        static int record_count = 0;
-        if (++record_count % 1000 == 0) {
-            trade_dump_stream_.flush();
-        }
+        trade_dump_stream_.flush();
 
     } catch (const std::exception& e) {
         printf("Error logging trade data: %s\n", e.what());

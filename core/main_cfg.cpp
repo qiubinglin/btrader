@@ -1,4 +1,5 @@
 #include "main_cfg.h"
+#include <filesystem>
 
 #include "extension/globalparams.h"
 #include "infra/singleton.h"
@@ -16,6 +17,7 @@ MainCfg::MainCfg(const std::string &filepath) {
 MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
     run_mode_ = enums::get_mode_by_name(cfg_["system"]["mode"].get<std::string>());
     root_ = cfg_["system"]["output_root_path"].get<std::string>();
+    root_ = std::filesystem::absolute(root_);
 
     for (auto &elm : cfg_["md"]) {
         std::string institution = elm["institution"];
@@ -31,8 +33,8 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
         td_institutions_.push_back(institution);
     }
 
-    if (cfg_["system"].contains("book")) {
-        initial_book_.asset.avail = cfg_["system"]["book"]["asset"].get<double>();
+    if (cfg_["system"].contains("initial_book")) {
+        initial_book_.asset.avail = cfg_["system"]["initial_book"]["asset"].get<double>();
     }
 
     if (run_mode_ == enums::RunMode::USER_APP) {
