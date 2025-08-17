@@ -18,5 +18,3 @@ target_include_directories(core PUBLIC
 target_include_directories(core PRIVATE
     ${PROJECT_SOURCE_DIR}
 )
-
-configure_file(main_cfg.tpl.json ${PROJECT_BINARY_DIR}/main_cfg.tpl.json COPYONLY)

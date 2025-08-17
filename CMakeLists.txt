@@ -24,3 +24,5 @@ add_subdirectory(main)
 add_subdirectory(tests)
 add_subdirectory(tradeview)
 add_subdirectory(extension)
+
+file(COPY ${CMAKE_SOURCE_DIR}/config-tpl DESTINATION ${CMAKE_BINARY_DIR})
