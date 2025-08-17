@@ -1,17 +1,17 @@
 #include "mentor.h"
 
-#include <csignal>
+#include "infra/signalhandler.h"
 #include <fstream>
 
 #include "engines/cp/cp_engine.h"
 #include "infra/log.h"
+#include "infra/singleton.h"
 #include "infra/time.h"
 #include "engines/md/md_engine.h"
 #include "option_parser.h"
 #include "engines/td/td_engine.h"
 
-void signal_handler(int signal) {
-    INFRA_LOG_ERROR("Caught signal {}, flushing logs...", signal);
+void signal_handler() {
     infra::LogMgr::shutdown(); // flush all loggers and shutdown
     /* Use _Exit to skip the execution of atexit-registered cleanup routines, which may otherwise cause issues during
      * the destruction of global or static resources.*/
@@ -28,8 +28,8 @@ namespace btra {
 std::string Mentor::s_socket_path = "";
 
 Mentor::Mentor(int argc, char **argv) {
-    std::signal(SIGINT, signal_handler);  // Ctrl+C
-    std::signal(SIGTERM, signal_handler); // kill
+    INSTANCE(infra::SignalHandler).register_to_filo(SIGINT, signal_handler);
+    INSTANCE(infra::SignalHandler).register_to_filo(SIGTERM, signal_handler);
     if (argc <= 1) {
         throw std::runtime_error("argc <= 1");
     }
