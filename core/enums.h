@@ -417,6 +417,12 @@ enum class BrokerReqType : uint8_t {
     PositionBook ///< Request position book information
 };
 
+enum class BrokerRespType : int8_t {
+    Unknown = 0, ///< Unknown or unspecified response type
+    OrderPlace,
+    OrderCancel,
+};
+
 /**
  * @brief Convert order side to position direction
  *

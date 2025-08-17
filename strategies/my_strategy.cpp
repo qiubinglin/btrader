@@ -53,7 +53,7 @@ public:
                        static_cast<int>(order.status));
     }
 
-    void on_order_action_error(ExecutorSPtr &executor, const OrderActionError &error, JID source) override {
+    void on_order_action_error(ExecutorSPtr &executor, const OrderActionResp &error, JID source) override {
         // Handle order action errors here
         INFRA_LOG_INFO("Order Action Error: {} for order ID {}", error.error_msg.to_string(), error.order_id);
     }

@@ -346,6 +346,7 @@ bool BinanceData::process_kline_data(const Json::json& data) {
 
         Bar bar;
         bar.instrument_id = data["data"]["s"].get<std::string>().c_str();
+        bar.exchange_id = "binance";
         bar.start_time = kline_json["t"];
         bar.end_time = kline_json["T"];
         bar.open = safe_string_to_double(kline_json["o"].get<std::string>());

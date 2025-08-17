@@ -38,7 +38,7 @@ uint64_t LiveExecutor::cancel_order(uint64_t order_id) {
     uint32_t account_location_uid = (order_id >> 32u) xor td_uid;
     auto writer = engine_->get_writer(account_location_uid);
 
-    OrderAction &action = writer->open_data<OrderAction>(now_event_time());
+    OrderCancel &action = writer->open_data<OrderCancel>(now_event_time());
     action.order_id = writer->current_frame_uid();
     action.target_order_id = order_id;
 

@@ -13,7 +13,7 @@ public:
     void stop() override;
     enums::AccountType get_account_type() const override;
     bool insert_order(const OrderInput &input) override;
-    bool cancel_order(const OrderAction &input) override;
+    bool cancel_order(const OrderCancel &input) override;
     bool req_account_info(const AccountReq &req) override;
 
 private:

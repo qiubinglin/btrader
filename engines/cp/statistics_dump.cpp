@@ -1,9 +1,11 @@
 #include "statistics_dump.h"
 
 #include <ctime>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
+#include "core/enums.h"
 #include "infra/time.h"
 
 namespace btra {
@@ -15,8 +17,8 @@ StatisticsDump::~StatisticsDump() {
     if (asset_dump_stream_.is_open()) {
         asset_dump_stream_.close();
     }
-    if (transaction_dump_stream_.is_open()) {
-        transaction_dump_stream_.close();
+    if (trade_dump_stream_.is_open()) {
+        trade_dump_stream_.close();
     }
 }
 
@@ -28,12 +30,12 @@ void StatisticsDump::init(const std::string& outdir) {
         // Initialize file streams with proper file paths
         std::string kline_file = outdir + "/kline_data.csv";
         std::string asset_file = outdir + "/asset_data.csv";
-        std::string transaction_file = outdir + "/transaction_data.csv";
+        std::string trade_file = outdir + "/trade_data.csv";
 
         // Open file streams
         kline_dump_stream_.open(kline_file, std::ios::out | std::ios::trunc);
         asset_dump_stream_.open(asset_file, std::ios::out | std::ios::trunc);
-        transaction_dump_stream_.open(transaction_file, std::ios::out | std::ios::trunc);
+        trade_dump_stream_.open(trade_file, std::ios::out | std::ios::trunc);
 
         // Check if files opened successfully
         if (!kline_dump_stream_.is_open()) {
@@ -42,8 +44,8 @@ void StatisticsDump::init(const std::string& outdir) {
         if (!asset_dump_stream_.is_open()) {
             throw std::runtime_error("Failed to open asset data file: " + asset_file);
         }
-        if (!transaction_dump_stream_.is_open()) {
-            throw std::runtime_error("Failed to open transaction data file: " + transaction_file);
+        if (!trade_dump_stream_.is_open()) {
+            throw std::runtime_error("Failed to open trade data file: " + trade_file);
         }
 
         // Write CSV headers
@@ -53,7 +55,7 @@ void StatisticsDump::init(const std::string& outdir) {
         printf("Files created:\n");
         printf("  - Kline data: %s\n", kline_file.c_str());
         printf("  - Asset data: %s\n", asset_file.c_str());
-        printf("  - Transaction data: %s\n", transaction_file.c_str());
+        printf("  - Trade data: %s\n", trade_file.c_str());
 
     } catch (const std::exception& e) {
         printf("Error initializing StatisticsDump: %s\n", e.what());
@@ -69,8 +71,8 @@ void StatisticsDump::flush() {
         if (asset_dump_stream_.is_open()) {
             asset_dump_stream_.flush();
         }
-        if (transaction_dump_stream_.is_open()) {
-            transaction_dump_stream_.flush();
+        if (trade_dump_stream_.is_open()) {
+            trade_dump_stream_.flush();
         }
     } catch (const std::exception& e) {
         printf("Error flushing StatisticsDump streams: %s\n", e.what());
@@ -130,32 +132,53 @@ void StatisticsDump::log_kline(const Bar& kline) {
     }
 }
 
-void StatisticsDump::log_transaction(const Transaction& transaction) {
+void StatisticsDump::log_trade(const Trade& trade) {
     try {
-        if (!transaction_dump_stream_.is_open()) {
-            printf("Warning: Transaction dump stream not open\n");
+        if (!trade_dump_stream_.is_open()) {
+            printf("Warning: Trade dump stream not open\n");
             return;
         }
 
         // Convert timestamp to readable format
-        std::string time_str = format_timestamp(transaction.data_time);
+        std::string time_str = format_timestamp(trade.trade_time);
 
         // Get side string
-        std::string side_str = (transaction.side == enums::Side::Buy) ? "BUY" : "SELL";
+        std::string side_str = (trade.side == enums::Side::Buy) ? "BUY" : "SELL";
 
-        // Write transaction data in CSV format
-        transaction_dump_stream_ << time_str << "," << transaction.instrument_id.to_string() << ","
-                                 << transaction.exchange_id.to_string() << "," << side_str << "," << std::fixed
-                                 << std::setprecision(6) << transaction.price << "," << transaction.volume << "\n";
+        // Get offset string
+        std::string offset_str;
+        switch (trade.offset) {
+            case enums::Offset::Open:
+                offset_str = "OPEN";
+                break;
+            case enums::Offset::Close:
+                offset_str = "CLOSE";
+                break;
+            case enums::Offset::CloseToday:
+                offset_str = "CLOSE_TODAY";
+                break;
+            case enums::Offset::CloseYesterday:
+                offset_str = "CLOSE_YESTERDAY";
+                break;
+            default:
+                offset_str = "UNKNOWN";
+                break;
+        }
+
+        // Write trade data in CSV format
+        trade_dump_stream_ << time_str << "," << trade.instrument_id.to_string() << "," << trade.exchange_id.to_string()
+                           << "," << side_str << "," << offset_str << "," << std::fixed << std::setprecision(6)
+                           << trade.price << "," << trade.volume << "," << std::fixed << std::setprecision(6)
+                           << trade.commission << "," << std::fixed << std::setprecision(6) << trade.tax << "\n";
 
         // Auto-flush every 1000 records
         static int record_count = 0;
         if (++record_count % 1000 == 0) {
-            transaction_dump_stream_.flush();
+            trade_dump_stream_.flush();
         }
 
     } catch (const std::exception& e) {
-        printf("Error logging transaction data: %s\n", e.what());
+        printf("Error logging trade data: %s\n", e.what());
     }
 }
 
@@ -168,13 +191,13 @@ void StatisticsDump::write_csv_headers() {
         // Write asset data headers
         asset_dump_stream_ << "timestamp,asset_value\n";
 
-        // Write transaction data headers
-        transaction_dump_stream_ << "timestamp,instrument_id,exchange_id,side,price,volume\n";
+        // Write trade data headers
+        trade_dump_stream_ << "timestamp,instrument_id,exchange_id,side,offset,price,volume,commission,tax\n";
 
         // Flush headers immediately
         kline_dump_stream_.flush();
         asset_dump_stream_.flush();
-        transaction_dump_stream_.flush();
+        trade_dump_stream_.flush();
 
     } catch (const std::exception& e) {
         printf("Error writing CSV headers: %s\n", e.what());

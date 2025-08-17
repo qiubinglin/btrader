@@ -86,9 +86,14 @@ struct Book {
 
     TradeBook trades = {};
 
-    void update(const Transaction &transaction);
+    void update(const Trade &trade);
     void update(const Bar &bar);
     double asset_price() const;
+
+private:
+    // Helper methods for updating positions and assets
+    void update_position_pnl(Position &position, const Bar &bar);
+    void update_asset_from_positions(const Bar &bar);
 };
 
 } // namespace btra

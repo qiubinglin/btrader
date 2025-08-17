@@ -33,20 +33,20 @@ static constexpr int OPPONENT_SEAT_LEN = 16;
 static constexpr int PASSWORD_ID_LEN = 32;
 static constexpr int INSTITUTION_ID_LEN = 32;
 
+using VolumeType = double;
+
 struct MsgTag {
     enum Tag {
         PageEnd = 0,
-        NextPage,
         OrderInput,
         Bar,
         MDSubscribe,
-        OrderAction,
+        OrderCancel,
         TradingDay,
         Quote,
-        Tree,
         Entrust,
         Transaction,
-        OrderActionError,
+        OrderActionResp,
         Trade,
         Asset,
         AssetMargin,
@@ -77,29 +77,14 @@ struct InstrumentDepth {
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所ID
     infra::Array<double, N> bid_price;                   // 申买价
     infra::Array<double, N> ask_price;                   // 申卖价
-    infra::Array<double, N> bid_volume;                  // 申买量
-    infra::Array<double, N> ask_volume;                  // 申卖量
+    infra::Array<VolumeType, N> bid_volume;              // 申买量
+    infra::Array<VolumeType, N> ask_volume;              // 申卖量
 };
 
-struct TimeValue { //
-    PACK_DATA_BODY
-    int64_t update_time; //
-    std::string tag_a;   //
-    std::string tag_b;   //
-    std::string tag_c;   //
-    std::string value;   //
-};
-
-struct TimeKeyValue { //
-    PACK_DATA_BODY
-    int64_t update_time; //
-    std::string key;     //
-    std::string tag_a;   //
-    std::string tag_b;   //
-    std::string tag_c;   //
-    std::string value;   //
-};
-
+/**
+ * @brief Not use now
+ *
+ */
 struct StrategyStateUpdate { //
     PACK_DATA_BODY
     enums::StrategyState state; //
@@ -110,30 +95,10 @@ struct StrategyStateUpdate { //
     std::string value;          //
 };
 
-struct RiskSetting { //
-    PACK_DATA_BODY
-    uint32_t location_uid;  //
-    enums::Module category; //
-    std::string group;      //
-    std::string name;       //
-    enums::RunMode mode;    //
-    std::string value;      //
-};
-
-struct Session { //
-    PACK_DATA_BODY
-    uint32_t location_uid;  //
-    enums::Module category; //
-    enums::RunMode mode;    //
-    std::string group;      //
-    std::string name;       //
-    int64_t begin_time;     //
-    int64_t update_time;    //
-    int64_t end_time;       //
-    uint32_t frame_count;   //
-    uint64_t data_size;     //
-};
-
+/**
+ * @brief Not use now
+ *
+ */
 struct Register { //
     PACK_DATA_BODY
     uint32_t location_uid;    //
@@ -146,6 +111,10 @@ struct Register { //
     int64_t checkin_time;     //
 };
 
+/**
+ * @brief Not use now
+ *
+ */
 struct Deregister {
     UNFIXED_DATA_BODY(Deregister)
     uint32_t location_uid;  //
@@ -155,27 +124,10 @@ struct Deregister {
     std::string name;       //
 };
 
-struct CacheReset { //
-    PACK_DATA_BODY
-    int32_t msg_type; //
-};
-
 struct BrokerStateUpdate {
     PACK_DATA_BODY2(BrokerStateUpdate)
     uint32_t location_uid;    //
     enums::BrokerState state; //
-};
-
-struct RequestReadFrom { //
-    PACK_DATA_BODY
-    uint32_t source_id; //
-    int64_t from_time;  //
-};
-
-struct RequestReadFromPublic { //
-    PACK_DATA_BODY
-    uint32_t source_id; //
-    int64_t from_time;  //
 };
 
 /**
@@ -183,7 +135,6 @@ struct RequestReadFromPublic { //
  *
  */
 struct Location {
-    PACK_DATA_BODY
     uint32_t location_uid;
     enums::Module category;
     enums::RunMode mode;
@@ -191,88 +142,26 @@ struct Location {
     std::string name;  /* self-defined name */
 };
 
-struct RequestReadFromSync { //
-    PACK_DATA_BODY
-    uint32_t source_id; //
-    int64_t from_time;  //
-};
-
-struct RequestWriteTo { //
-    PACK_DATA_BODY
-    uint32_t dest_id; //
-};
-
 struct TradingDay { //
     PACK_DATA_BODY2(TradingDay)
     int64_t timestamp; //
 };
 
-struct Channel { //
-    PACK_DATA_BODY
-    uint32_t source_id; //
-    uint32_t dest_id;   //
-};
-
-struct ChannelRequest { //
-    PACK_DATA_BODY
-    uint32_t source_id; //
-    uint32_t dest_id;   //
-};
-
-struct RequestWriteToBand { //
-    PACK_DATA_BODY
-    uint32_t location_uid;  //
-    enums::Module category; //
-    enums::RunMode mode;    //
-    std::string group;      //
-    std::string name;       //
-};
-
-struct Band { //
-    PACK_DATA_BODY
-    uint32_t source_id; //
-    uint32_t dest_id;   //
-};
-
-struct Basket { //
-    PACK_DATA_BODY
-    uint32_t id;                         //
-    std::string name;                    //
-    enums::BasketVolumeType volume_type; // 比例/数量
-    int64_t total_amount;                // 总数量
-    enums::BasketType type;              // 类型: Custom 或 ETF
-};
-
-struct BasketInstrument { //
-    PACK_DATA_BODY
-    uint32_t basket_uid;                                 //
-    infra::Array<char, INSTRUMENT_ID_LEN> instrument_id; // 合约ID
-    infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所ID
-    enums::InstrumentType instrument_type;               // 合约类型
-    enums::Direction direction;                          // 方向
-    int64_t volume;                                      // 数量
-    double rate;                                         // 比例, volume比例
-};
-
-struct RequestCachedDone { //
-    PACK_DATA_BODY
-    uint32_t dest_id; //
-};
-
-struct TimeRequest { //
-    PACK_DATA_BODY
-    int32_t id;       //
-    int64_t duration; //
-    int64_t repeat;   //
-};
-
+/**
+ * @brief Re-Synchronize the time
+ *
+ */
 struct TimeReset { //
     PACK_DATA_BODY
     int64_t system_clock_count; //
     int64_t steady_clock_count; //
 };
 
-struct Commission { //
+/**
+ * @brief The commission of a product
+ *
+ */
+struct Commission {
     PACK_DATA_BODY
     infra::Array<char, PRODUCT_ID_LEN> product_id;   // 品种
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id; // 交易所
@@ -324,14 +213,22 @@ struct InstrumentKey { //
     enums::InstrumentType instrument_type;               // 合约类型
 };
 
-struct CustomSubscribe { //
+/**
+ * @brief Figure out the usage. Not use now.
+ *
+ */
+struct CustomSubscribe {
     PACK_DATA_BODY
-    int64_t update_time;                            //
-    enums::MarketType market_type;                  //
-    enums::SubscribeInstrumentType instrument_type; //
-    enums::SubscribeDataType data_type;             //
+    int64_t update_time;
+    enums::MarketType market_type;
+    enums::SubscribeInstrumentType instrument_type;
+    enums::SubscribeDataType data_type;
 };
 
+/**
+ * @brief To be replace by Depth
+ *
+ */
 struct Quote { //
     PACK_DATA_BODY2(Quote)
     infra::Array<char, DATE_LEN> trading_day; // 交易日
@@ -347,7 +244,7 @@ struct Quote { //
     double pre_settlement_price; // 昨结价
 
     double last_price; // 最新价
-    int64_t volume;    // 数量
+    VolumeType volume; // 数量
     double turnover;   // 成交金额
 
     double pre_open_interest; // 昨持仓量
@@ -364,10 +261,10 @@ struct Quote { //
     double settlement_price; // 结算价
     double iopv;             // 基金实时参考净值
 
-    infra::Array<double, 20> bid_price;  // 申买价
-    infra::Array<double, 20> ask_price;  // 申卖价
-    infra::Array<double, 20> bid_volume; // 申买量
-    infra::Array<double, 20> ask_volume; // 申卖量
+    infra::Array<double, 20> bid_price;      // 申买价
+    infra::Array<double, 20> ask_price;      // 申卖价
+    infra::Array<VolumeType, 20> bid_volume; // 申买量
+    infra::Array<VolumeType, 20> ask_volume; // 申卖量
     infra::Array<char, TRAIDNG_PHASE_CODE_LEN> trading_phase_code;
     // 标的状态, 上交所用四位, 深交所用两位
     //************************************上海现货行情交易状态***************************************************************
@@ -386,7 +283,7 @@ struct Quote { //
 };
 
 /**
- * @brief The part of order which is not yet filled.
+ * @brief Maybe represent the conditional entrust. Not use now
  *
  */
 struct Entrust {
@@ -401,7 +298,7 @@ struct Entrust {
     enums::InstrumentType instrument_type; // 合约类型
 
     double price;                // 委托价格
-    int64_t volume;              // 委托量
+    VolumeType volume;           // 委托量
     enums::Side side;            // 委托方向
     enums::PriceType price_type; // 订单价格类型（市价、限价、本方最优）
 
@@ -412,7 +309,7 @@ struct Entrust {
 };
 
 /**
- * @brief The part of order which is already filled.
+ * @brief Represent a transaction happened in the market, not transaction of our order. Not use now.
  *
  */
 struct Transaction { //
@@ -426,64 +323,18 @@ struct Transaction { //
 
     enums::InstrumentType instrument_type; // 合约类型
 
-    double price;   // 成交价
-    int64_t volume; // 成交量
+    double price;      // 成交价
+    VolumeType volume; // 成交量
 
-    // int64_t bid_no; // 买方订单号
-    // int64_t ask_no; // 卖方订单号
+    int64_t bid_no; // 买方订单号
+    int64_t ask_no; // 卖方订单号
 
-    // enums::ExecType exec_type; // SZ: 成交标识
-    enums::Side side; // 买卖方向
+    enums::ExecType exec_type; // SZ: 成交标识
+    enums::Side side;          // 买卖方向
 
-    // int64_t main_seq;  // 主序号
-    // int64_t seq;       // 子序号
-    // int64_t biz_index; // 业务序号
-};
-
-/**
- * @brief Same as Quote.
- *
- */
-struct Tree { //
-    PACK_DATA_BODY2(Tree)
-    infra::Array<char, DATE_LEN> trading_day; // 交易日
-
-    int64_t data_time; // 数据生成时间
-
-    infra::Array<char, INSTRUMENT_ID_LEN> instrument_id; // 合约ID
-    infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所代码
-
-    enums::InstrumentType instrument_type; // 合约类型
-
-    int64_t trade_num; // 总成交笔数
-    int64_t volume;    // 总成交量
-    double turnover;   // 总成交金额
-
-    double bid_weighted_avg_price; // 加权平均委托买入价格
-    int64_t total_bid_volume;      // 委托买入数量
-    double ask_weighted_avg_price; // 加权平均委托卖出价格
-    int64_t total_ask_volume;      // 委托卖出数量
-
-    double pre_close_price; // 昨收价
-
-    double last_price; // 最新价
-    double open_price; // 今开盘
-    double high_price; // 最高价
-    double low_price;  // 最低价
-
-    double upper_limit_price; // 涨停板价
-    double lower_limit_price; // 跌停板价
-
-    double close_price; // 收盘价
-
-    int64_t bid_depth; // 申买档位数
-    int64_t ask_depth; // 申卖档位数
-
-    infra::Array<double, 10> bid_price;                            // 申买价
-    infra::Array<double, 10> ask_price;                            // 申卖价
-    infra::Array<int64_t, 10> bid_volume;                          // 申买量
-    infra::Array<int64_t, 10> ask_volume;                          // 申卖量
-    infra::Array<char, TRAIDNG_PHASE_CODE_LEN> trading_phase_code; // 标的状态, 上交所用四位, 深交所用两位,同quote
+    int64_t main_seq;  // 主序号
+    int64_t seq;       // 子序号
+    int64_t biz_index; // 业务序号
 };
 
 struct Bar {
@@ -502,8 +353,8 @@ struct Bar {
     double low;   // 低
     double high;  // 高
 
-    int64_t volume;       // 区间交易量
-    int64_t start_volume; // 初始总交易量
+    VolumeType volume;       // 区间交易量
+    VolumeType start_volume; // 初始总交易量
 
     int32_t tick_count; // 区间有效tick数
 };
@@ -525,7 +376,7 @@ struct OrderInput {
     double limit_price;  // 价格
     double frozen_price; // 冻结价格
 
-    int64_t volume; // 数量
+    VolumeType volume; // 数量
 
     bool is_swap;                            // 互换单
     enums::Side side;                        // 买卖方向
@@ -539,38 +390,34 @@ struct OrderInput {
     int64_t insert_time; // 写入时间
 };
 
-struct BlockMessage { //
-    PACK_DATA_BODY
-    uint64_t block_id;                                   // 大宗交易信息id, 用于TD从OrderInput找到此数据
-    infra::Array<char, OPPONENT_SEAT_LEN> opponent_seat; // 对手方席号
-    uint64_t match_number;                               // 成交约定号
-    bool is_specific;                                    // 是否受限(特定)股份
-    int64_t insert_time;                                 // 写入时间
-};
-
 /**
  * @brief Same as OrderInput, but used for order cancel. It maybe replace OrderInput in future.
  *
  */
-struct OrderAction {
-    PACK_DATA_BODY2(OrderAction)
+struct OrderCancel {
+    PACK_DATA_BODY2(OrderCancel)
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id;
     uint64_t order_id;        // Order id
     uint64_t target_order_id; // Target order id
 
     double price;        // 价格
-    int64_t volume;      // 数量
+    VolumeType volume;   // 数量
     int64_t insert_time; // 写入时间
 };
 
-struct OrderActionError {
-    PACK_DATA_BODY2(OrderActionError)
+/**
+ * @brief Response struct for all order actions (OrderInput, OrderCancel)
+ *
+ */
+struct OrderActionResp {
+    PACK_DATA_BODY2(OrderActionResp)
     uint64_t order_id;                                     // 订单ID
-    infra::Array<char, EXTERNAL_ID_LEN> external_order_id; // 撤单原委托柜台订单id, 新生成撤单委托编号不记录
+    infra::Array<char, EXTERNAL_ID_LEN> external_order_id; // Order id in exchange
     uint64_t order_action_id;                              // 订单操作ID
-    int32_t error_id;                                      // 错误ID
+    int32_t error_id{0};                                      // 错误ID
     infra::Array<char, ERROR_MSG_LEN> error_msg;           // 错误信息
     int64_t insert_time;                                   // 写入时间
+    enums::BrokerRespType resp_type;
 };
 
 /**
@@ -596,8 +443,8 @@ struct Order {
     double limit_price;  // 价格
     double frozen_price; // 冻结价格, 市价单冻结价格为0
 
-    int64_t volume;      // 数量
-    int64_t volume_left; // 剩余数量
+    VolumeType volume;      // 数量
+    VolumeType volume_left; // 剩余数量
 
     double tax;        // 税
     double commission; // 手续费
@@ -637,8 +484,8 @@ struct HistoryOrder { //
     double limit_price;  // 价格
     double frozen_price; // 冻结价格, 市价单冻结价格为0
 
-    int64_t volume;      // 数量
-    int64_t volume_left; // 剩余数量
+    VolumeType volume;      // 数量
+    VolumeType volume_left; // 剩余数量
 
     double tax;        // 税
     double commission; // 手续费
@@ -659,7 +506,7 @@ struct HistoryOrder { //
 };
 
 /**
- * @brief Same as Transaction? to be removed
+ * @brief Represent a trade of our order
  *
  */
 struct Trade {
@@ -682,8 +529,8 @@ struct Trade {
     enums::Offset offset;        // 开平方向
     enums::HedgeFlag hedge_flag; // 投机套保标识
 
-    double price;   // 成交价格
-    int64_t volume; // 成交量
+    double price;      // 成交价格
+    VolumeType volume; // 成交量
 
     double tax;        // 税
     double commission; // 手续费
@@ -713,9 +560,9 @@ struct HistoryTrade { //
     enums::Offset offset;        // 开平方向
     enums::HedgeFlag hedge_flag; // 投机套保标识
 
-    double price;               // 成交价格
-    int64_t volume;             // 成交量
-    int64_t close_today_volume; // 平今日仓量(期货)
+    double price;                  // 成交价格
+    VolumeType volume;             // 成交量
+    VolumeType close_today_volume; // 平今日仓量(期货)
 
     double tax;                                  // 税
     double commission;                           // 手续费
@@ -737,7 +584,7 @@ struct Position { //
 
     enums::Direction direction; // 持仓方向
 
-    int64_t volume; // 数量
+    VolumeType volume; // 数量
     // int64_t yesterday_volume; // 昨仓数量
     // int64_t frozen_total;     // 冻结数量
     // int64_t frozen_yesterday; // 冻结昨仓
@@ -825,15 +672,15 @@ struct AssetMargin {
 
 struct OrderStat { //
     PACK_DATA_BODY
-    uint64_t order_id;   //
-    int64_t md_time;     //
-    int64_t input_time;  //
-    int64_t insert_time; //
-    int64_t ack_time;    //
-    int64_t trade_time;  //
-    double total_price;  //
-    double total_volume; //
-    double avg_price;    //
+    uint64_t order_id;       //
+    int64_t md_time;         //
+    int64_t input_time;      //
+    int64_t insert_time;     //
+    int64_t ack_time;        //
+    int64_t trade_time;      //
+    double total_price;      //
+    VolumeType total_volume; //
+    double avg_price;        //
 };
 
 struct BasketOrder { //
@@ -849,8 +696,8 @@ struct BasketOrder { //
     enums::PriceLevel price_level; // 价格级别
     double price_offset;           // 价格偏移量
 
-    int64_t volume;      // 成交量
-    int64_t volume_left; // 剩余数量
+    VolumeType volume;      // 成交量
+    VolumeType volume_left; // 剩余数量
 
     enums::BasketOrderStatus status; // 订单状态
 
@@ -929,7 +776,8 @@ struct PositionBook {
     Position *get(const infra::Array<char, INSTRUMENT_ID_LEN> &instrument_id,
                   const infra::Array<char, EXCHANGE_ID_LEN> &exchange_id, enums::Direction direction);
 
-    void update(const Transaction &tranction);
+    void update(const Transaction &transaction);
+    void update(const Trade &trade);
 
     double unrealized_pnl() const;
 };
@@ -944,7 +792,5 @@ struct TDID {
 };
 
 void order_from_input(const OrderInput &input, Order &order);
-
-void trade_from_order(const Order &order, Trade &trade);
 
 } // namespace btra

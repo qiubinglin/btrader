@@ -35,15 +35,6 @@ public:
     virtual void on_quote(ExecutorSPtr &executor, const Quote &quote, JID source) {}
 
     /**
-     * @brief Callback on tree update, from md?
-     *
-     * @param executor
-     * @param tree
-     * @param source
-     */
-    virtual void on_tree(ExecutorSPtr &executor, const Tree &tree, JID source) {}
-
-    /**
      * @brief Callback on bar update, from md
      *
      * @param executor
@@ -86,7 +77,7 @@ public:
      * @param error
      * @param source
      */
-    virtual void on_order_action_error(ExecutorSPtr &executor, const OrderActionError &error, JID source) {}
+    virtual void on_order_action_error(ExecutorSPtr &executor, const OrderActionResp &error, JID source) {}
 
     /**
      * @brief Callback on trade update, from td

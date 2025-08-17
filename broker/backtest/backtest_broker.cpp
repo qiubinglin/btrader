@@ -23,7 +23,7 @@ bool BackTestBroker::insert_order(const OrderInput &) {
     return true;
 }
 
-bool BackTestBroker::cancel_order(const OrderAction &) {
+bool BackTestBroker::cancel_order(const OrderCancel &) {
     // Implementation for cancel_order
     return true;
 }

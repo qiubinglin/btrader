@@ -13,7 +13,6 @@ public:
     void on_trading_day(const EventSPtr &event);
     void on_bar(const EventSPtr &event);
     void on_quote(const EventSPtr &event);
-    void on_tree(const EventSPtr &event);
     void on_entrust(const EventSPtr &event);
     void on_transaction(const EventSPtr &event);
     void on_order_action_error(const EventSPtr &event);

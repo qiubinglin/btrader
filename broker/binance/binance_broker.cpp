@@ -103,7 +103,7 @@ bool BinanceBroker::insert_order(const OrderInput &input) {
     }
 }
 
-bool BinanceBroker::cancel_order(const OrderAction &input) {
+bool BinanceBroker::cancel_order(const OrderCancel &input) {
     try {
         if (!is_connected_) {
             INFRA_LOG_ERROR("Cannot cancel order: broker not connected");
@@ -168,7 +168,7 @@ void BinanceBroker::on_msg(const std::string &msg) {
             return;
         }
 
-        INFRA_LOG_INFO("Binance broker received message: {}", msg);
+        // INFRA_LOG_INFO("Binance broker received message: {}", msg);
 
         Json::json json_msg = Json::json::parse(msg);
 
@@ -265,7 +265,7 @@ std::map<std::string, std::string> BinanceBroker::build_order_params(const Order
     return params;
 }
 
-std::map<std::string, std::string> BinanceBroker::build_cancel_params(const OrderAction &input) {
+std::map<std::string, std::string> BinanceBroker::build_cancel_params(const OrderCancel &input) {
     std::map<std::string, std::string> params;
 
     params["symbol"] = input.instrument_id.to_string();

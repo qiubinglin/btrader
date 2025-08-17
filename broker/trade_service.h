@@ -2,7 +2,11 @@
 
 #include <memory>
 
+#include "book.h"
+#include "core/journal/writer.h"
 #include "core/types.h"
+#include "infra/time.h"
+#include "jid.h"
 
 namespace btra::broker {
 
@@ -72,12 +76,33 @@ public:
      * @return true
      * @return false
      */
-    virtual bool cancel_order(const OrderAction &input) = 0;
+    virtual bool cancel_order(const OrderCancel &input) = 0;
 
     virtual bool req_account_info(const AccountReq &req) = 0;
 
+    /**
+     * @brief Notice cp about action response
+     *
+     * @tparam T
+     * @param response
+     * @return true
+     * @return false
+     */
+    template <typename T>
+    bool notify_response(const T &response) {
+        auto id = journal::JIDUtil::build(journal::JIDUtil::TD_RESPONSE);
+        if (writers_ == nullptr) {
+            return false;
+        }
+        writers_->at(id)->write(infra::time::now_time(), response);
+        return true;
+    }
+
+    void set_writers(WriterMap *writers) { writers_ = writers; }
+
 protected:
     enums::BrokerState state_ = enums::BrokerState::DisConnected;
+    WriterMap *writers_{nullptr};
 };
 
 } // namespace btra::broker

@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #include "broker/trade_service.h"
-
 #include "extension/depthcallboard.h"
 
 namespace btra::broker {
@@ -21,7 +20,7 @@ public:
     void stop() override;
     enums::AccountType get_account_type() const override;
     bool insert_order(const OrderInput& input) override;
-    bool cancel_order(const OrderAction& input) override;
+    bool cancel_order(const OrderCancel& input) override;
     bool req_account_info(const AccountReq& req) override;
 
 private:
@@ -29,7 +28,6 @@ private:
     void process_order_matching();
     void match_order_with_market_data(Order& order);
     bool can_execute_order(const Order& order, double market_price);
-    void execute_trade(Order& order, double price, int64_t volume);
 
     // 订单管理
     void add_order(const Order& order);
@@ -47,9 +45,27 @@ private:
     // 生成模拟市场数据
     double generate_market_price(const Order& order);
     double apply_slippage(double base_price, enums::Side side);
-    
+
+    // 成交汇总处理
+    Trade generate_summary_trade(const Order& order, double avg_price, VolumeType total_volume,
+                                 const std::vector<std::pair<double, VolumeType>>& executed_trades);
+    void execute_summary_trade(Order& order, const Trade& summary_trade);
+
     // 辅助函数
     std::string get_order_status_string(enums::OrderStatus status);
+
+    // 无深度数据处理
+    void handle_no_depth_execution(Order& order);
+
+    // 资金检查
+    bool check_funds_sufficiency(const Order& order, double price, VolumeType volume);
+
+    // 深度数据处理
+    std::vector<std::pair<double, VolumeType>> build_price_levels(const InstrumentDepth<20>& depth, enums::Side side);
+
+    // 持仓管理辅助方法
+    void update_existing_position(Position& position, const Trade& trade);
+    void create_new_position(const Trade& trade, enums::Direction direction);
 
     // 内部状态
     std::map<uint64_t, Order> active_orders_;

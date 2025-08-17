@@ -36,10 +36,9 @@ void CPEngine::react() {
     events_.filter(is<MsgTag::TradingDay>).subscribe(ON_MEM_OBJ(live_subscriber_, on_trading_day));
     events_.filter(is<MsgTag::Bar>).subscribe(ON_MEM_OBJ(live_subscriber_, on_bar));
     events_.filter(is<MsgTag::Quote>).subscribe(ON_MEM_OBJ(live_subscriber_, on_quote));
-    events_.filter(is<MsgTag::Tree>).subscribe(ON_MEM_OBJ(live_subscriber_, on_tree));
     events_.filter(is<MsgTag::Entrust>).subscribe(ON_MEM_OBJ(live_subscriber_, on_entrust));
     events_.filter(is<MsgTag::Transaction>).subscribe(ON_MEM_OBJ(live_subscriber_, on_transaction));
-    events_.filter(is<MsgTag::OrderActionError>).subscribe(ON_MEM_OBJ(live_subscriber_, on_order_action_error));
+    events_.filter(is<MsgTag::OrderActionResp>).subscribe(ON_MEM_OBJ(live_subscriber_, on_order_action_error));
     events_.filter(is<MsgTag::Trade>).subscribe(ON_MEM_OBJ(live_subscriber_, on_trade));
     events_.filter(is<MsgTag::Asset>).subscribe(ON_MEM_OBJ(live_subscriber_, on_asset_sync_reset));
     events_.filter(is<MsgTag::AssetMargin>).subscribe(ON_MEM_OBJ(live_subscriber_, on_asset_margin_sync_reset));
@@ -94,6 +93,8 @@ void CPEngine::on_setup() {
             add_strategy(strat_sptr);
         }
     }
+
+    statistics_dump_.init(INSTANCE(GlobalParams).root_dir);
 
     if (INSTANCE(GlobalParams).is_simulation) {
         simulation_depth_callboard_ = std::make_unique<extension::DepthCallBoard>();

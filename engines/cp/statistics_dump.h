@@ -20,7 +20,7 @@ struct StatisticsDump {
     void flush();
     void log_asset(int64_t time, double asset);
     void log_kline(const Bar &kline);
-    void log_transaction(const Transaction &transaction);
+    void log_trade(const Trade &trade);
 
 private:
     // Helper methods
@@ -30,7 +30,7 @@ private:
     // File streams
     std::ofstream kline_dump_stream_;
     std::ofstream asset_dump_stream_;
-    std::ofstream transaction_dump_stream_;
+    std::ofstream trade_dump_stream_;
 };
 
 } // namespace btra

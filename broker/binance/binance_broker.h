@@ -29,7 +29,7 @@ public:
     enums::AccountType get_account_type() const override;
 
     bool insert_order(const OrderInput &input) override;
-    bool cancel_order(const OrderAction &input) override;
+    bool cancel_order(const OrderCancel &input) override;
     bool req_account_info(const AccountReq &req) override;
 
     // Additional utility methods
@@ -51,7 +51,7 @@ private:
     bool send_order_request(const std::string &method, std::map<std::string, std::string> &params, uint64_t request_id,
                             enums::BrokerReqType req_type);
     std::map<std::string, std::string> build_order_params(const OrderInput &input);
-    std::map<std::string, std::string> build_cancel_params(const OrderAction &input);
+    std::map<std::string, std::string> build_cancel_params(const OrderCancel &input);
     std::map<std::string, std::string> build_account_params(const AccountReq &req);
 
     // Utility methods

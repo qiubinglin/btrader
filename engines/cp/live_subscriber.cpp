@@ -66,32 +66,24 @@ void LiveSubscriber::on_quote(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_quote, event->data<Quote>(), event->source());
 }
 
-void LiveSubscriber::on_tree(const EventSPtr &event) {
-    Invoker::invoke(*this, &strategy::Strategy::on_tree, event->data<Tree>(), event->source());
-}
-
 void LiveSubscriber::on_entrust(const EventSPtr &event) {
     Invoker::invoke(*this, &strategy::Strategy::on_entrust, event->data<Entrust>(), event->source());
 }
 
 void LiveSubscriber::on_transaction(const EventSPtr &event) {
-    const auto &transaction = event->data<Transaction>();
-
-    if (INSTANCE(GlobalParams).stat_params.stat_all()) {
-        engine_->statistics_dump_.log_transaction(transaction);
-    }
-
-    engine_->executor_->book().update(transaction);
-
-    Invoker::invoke(*this, &strategy::Strategy::on_transaction, transaction, event->source());
+    Invoker::invoke(*this, &strategy::Strategy::on_transaction, event->data<Transaction>(), event->source());
 }
 
 void LiveSubscriber::on_order_action_error(const EventSPtr &event) {
-    Invoker::invoke(*this, &strategy::Strategy::on_order_action_error, event->data<OrderActionError>(),
+    Invoker::invoke(*this, &strategy::Strategy::on_order_action_error, event->data<OrderActionResp>(),
                     event->source());
 }
 
 void LiveSubscriber::on_trade(const EventSPtr &event) {
+    engine_->executor_->book().update(event->data<Trade>());
+    if (INSTANCE(GlobalParams).stat_params.stat_all()) {
+        engine_->statistics_dump_.log_trade(event->data<Trade>());
+    }
     Invoker::invoke(*this, &strategy::Strategy::on_trade, event->data<Trade>(), event->source());
 }
 

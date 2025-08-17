@@ -2,7 +2,7 @@
 
 namespace btra {
 
-Deregister::Deregister(const char *data, uint32_t len) {
+Deregister::Deregister(const char *data, [[maybe_unused]] uint32_t len) {
     memcpy(&location_uid, data, sizeof(location_uid));
     data += sizeof(location_uid);
     len -= sizeof(location_uid);
@@ -107,17 +107,6 @@ void order_from_input(const OrderInput &input, Order &order) {
     order.time_condition = input.time_condition;
 
     order.parent_id = input.parent_id;
-}
-
-void trade_from_order(const Order &order, Trade &trade) {
-    trade.order_id = order.order_id;
-    trade.instrument_id = order.instrument_id;
-    trade.exchange_id = order.exchange_id;
-    trade.external_order_id = order.external_order_id;
-    trade.instrument_type = order.instrument_type;
-    trade.side = order.side;
-    trade.offset = order.offset;
-    trade.hedge_flag = order.hedge_flag;
 }
 
 } // namespace btra

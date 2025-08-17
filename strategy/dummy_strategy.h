@@ -16,7 +16,7 @@ public:
 
     void on_order(ExecutorSPtr &executor, const Order &order, JID source) override {}
 
-    void on_order_action_error(ExecutorSPtr &executor, const OrderActionError &error, JID source) override {}
+    void on_order_action_error(ExecutorSPtr &executor, const OrderActionResp &error, JID source) override {}
 
     void on_position_sync_reset(ExecutorSPtr &executor, const PositionBook &old_book, const PositionBook &new_book,
                                 JID source) override {}

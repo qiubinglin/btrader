@@ -23,7 +23,7 @@ bool PyTradeService::insert_order(const OrderInput &input) {
     return true;
 }
 
-bool PyTradeService::cancel_order(const OrderAction &input) {
+bool PyTradeService::cancel_order(const OrderCancel &input) {
     // Implementation for cancel_order
     return true;
 }

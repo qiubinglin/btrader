@@ -7,7 +7,7 @@ void TDEngine::react() {
 
     events_.filter(is<MsgTag::TradingStart>).subscribe(ON_MEM_FUNC(on_trading_start));
     events_.filter(is<MsgTag::OrderInput>).subscribe(ON_MEM_FUNC(insert_order));
-    events_.filter(is<MsgTag::OrderAction>).subscribe(ON_MEM_FUNC(cancel_order));
+    events_.filter(is<MsgTag::OrderCancel>).subscribe(ON_MEM_FUNC(cancel_order));
     events_.filter(is<MsgTag::AccountReq>).subscribe(ON_MEM_FUNC(on_account_req));
 }
 
@@ -25,6 +25,7 @@ void TDEngine::on_setup() {
 
         trade_services_[dest] = broker::TradeService::create(institution);
         trade_services_[dest]->setup(cfg_["td"][i]);
+        trade_services_[dest]->set_writers(&writers_);
     }
 
     auto response_td_id = journal::JIDUtil::build(journal::JIDUtil::TD_RESPONSE);
@@ -64,7 +65,7 @@ void TDEngine::insert_order(const EventSPtr &event) {
 }
 
 void TDEngine::cancel_order(const EventSPtr &event) {
-    const OrderAction &action = event->data<OrderAction>();
+    const OrderCancel &action = event->data<OrderCancel>();
     auto td_uid = get_main_cfg().get_td_location_uid();
     uint32_t account_uid = uidutil::to_account_uid(action.order_id, td_uid);
 
