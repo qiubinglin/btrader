@@ -764,24 +764,6 @@ struct AccountReq {
     int64_t insert_time; /* Maybe useless */
 };
 
-// key = hash_instrument(exchange_id, instrument_id)
-struct PositionBook {
-    UNFIXED_DATA_BODY(PositionBook)
-
-    std::unordered_map<uint32_t, Position> long_positions;
-    std::unordered_map<uint32_t, Position> short_positions;
-
-    void set(const Position &position);
-
-    Position *get(const infra::Array<char, INSTRUMENT_ID_LEN> &instrument_id,
-                  const infra::Array<char, EXCHANGE_ID_LEN> &exchange_id, enums::Direction direction);
-
-    void update(const Transaction &transaction);
-    void update(const Trade &trade);
-
-    double unrealized_pnl() const;
-};
-
 struct Termination {
     PACK_DATA_BODY2(Termination)
 };
