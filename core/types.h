@@ -72,7 +72,7 @@ struct MsgTag {
 template <size_t N>
 struct InstrumentDepth {
     static const size_t MAX_SIZE = N;
-    uint32_t real_depth_size = N;
+    uint32_t real_depth_size = 0;
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id; // 合约ID
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所ID
     infra::Array<double, N> bid_price;                   // 申买价
@@ -265,6 +265,7 @@ struct Quote { //
     infra::Array<double, 20> ask_price;      // 申卖价
     infra::Array<VolumeType, 20> bid_volume; // 申买量
     infra::Array<VolumeType, 20> ask_volume; // 申卖量
+    uint32_t real_depth_size = infra::Array<double, 20>::length;
     infra::Array<char, TRAIDNG_PHASE_CODE_LEN> trading_phase_code;
     // 标的状态, 上交所用四位, 深交所用两位
     //************************************上海现货行情交易状态***************************************************************

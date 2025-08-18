@@ -75,7 +75,7 @@ void BrokerSim::start() {
     }
 
     running_ = true;
-    state_ = enums::BrokerState::Connected;
+    state_ = enums::BrokerState::Ready;
 
     // 启动订单匹配线程
     matching_thread_ = std::thread([this]() {
@@ -272,7 +272,7 @@ void BrokerSim::process_order_matching() {
 void BrokerSim::match_order_with_market_data(Order& order) {
     // 获取实时深度数据
     InstrumentDepth<20> depth;
-    depth_callboard_.get(order.instrument_id, order.exchange_id, depth);
+    depth_callboard_.get(order.instrument_id, depth);
 
     // 如果没有深度数据，执行模拟成交
     if (depth.real_depth_size == 0) {
@@ -558,14 +558,15 @@ void BrokerSim::handle_no_depth_execution(Order& order) {
         // 限价单：直接按限价成交，无需滑点
         execution_price = order.limit_price;
         std::cout << "No depth data available, limit order " << order.order_id
-                  << " executed at limit price: " << execution_price << std::endl;
+                  << " executed at limit price: " << execution_price << " symbol: " << order.instrument_id.to_string()
+                  << std::endl;
     } else {
         // 市价单：生成模拟价格并加滑点
         double simulated_price = generate_market_price(order);
         execution_price = apply_slippage(simulated_price, order.side);
         std::cout << "No depth data available, market order " << order.order_id
                   << " executed at simulated price with slippage: " << execution_price << " (base: " << simulated_price
-                  << ")" << std::endl;
+                  << ")" << " symbol: " << order.instrument_id.to_string() << std::endl;
     }
 
     // 检查资金是否足够（买单需要检查）

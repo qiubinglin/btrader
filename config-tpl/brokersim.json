@@ -1,0 +1,65 @@
+{
+    "system" : {
+        "log": {
+            "level": "info",
+            "path": "./log",
+            "logger": "rotating",
+            "max_size": 16,
+            "max_files": 10,
+            "mode": "log"
+        },
+        "mode": "live",
+        "output_root_path": "./output",
+        "time_unit": "milli",
+        "currency": "USD",
+        "page_rollback_size": 10,
+        "initial_book": {
+            "asset": 10000000.0
+        },
+        "statistics": {
+            "mode": "all"
+        },
+        "simulation": true
+    },
+    "md": [
+        {
+            "institution": "binance",
+            "account": "bing",
+            "password": "/home/qiubinglin/btrader/usrconf/Private_key.txt",
+            "authentication": "private-key",
+            "extra": {
+                "stream_uri": "wss://stream.binance.com:443/stream?streams=ethusdt@kline_1s/ethusdt@depth20"
+            }
+        }
+    ],
+    "strategy": [
+        {
+            "path": "/home/qiubinglin/btrader/build/lib",
+            "lib_name": "libstrategies.so",
+            "id": "ConsecutiveBarStrategy",
+            "params": {
+                "symbol": "ethusdt",
+                "institution": "simulation",
+                "account": "simulation1"
+            }
+        }
+    ],
+    "td": [
+        {
+            "institution": "simulation",
+            "account": "simulation1",
+            "password": "none",
+            "authentication": "none",
+            "extra": {
+                "commission_rate": 0.0003,
+                "slippage_rate": 0.0001,
+                "enable_slippage": true,
+                "enable_commission": true,
+                "initial_capital": 10000000.0
+            }
+        }
+    ],
+    "user-app": {
+        "fds_file": "/home/qiubinglin/btrader/userconf/fds.txt"
+    }
+}

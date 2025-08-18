@@ -61,7 +61,7 @@ void LiveSubscriber::on_quote(const EventSPtr &event) {
         input.bid_price = data.bid_price;
         input.ask_volume = data.ask_volume;
         input.bid_volume = data.bid_volume;
-        engine_->simulation_depth_callboard_->set(input.instrument_id, input.exchange_id, input);
+        engine_->simulation_depth_callboard_->set(input.instrument_id, input);
     }
     Invoker::invoke(*this, &strategy::Strategy::on_quote, event->data<Quote>(), event->source());
 }

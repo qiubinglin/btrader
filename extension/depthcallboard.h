@@ -14,10 +14,9 @@ public:
     void init(const std::string &dir, size_t size, size_t elm_size, bool is_writing);
 
     template <size_t N>
-    bool get(const infra::Array<char, INSTRUMENT_ID_LEN> &instrument_id,
-             const infra::Array<char, EXCHANGE_ID_LEN> &exchange_id, InstrumentDepth<N> &output) {
+    bool get(const infra::Array<char, INSTRUMENT_ID_LEN> &instrument_id, InstrumentDepth<N> &output) {
         using DataType = InstrumentDepth<N>;
-        auto id = hash_instrument(exchange_id, instrument_id);
+        auto id = infra::hash_str_32(instrument_id);
         char *ptr = nullptr;
         if (data_positions_.contains(id)) {
             ptr = data_positions_.at(id);
@@ -26,7 +25,7 @@ public:
             auto end = (char *)header_ + header_->used_length;
             while (ptr + sizeof(DataType) <= end) {
                 const DataType *data = reinterpret_cast<const DataType *>(ptr);
-                auto id_cmp = hash_instrument(data->exchange_id, data->instrument_id);
+                auto id_cmp = infra::hash_str_32(data->instrument_id);
                 if (id == id_cmp) {
                     data_positions_[id] = ptr;
                     break;
@@ -42,13 +41,12 @@ public:
     }
 
     template <size_t N>
-    void set(const infra::Array<char, INSTRUMENT_ID_LEN> &instrument_id,
-             const infra::Array<char, EXCHANGE_ID_LEN> &exchange_id, const InstrumentDepth<N> &input) {
+    void set(const infra::Array<char, INSTRUMENT_ID_LEN> &instrument_id, const InstrumentDepth<N> &input) {
         if (not is_writing_) {
             return;
         }
         using DataType = InstrumentDepth<N>;
-        auto id = hash_instrument(exchange_id, instrument_id);
+        auto id = infra::hash_str_32(instrument_id);
         char *ptr = nullptr;
         if (data_positions_.contains(id)) {
             ptr = data_positions_.at(id);
