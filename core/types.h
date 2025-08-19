@@ -64,6 +64,7 @@ struct MsgTag {
         HistoryTrade,
         RequestHistoryOrderError,
         RequestHistoryTradeError,
+        BacktestSyncSignal,
         Termination,  /* Terminate event engine. */
         TAG_MAX_SIZE, /* This must be the last tag which indicates the maximum size of the tag. */
     };
@@ -79,6 +80,19 @@ struct InstrumentDepth {
     infra::Array<double, N> ask_price;                   // 申卖价
     infra::Array<VolumeType, N> bid_volume;              // 申买量
     infra::Array<VolumeType, N> ask_volume;              // 申卖量
+};
+
+/**
+ * @brief Signal to synchronize md/td behaviours in backtest
+ *
+ */
+struct BacktestSyncSignal {
+    PACK_DATA_BODY2(BacktestSyncSignal)
+    enum Flag {
+        MarketData,
+        MatchOrder,
+    };
+    Flag flag;
 };
 
 /**
@@ -415,7 +429,7 @@ struct OrderActionResp {
     uint64_t order_id;                                     // 订单ID
     infra::Array<char, EXTERNAL_ID_LEN> external_order_id; // Order id in exchange
     uint64_t order_action_id;                              // 订单操作ID
-    int32_t error_id{0};                                      // 错误ID
+    int32_t error_id{0};                                   // 错误ID
     infra::Array<char, ERROR_MSG_LEN> error_msg;           // 错误信息
     int64_t insert_time;                                   // 写入时间
     enums::BrokerRespType resp_type;
