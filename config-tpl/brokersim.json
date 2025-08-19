@@ -19,7 +19,8 @@
         "statistics": {
             "mode": "all"
         },
-        "simulation": true
+        "simulation": true,
+        "backtest": false
     },
     "md": [
         {

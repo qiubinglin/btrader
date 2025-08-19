@@ -1,8 +1,10 @@
 #include "main_cfg.h"
+
 #include <filesystem>
 
 #include "extension/globalparams.h"
 #include "infra/singleton.h"
+#include "jid.h"
 
 namespace btra {
 
@@ -64,6 +66,10 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
     if (cfg_["system"].contains("simulation")) {
         INSTANCE(GlobalParams).is_simulation = cfg_["system"]["simulation"].get<bool>();
     }
+
+    if (cfg_["system"].contains("backtest")) {
+        INSTANCE(GlobalParams).is_backtest = cfg_["system"]["backtest"].get<bool>();
+    }
 }
 
 JLocationSPtr MainCfg::md_location() const {
@@ -109,9 +115,16 @@ std::vector<std::string> MainCfg::get_journal_names() const {
         }
 
         auto md_req_l = md_req_location();
-        std::string key =
-            std::to_string(md_req_l->uid) + "_" + std::to_string(journal::JIDUtil::build(journal::JIDUtil::MD_REQ));
-        res.push_back(key);
+        {
+            std::string key =
+                std::to_string(md_req_l->uid) + "_" + std::to_string(journal::JIDUtil::build(journal::JIDUtil::MD_REQ));
+            res.push_back(key);
+        }
+        {
+            std::string key = std::to_string(md_req_l->uid) + "_" +
+                              std::to_string(journal::JIDUtil::build(journal::JIDUtil::MD_RESPONSE));
+            res.push_back(key);
+        }
     }
 
     /* td */
@@ -123,9 +136,16 @@ std::vector<std::string> MainCfg::get_journal_names() const {
         }
 
         auto td_resp_l = td_reponse_location();
-        std::string key = std::to_string(td_resp_l->uid) + "_" +
-                          std::to_string(journal::JIDUtil::build(journal::JIDUtil::TD_RESPONSE));
-        res.push_back(key);
+        {
+            std::string key = std::to_string(td_resp_l->uid) + "_" +
+                              std::to_string(journal::JIDUtil::build(journal::JIDUtil::TD_RESPONSE));
+            res.push_back(key);
+        }
+        {
+            std::string key = std::to_string(td_resp_l->uid) + "_" +
+                              std::to_string(journal::JIDUtil::build(journal::JIDUtil::TD_REQ));
+            res.push_back(key);
+        }
     }
     return res;
 }

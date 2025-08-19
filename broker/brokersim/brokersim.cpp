@@ -37,9 +37,7 @@ BrokerSim::BrokerSim() {
     positions_ = PositionBook{};
 }
 
-BrokerSim::~BrokerSim() {
-    std::cout << "Free BrokerSim!" << std::endl;
-}
+BrokerSim::~BrokerSim() { std::cout << "Free BrokerSim!" << std::endl; }
 
 void BrokerSim::setup(const Json::json& cfg) {
     try {
@@ -63,6 +61,8 @@ void BrokerSim::setup(const Json::json& cfg) {
         std::cout << "BrokerSim setup completed. Commission rate: " << commission_rate_
                   << ", Slippage rate: " << slippage_rate_ << std::endl;
 
+        is_backtest_ = INSTANCE(GlobalParams).is_backtest;
+
         depth_callboard_.init(INSTANCE(GlobalParams).root_dir, PAGE_SIZE, sizeof(InstrumentDepth<10>), false);
 
     } catch (const std::exception& e) {
@@ -81,13 +81,15 @@ void BrokerSim::start() {
     running_ = true;
     state_ = enums::BrokerState::Ready;
 
-    // 启动订单匹配线程
-    matching_thread_ = std::thread([this]() {
-        while (running_) {
-            process_order_matching();
-            std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_MATCHING_INTERVAL_MS));
-        }
-    });
+    if (!is_backtest_) {
+        // 启动订单匹配线程
+        matching_thread_ = std::thread([this]() {
+            while (running_) {
+                process_order_matching();
+                std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_MATCHING_INTERVAL_MS));
+            }
+        });
+    }
 
     std::cout << "BrokerSim started successfully" << std::endl;
 }
@@ -246,6 +248,11 @@ bool BrokerSim::req_account_info(const AccountReq& req) {
         std::cerr << "Error requesting account info: " << e.what() << std::endl;
         return false;
     }
+}
+
+bool BrokerSim::handle_backtest_sync_signal(const BacktestSyncSignal &signal) {
+    process_order_matching();
+    return true;
 }
 
 void BrokerSim::process_order_matching() {

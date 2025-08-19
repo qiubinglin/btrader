@@ -23,6 +23,8 @@ public:
     bool cancel_order(const OrderCancel& input) override;
     bool req_account_info(const AccountReq& req) override;
 
+    bool handle_backtest_sync_signal(const BacktestSyncSignal &signal) override;
+
 private:
     // 模拟成交逻辑
     void process_order_matching();
@@ -86,6 +88,7 @@ private:
     std::thread matching_thread_;
 
     extension::DepthCallBoard depth_callboard_;
+    bool is_backtest_ = false;
 };
 
 } // namespace btra::broker

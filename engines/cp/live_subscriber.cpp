@@ -1,6 +1,7 @@
 #include "live_subscriber.h"
 
 #include "extension/globalparams.h"
+#include "infra/singleton.h"
 #include "infra/time.h"
 #include "jid.h"
 #include "strategy_invoke.h"
@@ -24,6 +25,12 @@ void LiveSubscriber::pre_start() {
     }
 
     Invoker::invoke(*this, &strategy::Strategy::pre_start);
+
+    if (INSTANCE(GlobalParams).is_backtest) {
+        BacktestSyncSignal signal;
+        signal.flag = BacktestSyncSignal::MarketData;
+        engine_->writers_[req_md_dest]->write(infra::time::now_time(), signal);
+    }
 }
 
 void LiveSubscriber::post_stop() {}
@@ -78,8 +85,7 @@ void LiveSubscriber::on_transaction(const EventSPtr &event) {
 }
 
 void LiveSubscriber::on_order_action_error(const EventSPtr &event) {
-    Invoker::invoke(*this, &strategy::Strategy::on_order_action_error, event->data<OrderActionResp>(),
-                    event->source());
+    Invoker::invoke(*this, &strategy::Strategy::on_order_action_error, event->data<OrderActionResp>(), event->source());
 }
 
 void LiveSubscriber::on_trade(const EventSPtr &event) {

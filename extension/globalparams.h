@@ -33,6 +33,8 @@ struct GlobalParams {
     StatisticsParams stat_params;
 
     bool is_simulation{false};
+
+    bool is_backtest{false};
 };
 
 } // namespace btra
