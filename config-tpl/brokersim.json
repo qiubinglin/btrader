@@ -26,7 +26,7 @@
         {
             "institution": "binance",
             "account": "bing",
-            "password": "/home/qiubinglin/btrader/usrconf/Private_key.txt",
+            "password": "../usrconf/Private_key.txt",
             "authentication": "private-key",
             "extra": {
                 "stream_uri": "wss://stream.binance.com:443/stream?streams=ethusdt@kline_1s/ethusdt@depth20"
@@ -35,7 +35,7 @@
     ],
     "strategy": [
         {
-            "path": "/home/qiubinglin/btrader/build/lib",
+            "path": "./lib",
             "lib_name": "libstrategies.so",
             "id": "ConsecutiveBarStrategy",
             "params": {
@@ -61,6 +61,6 @@
         }
     ],
     "user-app": {
-        "fds_file": "/home/qiubinglin/btrader/userconf/fds.txt"
+        "fds_file": "../userconf/fds.txt"
     }
 }

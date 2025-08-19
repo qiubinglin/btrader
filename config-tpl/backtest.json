@@ -25,12 +25,12 @@
     "md": [
         {
             "institution": "csv",
-            "account": "/home/qiubinglin/btrader/main/2005-2006-day-001.txt"
+            "account": "../main/2005-2006-day-001.txt"
         }
     ],
     "strategy": [
         {
-            "path": "/home/qiubinglin/btrader/build/lib",
+            "path": "./lib",
             "lib_name": "libstrategies.so",
             "id": "MyStrategy",
             "params": {
@@ -56,6 +56,6 @@
         }
     ],
     "user-app": {
-        "fds_file": "/home/qiubinglin/btrader/userconf/fds.txt"
+        "fds_file": "../userconf/fds.txt"
     }
 }

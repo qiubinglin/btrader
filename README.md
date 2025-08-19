@@ -1,6 +1,6 @@
 ### BTrader
 
-High-performance trading research and visualization toolkit. Core engine in C++ with real-time data pipelines, plus a Qt6/QML GUI (TradeView) for charts and order flow.
+High-performance trading research, execution, and visualization toolkit built with a C++ core engine featuring market data processing, strategy execution, and trading operations. Enhanced with a modern Qt6/QML GUI (TradeView) for advanced charting and order flow visualization. The platform supports comprehensive backtesting, live trading, and simulation trading capabilities.
 
 ---
 
@@ -54,6 +54,19 @@ Prepare a configuration file from the template `core/main_cfg.tpl.json`. Adjust 
 
 ```bash
 ./btrader --role=master --cfg=/path/to/config.json
+```
+
+### Run examples
+Run backtest example:
+```
+cd build
+./btrader --role=master --cfg=./config-tpl/backtest.json
+```
+
+Run simulated trading example:
+```
+cd build
+./btrader --role=master --cfg=./config-tpl/brokersim.json
 ```
 
 ## Run (GUI / TradeView)

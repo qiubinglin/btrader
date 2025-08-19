@@ -26,7 +26,7 @@
         {
             "institution": "binance",
             "account": "bing",
-            "password": "/home/qiubinglin/btrader/usrconf/Private_key.txt",
+            "password": "../usrconf/Private_key.txt",
             "authentication": "private-key",
             "extra": {
                 "stream_uri": "wss://stream.binance.com:443/stream?streams=ethusdt@kline_1s"
@@ -35,7 +35,7 @@
     ],
     "strategy": [
         {
-            "path": "/home/qiubinglin/btrader/build/lib",
+            "path": "./lib",
             "lib_name": "libstrategies.so",
             "id": "MyStrategy",
             "params": {
@@ -47,7 +47,7 @@
         {
             "institution": "binance",
             "account": "euHZeWJLF1IO5MNsuKIQYqJH4ZqLfFbtwxp0ychQi41f7CDBRRCrSt2d7nRzXq1T",
-            "password": "/home/qiubinglin/btrader/usrconf/Private_key.txt",
+            "password": "../usrconf/Private_key.txt",
             "authentication": "private-key"
         },
         {
@@ -65,6 +65,6 @@
         }
     ],
     "user-app": {
-        "fds_file": "/home/qiubinglin/btrader/userconf/fds.txt"
+        "fds_file": "../userconf/fds.txt"
     }
 }
