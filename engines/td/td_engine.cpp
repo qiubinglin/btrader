@@ -1,5 +1,8 @@
 #include "td_engine.h"
 
+#include "infra/time.h"
+#include "jid.h"
+
 namespace btra {
 
 void TDEngine::react() {
@@ -9,12 +12,14 @@ void TDEngine::react() {
     events_.filter(is<MsgTag::OrderInput>).subscribe(ON_MEM_FUNC(insert_order));
     events_.filter(is<MsgTag::OrderCancel>).subscribe(ON_MEM_FUNC(cancel_order));
     events_.filter(is<MsgTag::AccountReq>).subscribe(ON_MEM_FUNC(on_account_req));
+    events_.filter(is<MsgTag::BacktestSyncSignal>).subscribe(ON_MEM_FUNC(on_backtest_sync_signal));
 }
 
 void TDEngine::on_setup() {
     main_cfg_ = MainCfg(cfg_);
 
     reader_ = std::make_unique<journal::Reader>(false);
+    reader_->join(main_cfg_.td_reponse_location(), journal::JIDUtil::build(journal::JIDUtil::TD_REQ), begin_time_);
 
     const auto &td_dests = main_cfg_.td_dests();
     const auto &td_institutions = main_cfg_.td_institutions();
@@ -97,6 +102,17 @@ void TDEngine::on_account_req(const EventSPtr &event) {
     bool success = trade_services_[account_uid]->req_account_info(req);
     if (not success) {
         // retry and notify me.
+    }
+}
+
+void TDEngine::on_backtest_sync_signal(const EventSPtr &event) {
+    bool success = true;
+    for (auto &[_, trade_service] : trade_services_) {
+        success &= trade_service->handle_backtest_sync_signal(event->data<BacktestSyncSignal>());
+    }
+    if (success) {
+        auto id = journal::JIDUtil::build(journal::JIDUtil::TD_RESPONSE);
+        writers_[id]->write(infra::time::now_time(), event->data<BacktestSyncSignal>());
     }
 }
 

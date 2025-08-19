@@ -80,6 +80,8 @@ public:
 
     virtual bool req_account_info(const AccountReq &req) = 0;
 
+    virtual bool handle_backtest_sync_signal(const BacktestSyncSignal &signal) { return false; }
+
     /**
      * @brief Notice cp about action response
      *

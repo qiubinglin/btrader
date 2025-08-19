@@ -24,6 +24,8 @@ public:
     void on_broker_state_change(const EventSPtr &event);
     void on_custom_data(const EventSPtr &event);
 
+    void on_backtest_sync_signal(const EventSPtr &event);
+
 private:
     CPEngine *engine_; /* Make public for invoke. */
 

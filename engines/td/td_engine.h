@@ -17,6 +17,8 @@ private:
     void cancel_order(const EventSPtr &event);
     void on_account_req(const EventSPtr &event);
 
+    void on_backtest_sync_signal(const EventSPtr &event);
+
     std::unordered_map<uint32_t, broker::TradeServiceUPtr> trade_services_;
     bool is_trading_started_ = false;
 };

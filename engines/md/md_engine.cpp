@@ -1,4 +1,6 @@
 #include "md_engine.h"
+#include "jid.h"
+#include "types.h"
 
 namespace btra {
 
@@ -7,6 +9,7 @@ void MDEngine::react() {
 
     events_.filter(is<MsgTag::TradingStart>).subscribe(ON_MEM_FUNC(on_trading_start));
     events_.filter(is<MsgTag::MDSubscribe>).subscribe(ON_MEM_FUNC(on_subscribe_data));
+    events_.filter(is<MsgTag::BacktestSyncSignal>).subscribe(ON_MEM_FUNC(on_backtest_sync_signal));
 }
 
 void MDEngine::on_active() {}
@@ -16,6 +19,9 @@ void MDEngine::on_setup() {
 
     reader_ = std::make_unique<journal::Reader>(false);
     reader_->join(main_cfg_.md_req_location(), journal::JIDUtil::build(journal::JIDUtil::MD_REQ), begin_time_);
+
+    auto response_id = journal::JIDUtil::build(journal::JIDUtil::MD_RESPONSE);
+    writers_[response_id] = std::make_unique<journal::Writer>(main_cfg_.md_req_location(), response_id, false);
 
     const auto &md_dests = main_cfg_.md_dests();
     const auto &md_institutions = main_cfg_.md_institutions();
@@ -42,6 +48,17 @@ void MDEngine::on_trading_start(const EventSPtr &event) {
 void MDEngine::on_subscribe_data(const EventSPtr &event) {
     auto md_subscribe = event->data<MDSubscribe>();
     data_services_[md_subscribe.id]->subscribe(md_subscribe.instrument_keys);
+}
+
+void MDEngine::on_backtest_sync_signal(const EventSPtr &event) {
+    bool success = true;
+    for (auto &[_, data_service] : data_services_) {
+        success &= data_service->handle_backtest_sync_signal(event->data<BacktestSyncSignal>());
+    }
+    if (success) {
+        auto id = journal::JIDUtil::build(journal::JIDUtil::MD_RESPONSE);
+        writers_[id]->write(infra::time::now_time(), event->data<BacktestSyncSignal>());
+    }
 }
 
 } // namespace btra

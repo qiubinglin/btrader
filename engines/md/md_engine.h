@@ -15,6 +15,7 @@ public:
 private:
     void on_trading_start(const EventSPtr &event);
     void on_subscribe_data(const EventSPtr &event);
+    void on_backtest_sync_signal(const EventSPtr &event);
 
 private:
     std::unordered_map<uint32_t, broker::DataServiceUPtr> data_services_;

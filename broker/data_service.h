@@ -96,6 +96,8 @@ public:
      */
     virtual bool unsubscribe(const std::vector<InstrumentKey> &instrument_keys) = 0;
 
+    virtual bool handle_backtest_sync_signal(const BacktestSyncSignal &signal) { return false; }
+
 protected:
     /* writer_ will consume the data. */
     DataCustomer *writer_ = nullptr;

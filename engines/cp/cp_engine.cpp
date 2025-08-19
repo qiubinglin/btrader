@@ -4,6 +4,7 @@
 #include "cp/live_subscriber.h"
 #include "extension/globalparams.h"
 #include "infra/singleton.h"
+#include "jid.h"
 #include "strategy/dummy_strategy.h"
 #include "types.h"
 
@@ -45,6 +46,7 @@ void CPEngine::react() {
     events_.filter(is<MsgTag::Deregister>).subscribe(ON_MEM_OBJ(live_subscriber_, on_deregister));
     events_.filter(is<MsgTag::BrokerStateUpdate>).subscribe(ON_MEM_OBJ(live_subscriber_, on_broker_state_change));
     events_.filter(over_max_tag).subscribe(ON_MEM_OBJ(live_subscriber_, on_custom_data));
+    events_.filter(is<MsgTag::BacktestSyncSignal>).subscribe(ON_MEM_OBJ(live_subscriber_, on_backtest_sync_signal));
 }
 
 void CPEngine::on_setup() {
@@ -58,6 +60,7 @@ void CPEngine::on_setup() {
     md_account_count_ = md_dests.size();
 
     reader_->join(main_cfg_.td_reponse_location(), journal::JIDUtil::build(journal::JIDUtil::TD_RESPONSE), begin_time_);
+    reader_->join(main_cfg_.md_req_location(), journal::JIDUtil::build(journal::JIDUtil::MD_RESPONSE), begin_time_);
 
     const auto &td_dests = main_cfg_.td_dests();
     for (auto dest : td_dests) {
@@ -66,6 +69,8 @@ void CPEngine::on_setup() {
 
     auto md_req_dest = journal::JIDUtil::build(journal::JIDUtil::MD_REQ);
     writers_[md_req_dest] = std::make_unique<journal::Writer>(main_cfg_.md_req_location(), md_req_dest, false);
+    auto td_req_dest = journal::JIDUtil::build(journal::JIDUtil::TD_REQ);
+    writers_[td_req_dest] = std::make_unique<journal::Writer>(main_cfg_.td_reponse_location(), td_req_dest, false);
 
     executor_ = strategy::Executor::create(main_cfg_.run_mode(), this);
 

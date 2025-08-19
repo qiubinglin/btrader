@@ -13,6 +13,8 @@ namespace JIDUtil {
 
 enum Flag : int8_t {
     MD_REQ,
+    MD_RESPONSE,
+    TD_REQ,
     TD_RESPONSE,
 };
 inline JID build(JIDUtil::Flag flag) { return infra::hash_32((const unsigned char *)&flag, 1); }

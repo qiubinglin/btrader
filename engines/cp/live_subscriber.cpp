@@ -1,7 +1,10 @@
 #include "live_subscriber.h"
 
 #include "extension/globalparams.h"
+#include "infra/time.h"
+#include "jid.h"
 #include "strategy_invoke.h"
+#include "types.h"
 
 namespace btra {
 
@@ -120,6 +123,21 @@ void LiveSubscriber::on_custom_data(const EventSPtr &event) {
     for (const auto &strategy : engine_->strategies_) {
         strategy->on_custom_data(context, event->msg_type(), event->data_as_bytes(), event->data_length(),
                                  event->source());
+    }
+}
+
+void LiveSubscriber::on_backtest_sync_signal(const EventSPtr &event) {
+    const auto &signal = event->data<BacktestSyncSignal>();
+    if (signal.flag == BacktestSyncSignal::MarketData) {
+        auto id = journal::JIDUtil::build(journal::JIDUtil::TD_REQ);
+        BacktestSyncSignal signal_to_send;
+        signal_to_send.flag = BacktestSyncSignal::MatchOrder;
+        engine_->writers_[id]->write(infra::time::now_time(), signal_to_send);
+    } else if (signal.flag == BacktestSyncSignal::MatchOrder) {
+        auto id = journal::JIDUtil::build(journal::JIDUtil::MD_REQ);
+        BacktestSyncSignal signal_to_send;
+        signal_to_send.flag = BacktestSyncSignal::MarketData;
+        engine_->writers_[id]->write(infra::time::now_time(), signal_to_send);
     }
 }
 
