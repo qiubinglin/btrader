@@ -13,7 +13,7 @@ namespace btra::broker {
 class BrokerSim : public TradeService {
 public:
     BrokerSim();
-    ~BrokerSim() override = default;
+    ~BrokerSim();
 
     void setup(const Json::json& cfg) override;
     void start() override;

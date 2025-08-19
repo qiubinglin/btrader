@@ -1,11 +1,13 @@
 #pragma once
 
+#include <memory>
+
 #include "broker/data_service.h"
 #include "infra/csv.h"
 
 namespace btra::broker {
 
-class BackTestCSVData : public DataService {
+class FileDataService : public DataService {
 public:
     void setup(const Json::json &cfg) override;
     void start() override;
@@ -15,7 +17,7 @@ public:
     bool unsubscribe(const std::vector<InstrumentKey> &instrument_keys) override;
 
 private:
-    infra::CSVReader reader_;
+    std::unique_ptr<infra::CSVReader> reader_;
     std::string filename_;
 };
 

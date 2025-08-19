@@ -109,4 +109,45 @@ void order_from_input(const OrderInput &input, Order &order) {
     order.parent_id = input.parent_id;
 }
 
+void trade_from_orderinput(const OrderInput &input, Trade &trade) {
+    // Generate a unique trade ID (this should be provided by the exchange in real scenarios)
+    // For now, we use the order_id as a placeholder trade_id
+    trade.trade_id = input.order_id;
+    
+    // Copy order information
+    trade.order_id = input.order_id;
+    
+    // Set external IDs (these would be filled by the exchange in real trading)
+    // trade.external_order_id and trade.external_trade_id are left empty for now
+    // In a real implementation, these would be provided by the broker/exchange
+    
+    // Set timing information
+    trade.trade_time = input.insert_time;
+    // Note: trading_day would need to be set based on the actual trading day
+    // This could be extracted from the current system time or trading calendar
+    
+    // Copy instrument information
+    trade.instrument_id = input.instrument_id;
+    trade.exchange_id = input.exchange_id;
+    trade.instrument_type = input.instrument_type;
+    
+    // Copy trading parameters
+    trade.side = input.side;
+    trade.offset = input.offset;
+    trade.hedge_flag = input.hedge_flag;
+    
+    // Set price and volume
+    trade.price = input.limit_price;
+    trade.volume = input.volume;
+    
+    // Initialize fees (these would be calculated by the exchange in real scenarios)
+    // Tax and commission are typically calculated based on:
+    // - Exchange rules
+    // - Broker fees
+    // - Regulatory requirements
+    // - Trade volume and price
+    trade.tax = 0.0;
+    trade.commission = 0.0;
+}
+
 } // namespace btra

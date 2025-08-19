@@ -1,5 +1,5 @@
 add_subdirectory(binance)
-add_subdirectory(backtest)
+add_subdirectory(filedataservice)
 add_subdirectory(pyservice)
 add_subdirectory(brokersim)
 
@@ -18,7 +18,7 @@ set(XTP_LIBS
 target_link_libraries(broker PUBLIC
     core
     binance
-    backtest_service
+    filedataservice
     brokersim
     # ${XTP_LIBS}
 )

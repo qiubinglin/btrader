@@ -775,5 +775,6 @@ struct TDID {
 };
 
 void order_from_input(const OrderInput &input, Order &order);
+void trade_from_orderinput(const OrderInput &input, Trade &trade);
 
 } // namespace btra

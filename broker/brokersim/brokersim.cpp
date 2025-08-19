@@ -37,6 +37,10 @@ BrokerSim::BrokerSim() {
     positions_ = PositionBook{};
 }
 
+BrokerSim::~BrokerSim() {
+    std::cout << "Free BrokerSim!" << std::endl;
+}
+
 void BrokerSim::setup(const Json::json& cfg) {
     try {
         Json::json simulation_cfg = cfg["extra"];
