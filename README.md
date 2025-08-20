@@ -86,6 +86,8 @@ git clone https://github.com/your-repo/btrader.git
 cd btrader
 
 mkdir -p build && cd build
+git submodule init
+git submodule update
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel $(nproc)
 ```
