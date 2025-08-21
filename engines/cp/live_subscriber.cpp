@@ -51,7 +51,7 @@ void LiveSubscriber::on_bar(const EventSPtr &event) {
     engine_->executor_->book().update(bar);
 
     Invoker::invoke(*this, &strategy::Strategy::on_bar, bar, event->source());
-    if (INSTANCE(GlobalParams).stat_params.stat_all()) {
+    if (INSTANCE(GlobalParams).stat_params.stats_all()) {
         /* Compute floating profit indicators according to bar and current positions? */
         auto &statistics_dump = engine_->statistics_dump_;
         statistics_dump.log_asset(bar.end_time, engine_->executor_->book().asset_price());
@@ -90,7 +90,7 @@ void LiveSubscriber::on_order_action_error(const EventSPtr &event) {
 
 void LiveSubscriber::on_trade(const EventSPtr &event) {
     engine_->executor_->book().update(event->data<Trade>());
-    if (INSTANCE(GlobalParams).stat_params.stat_all()) {
+    if (INSTANCE(GlobalParams).stat_params.stats_all()) {
         engine_->statistics_dump_.log_trade(event->data<Trade>());
     }
     Invoker::invoke(*this, &strategy::Strategy::on_trade, event->data<Trade>(), event->source());

@@ -9,7 +9,7 @@ struct StatisticsParams {
         None,
         All,
     };
-    Mode stat_mode;
+    Mode stats_mode;
 
     static Mode str2mode(const std::string &str) {
         if (str == "all") {
@@ -18,8 +18,16 @@ struct StatisticsParams {
         return Mode::None;
     }
 
-    bool stat_all() const {
-        return stat_mode == Mode::All;
+    bool stats_all() const {
+        return stats_mode == Mode::All;
+    }
+
+    bool active() const {
+        return stats_mode != Mode::None;
+    }
+
+    void set_mode(const std::string &str) {
+        stats_mode = StatisticsParams::str2mode(str);
     }
 };
 

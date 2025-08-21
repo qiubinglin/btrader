@@ -100,7 +100,9 @@ void CPEngine::on_setup() {
         }
     }
 
-    statistics_dump_.init(INSTANCE(GlobalParams).root_dir);
+    if (INSTANCE(GlobalParams).stat_params.active()) {
+        statistics_dump_.init(INSTANCE(GlobalParams).root_dir);
+    }
 
     if (INSTANCE(GlobalParams).is_simulation) {
         simulation_depth_callboard_ = std::make_unique<extension::DepthCallBoard>();
