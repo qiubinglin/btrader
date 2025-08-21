@@ -8,9 +8,7 @@
 
 namespace btra {
 
-#define PACK_DATA_BODY static constexpr bool fixed = true;
-
-#define PACK_DATA_BODY2(tag_num)        \
+#define PACK_DATA_BODY(tag_num)         \
     static constexpr bool fixed = true; \
     static constexpr int tag = MsgTag::tag_num;
 
@@ -43,6 +41,8 @@ struct MsgTag {
         MDSubscribe,
         OrderCancel,
         TradingDay,
+        TimeReset,
+        Commission,
         Quote,
         Entrust,
         Transaction,
@@ -50,6 +50,9 @@ struct MsgTag {
         Trade,
         Asset,
         AssetMargin,
+        RequestHistoryOrder,
+        RequestHistoryTrade,
+        Register,
         Deregister,
         BrokerStateUpdate,
         TradingStart,
@@ -65,6 +68,7 @@ struct MsgTag {
         RequestHistoryOrderError,
         RequestHistoryTradeError,
         BacktestSyncSignal,
+        StrategyStateUpdate,
         Termination,  /* Terminate event engine. */
         TAG_MAX_SIZE, /* This must be the last tag which indicates the maximum size of the tag. */
     };
@@ -87,7 +91,7 @@ struct InstrumentDepth {
  *
  */
 struct BacktestSyncSignal {
-    PACK_DATA_BODY2(BacktestSyncSignal)
+    PACK_DATA_BODY(BacktestSyncSignal)
     enum Flag {
         MarketData,
         MatchOrder,
@@ -96,25 +100,21 @@ struct BacktestSyncSignal {
 };
 
 /**
- * @brief Not use now
+ * @brief Notify strategy state to md/td engine
  *
  */
-struct StrategyStateUpdate { //
-    PACK_DATA_BODY
-    enums::StrategyState state; //
-    int64_t update_time;        //
-    std::string info_a;         //
-    std::string info_b;         //
-    std::string info_c;         //
-    std::string value;          //
+struct StrategyStateUpdate {
+    PACK_DATA_BODY(StrategyStateUpdate)
+    enums::StrategyState state;
+    int64_t update_time;
 };
 
 /**
- * @brief Not use now
+ * @brief Dynamically register journal, not use now
  *
  */
 struct Register { //
-    PACK_DATA_BODY
+    UNFIXED_DATA_BODY(Register)
     uint32_t location_uid;    //
     enums::Module category;   //
     enums::RunMode mode;      //
@@ -126,7 +126,7 @@ struct Register { //
 };
 
 /**
- * @brief Not use now
+ * @brief Dynamically deregister journal, not use now
  *
  */
 struct Deregister {
@@ -139,7 +139,7 @@ struct Deregister {
 };
 
 struct BrokerStateUpdate {
-    PACK_DATA_BODY2(BrokerStateUpdate)
+    PACK_DATA_BODY(BrokerStateUpdate)
     uint32_t location_uid;    //
     enums::BrokerState state; //
 };
@@ -157,7 +157,7 @@ struct Location {
 };
 
 struct TradingDay { //
-    PACK_DATA_BODY2(TradingDay)
+    PACK_DATA_BODY(TradingDay)
     int64_t timestamp; //
 };
 
@@ -165,10 +165,10 @@ struct TradingDay { //
  * @brief Re-Synchronize the time
  *
  */
-struct TimeReset { //
-    PACK_DATA_BODY
-    int64_t system_clock_count; //
-    int64_t steady_clock_count; //
+struct TimeReset {
+    PACK_DATA_BODY(TimeReset)
+    int64_t system_clock_count;
+    int64_t steady_clock_count;
 };
 
 /**
@@ -176,7 +176,7 @@ struct TimeReset { //
  *
  */
 struct Commission {
-    PACK_DATA_BODY
+    PACK_DATA_BODY(Commission)
     infra::Array<char, PRODUCT_ID_LEN> product_id;   // 品种
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id; // 交易所
 
@@ -192,7 +192,7 @@ struct Commission {
 };
 
 struct Instrument {
-    PACK_DATA_BODY2(Instrument)
+    PACK_DATA_BODY(Instrument)
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id; // 合约ID
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所ID
     enums::InstrumentType instrument_type;               // 合约类型
@@ -220,7 +220,7 @@ struct Instrument {
 };
 
 struct InstrumentKey { //
-    PACK_DATA_BODY2(InstrumentKey)
+    PACK_DATA_BODY(InstrumentKey)
     uint32_t key;                                        //
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id; // 合约ID
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所ID
@@ -228,11 +228,10 @@ struct InstrumentKey { //
 };
 
 /**
- * @brief Figure out the usage. Not use now.
+ * @brief The Abstraction for subscribing instruments easily. Not use now.
  *
  */
 struct CustomSubscribe {
-    PACK_DATA_BODY
     int64_t update_time;
     enums::MarketType market_type;
     enums::SubscribeInstrumentType instrument_type;
@@ -244,7 +243,7 @@ struct CustomSubscribe {
  *
  */
 struct Quote { //
-    PACK_DATA_BODY2(Quote)
+    PACK_DATA_BODY(Quote)
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
     int64_t data_time; // 数据生成时间
@@ -302,7 +301,7 @@ struct Quote { //
  *
  */
 struct Entrust {
-    PACK_DATA_BODY2(Entrust)
+    PACK_DATA_BODY(Entrust)
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
     int64_t data_time; // 数据生成时间
@@ -328,7 +327,7 @@ struct Entrust {
  *
  */
 struct Transaction { //
-    PACK_DATA_BODY2(Transaction)
+    PACK_DATA_BODY(Transaction)
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
     int64_t data_time; // 数据生成时间
@@ -353,7 +352,7 @@ struct Transaction { //
 };
 
 struct Bar {
-    PACK_DATA_BODY2(Bar)
+    PACK_DATA_BODY(Bar)
     infra::Array<char, DATE_LEN> trading_day;            // 交易日
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id; // 合约代码
     infra::Array<char, EXCHANGE_ID_LEN> exchange_id;     // 交易所代码
@@ -379,7 +378,7 @@ struct Bar {
  * This structure is used to send an order request to the exchange.
  */
 struct OrderInput {
-    PACK_DATA_BODY2(OrderInput)
+    PACK_DATA_BODY(OrderInput)
     uint64_t order_id;  // 订单ID
     uint64_t parent_id; // 母单号
 
@@ -410,7 +409,7 @@ struct OrderInput {
  *
  */
 struct OrderCancel {
-    PACK_DATA_BODY2(OrderCancel)
+    PACK_DATA_BODY(OrderCancel)
     infra::Array<char, INSTRUMENT_ID_LEN> instrument_id;
     uint64_t order_id;        // Order id
     uint64_t target_order_id; // Target order id
@@ -425,7 +424,7 @@ struct OrderCancel {
  *
  */
 struct OrderActionResp {
-    PACK_DATA_BODY2(OrderActionResp)
+    PACK_DATA_BODY(OrderActionResp)
     uint64_t order_id;                                     // 订单ID
     infra::Array<char, EXTERNAL_ID_LEN> external_order_id; // Order id in exchange
     uint64_t order_action_id;                              // 订单操作ID
@@ -440,7 +439,7 @@ struct OrderActionResp {
  *
  */
 struct Order {
-    PACK_DATA_BODY2(Order)
+    PACK_DATA_BODY(Order)
     uint64_t order_id;                                     // 订单ID
     infra::Array<char, EXTERNAL_ID_LEN> external_order_id; // 柜台订单id
     uint64_t parent_id;                                    // 母单号
@@ -479,7 +478,7 @@ struct Order {
 };
 
 struct HistoryOrder { //
-    PACK_DATA_BODY2(HistoryOrder)
+    PACK_DATA_BODY(HistoryOrder)
     uint64_t order_id;                                     // 订单ID
     infra::Array<char, EXTERNAL_ID_LEN> external_order_id; // 柜台订单id, 字符型则hash转换
 
@@ -525,7 +524,7 @@ struct HistoryOrder { //
  *
  */
 struct Trade {
-    PACK_DATA_BODY2(Trade)
+    PACK_DATA_BODY(Trade)
     uint64_t trade_id; // 成交ID
 
     uint64_t order_id;                                     // 订单ID
@@ -552,7 +551,7 @@ struct Trade {
 };
 
 struct HistoryTrade { //
-    PACK_DATA_BODY2(HistoryTrade)
+    PACK_DATA_BODY(HistoryTrade)
     uint64_t trade_id; // 成交ID
 
     uint64_t order_id;                                     // 订单ID
@@ -586,7 +585,7 @@ struct HistoryTrade { //
 };
 
 struct Position { //
-    PACK_DATA_BODY2(Position)
+    PACK_DATA_BODY(Position)
     int64_t update_time;                      // 更新时间
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
@@ -623,13 +622,8 @@ struct Position { //
     double unrealized_pnl; // 未实现盈亏
 };
 
-struct PositionEnd { //
-    PACK_DATA_BODY
-    uint32_t holder_uid; //
-};
-
 struct Asset {
-    PACK_DATA_BODY2(Asset)
+    PACK_DATA_BODY(Asset)
     int64_t update_time;                      // 更新时间
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
@@ -660,7 +654,7 @@ struct Asset {
 };
 
 struct AssetMargin {
-    PACK_DATA_BODY2(AssetMargin)
+    PACK_DATA_BODY(AssetMargin)
     int64_t update_time;                      // 更新时间
     infra::Array<char, DATE_LEN> trading_day; // 交易日
 
@@ -685,63 +679,27 @@ struct AssetMargin {
     double collateral_ratio; // 担保比例
 };
 
-struct OrderStat { //
-    PACK_DATA_BODY
-    uint64_t order_id;       //
-    int64_t md_time;         //
-    int64_t input_time;      //
-    int64_t insert_time;     //
-    int64_t ack_time;        //
-    int64_t trade_time;      //
-    double total_price;      //
-    VolumeType total_volume; //
-    double avg_price;        //
-};
-
-struct BasketOrder { //
-    PACK_DATA_BODY
-    uint64_t order_id;  // 篮子单uid
-    uint64_t parent_id; // 母单号
-
-    int64_t insert_time; // 下单时间
-    int64_t update_time; // 更新时间
-
-    enums::Side side;              // 买卖方向
-    enums::PriceType price_type;   // 价格类型
-    enums::PriceLevel price_level; // 价格级别
-    double price_offset;           // 价格偏移量
-
-    VolumeType volume;      // 成交量
-    VolumeType volume_left; // 剩余数量
-
-    enums::BasketOrderStatus status; // 订单状态
-
-    uint32_t source_id; // 下单方
-    uint32_t dest_id;   // 下单账户
-
-    enums::BasketOrderCalculationMode calculation_mode; // 计算方式
-};
-
-struct RequestHistoryOrder { //
-    PACK_DATA_BODY
+struct RequestHistoryOrder {
+    PACK_DATA_BODY(RequestHistoryOrder)
     uint64_t trigger_time; // 触发时间
     uint32_t query_num;    // 请求查询的数量
 };
 
-struct RequestHistoryTrade { //
-    uint64_t trigger_time;   // 触发时间
-    uint32_t query_num;      // 请求查询的数量
+struct RequestHistoryTrade {
+    PACK_DATA_BODY(RequestHistoryTrade)
+    uint64_t trigger_time; // 触发时间
+    uint32_t query_num;    // 请求查询的数量
 };
 
 struct RequestHistoryOrderError { //
-    PACK_DATA_BODY2(RequestHistoryOrderError)
+    PACK_DATA_BODY(RequestHistoryOrderError)
     int32_t error_id;                            // 错误ID
     infra::Array<char, ERROR_MSG_LEN> error_msg; // 错误信息
     int64_t trigger_time;                        // 写入时间
 };
 
 struct RequestHistoryTradeError { //
-    PACK_DATA_BODY2(RequestHistoryTradeError)
+    PACK_DATA_BODY(RequestHistoryTradeError)
     int32_t error_id;                            // 错误ID
     infra::Array<char, ERROR_MSG_LEN> error_msg; // 错误信息
     int64_t trigger_time;                        // 写入时间
@@ -754,17 +712,17 @@ struct MDSubscribe {
 };
 
 struct TradingStart {
-    PACK_DATA_BODY2(TradingStart)
+    PACK_DATA_BODY(TradingStart)
     int64_t sync_time;
 };
 
 struct TradingStop {
-    PACK_DATA_BODY2(TradingStop)
+    PACK_DATA_BODY(TradingStop)
     int64_t sync_time;
 };
 
 struct AccountReq {
-    PACK_DATA_BODY2(AccountReq)
+    PACK_DATA_BODY(AccountReq)
 
     enum ReqType {
         Status,
@@ -780,7 +738,7 @@ struct AccountReq {
 };
 
 struct Termination {
-    PACK_DATA_BODY2(Termination)
+    PACK_DATA_BODY(Termination)
 };
 
 struct TDID {

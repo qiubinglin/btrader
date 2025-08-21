@@ -2,7 +2,79 @@
 
 namespace btra {
 
-Deregister::Deregister(const char *data, [[maybe_unused]] uint32_t len) {
+Register::Register(const char *data, uint32_t len) {
+    memcpy(&location_uid, data, sizeof(location_uid));
+    data += sizeof(location_uid);
+    len -= sizeof(location_uid);
+
+    memcpy(&category, data, sizeof(category));
+    data += sizeof(category);
+    len -= sizeof(category);
+
+    memcpy(&mode, data, sizeof(mode));
+    data += sizeof(mode);
+    len -= sizeof(mode);
+
+    auto group_len = *reinterpret_cast<const uint32_t *>(data);
+    data += sizeof(uint32_t);
+    len -= sizeof(uint32_t);
+    group.assign(data, group_len);
+    data += group_len;
+    len -= group_len;
+
+    auto name_len = *reinterpret_cast<const uint32_t *>(data);
+    data += sizeof(uint32_t);
+    len -= sizeof(uint32_t);
+    name.assign(data, name_len);
+    data += name_len;
+    len -= name_len;
+
+    memcpy(&pid, data, sizeof(pid));
+    data += sizeof(pid);
+    len -= sizeof(pid);
+
+    memcpy(&last_active_time, data, sizeof(last_active_time));
+    data += sizeof(last_active_time);
+    len -= sizeof(last_active_time);
+
+    memcpy(&checkin_time, data, sizeof(checkin_time));
+}
+
+std::string Register::to_string() const {
+    size_t size = sizeof(location_uid) + sizeof(category) + sizeof(mode);
+    size += sizeof(uint32_t) + group.size();
+    size += sizeof(uint32_t) + name.size();
+    size += sizeof(pid) + sizeof(last_active_time) + sizeof(checkin_time);
+
+    std::string res(size, 0);
+    char *header = (char *)res.data();
+    memcpy(header, &location_uid, sizeof(location_uid));
+    header += sizeof(location_uid);
+    memcpy(header, &category, sizeof(category));
+    header += sizeof(category);
+    memcpy(header, &mode, sizeof(mode));
+    header += sizeof(mode);
+
+    *reinterpret_cast<uint32_t *>(header) = group.size();
+    header += sizeof(uint32_t);
+    memcpy(header, group.data(), group.size());
+    header += group.size();
+
+    *reinterpret_cast<uint32_t *>(header) = name.size();
+    header += sizeof(uint32_t);
+    memcpy(header, name.data(), name.size());
+    header += name.size();
+
+    memcpy(header, &pid, sizeof(pid));
+    header += sizeof(pid);
+    memcpy(header, &last_active_time, sizeof(last_active_time));
+    header += sizeof(last_active_time);
+    memcpy(header, &checkin_time, sizeof(checkin_time));
+
+    return res;
+}
+
+Deregister::Deregister(const char *data, uint32_t len) {
     memcpy(&location_uid, data, sizeof(location_uid));
     data += sizeof(location_uid);
     len -= sizeof(location_uid);
