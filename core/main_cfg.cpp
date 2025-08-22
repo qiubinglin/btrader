@@ -40,7 +40,7 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
     }
 
     if (run_mode_ == enums::RunMode::USER_APP) {
-        fds_file_ = cfg_["user-app"]["fds_file"].get<std::string>();
+        fds_file_ = std::filesystem::absolute(cfg_["user-app"]["fds_file"].get<std::string>());
     }
 
     page_rollback_size_ = cfg_["system"]["page_rollback_size"].get<uint32_t>();
@@ -60,7 +60,7 @@ MainCfg::MainCfg(const Json::json &cfg) : cfg_(cfg) {
     Singleton<GlobalParams>::instance().root_dir = root_;
     if (cfg_["system"].contains("statistics")) {
         auto stat_mode = cfg_["system"]["statistics"]["mode"].get<std::string>();
-        INSTANCE(GlobalParams).stat_params.stat_mode = StatisticsParams::str2mode(stat_mode);
+        INSTANCE(GlobalParams).stat_params.set_mode(stat_mode);
     }
 
     if (cfg_["system"].contains("simulation")) {

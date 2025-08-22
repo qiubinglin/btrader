@@ -65,6 +65,6 @@
         }
     ],
     "user-app": {
-        "fds_file": "../userconf/fds.txt"
+        "fds_file": "../usrconf/fds.txt"
     }
 }

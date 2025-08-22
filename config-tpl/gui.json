@@ -8,7 +8,7 @@
             "max_files": 10,
             "mode": "log"
         },
-        "mode": "live",
+        "mode": "user-app",
         "output_root_path": "./output",
         "time_unit": "milli",
         "currency": "USD",
@@ -17,9 +17,9 @@
             "asset": 10000000.0
         },
         "statistics": {
-            "mode": "all"
+            "mode": "none"
         },
-        "simulation": true,
+        "simulation": false,
         "backtest": false
     },
     "md": [
@@ -29,7 +29,7 @@
             "password": "../usrconf/Private_key.txt",
             "authentication": "private-key",
             "extra": {
-                "stream_uri": "wss://stream.binance.com:443/stream?streams=ethusdt@kline_1s/ethusdt@depth20"
+                "stream_uri": "wss://stream.binance.com:443/stream?streams=btcusdt@kline_1s/ethusdt@kline_1s/bnbusdt@kline_1s/adausdt@kline_1s"
             }
         }
     ],
@@ -37,27 +37,21 @@
         {
             "path": "./lib",
             "lib_name": "libstrategies.so",
-            "id": "ConsecutiveBarStrategy",
+            "id": "MyStrategy",
             "params": {
-                "symbol": "ethusdt",
-                "institution": "simulation",
-                "account": "simulation1"
+                "description": "your self-defined parameters passed to strategy"
             }
         }
     ],
     "td": [
         {
-            "institution": "simulation",
-            "account": "simulation1",
-            "password": "none",
-            "authentication": "none",
-            "extra": {
-                "commission_rate": 0.0003,
-                "slippage_rate": 0.0001,
-                "enable_slippage": true,
-                "enable_commission": true,
-                "initial_capital": 10000000.0
-            }
+            "institution": "binance",
+            "account": "euHZeWJLF1IO5MNsuKIQYqJH4ZqLfFbtwxp0ychQi41f7CDBRRCrSt2d7nRzXq1T",
+            "password": "../usrconf/Private_key.txt",
+            "authentication": "private-key"
         }
-    ]
+    ],
+    "user-app": {
+        "fds_file": "../usrconf/fds.txt"
+    }
 }

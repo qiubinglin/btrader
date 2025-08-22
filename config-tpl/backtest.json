@@ -54,8 +54,5 @@
                 "initial_capital": 10000000.0
             }
         }
-    ],
-    "user-app": {
-        "fds_file": "../userconf/fds.txt"
-    }
+    ]
 }
