@@ -54,7 +54,7 @@ bool DataManager::initialize() {
     // 初始化模拟数据
     initializeSimulatedData();
 
-    event_handlers_ = {{MsgTag::Bar, ON_MEM_FUNC(handle_bar)}};
+    event_handlers_ = {{MsgTag::Bar, ON_MEM_FUNC(on_incomming_bar)}};
 
     qDebug() << "DataManager initialized successfully";
     return true;
@@ -308,7 +308,7 @@ void DataManager::on_incomming_message() {
     });
 }
 
-void DataManager::handle_bar(const EventSPtr& event) {
+void DataManager::on_incomming_bar(const EventSPtr& event) {
     const auto& bar = event->data<Bar>();
     auto dataset = database_->reqKlineDB(bar.instrument_id);
 

@@ -141,7 +141,7 @@ public:
 
 private:
     /* Functions to handle incoming message begin */
-    void handle_bar(const EventSPtr&);
+    void on_incomming_bar(const EventSPtr&);
     /* Functions to handle incoming message end */
 
     // 连接状态
