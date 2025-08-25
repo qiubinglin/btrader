@@ -9,4 +9,3 @@
 #include "infra/mmap.h"
 #include "infra/socket.h"
 #include "infra/time.h"
-#include "infra/trace.h"
